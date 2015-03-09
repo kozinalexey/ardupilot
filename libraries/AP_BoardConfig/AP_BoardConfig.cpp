@@ -47,7 +47,7 @@ extern const AP_HAL::HAL& hal;
 
 // table of user settable parameters
 const AP_Param::GroupInfo AP_BoardConfig::var_info[] PROGMEM = {
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
     // @Param: PWM_COUNT
     // @DisplayName: PWM Count
     // @Description: Number of auxillary PWMs to enable. On PX4v1 only 0 or 2 is valid. On Pixhawk 0, 2, 4 or 6 is valid.
@@ -71,6 +71,7 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] PROGMEM = {
     // @Description: Disabling this option will disable the use of the safety switch on PX4 for arming. Use of the safety switch is highly recommended, so you should leave this option set to 1 except in unusual circumstances.
     // @Values: 0:Disabled,1:Enabled
     AP_GROUPINFO("SAFETYENABLE",   3, AP_BoardConfig, _safety_enable, 1),
+#elif CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 #elif CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
 #endif
 
@@ -98,33 +99,8 @@ void AP_BoardConfig::init()
     }   
     close(fd);
 #elif CONFIG_HAL_BOARD == HAL_BOARD_F4BY
-	/* configurre the FMU driver for the right number of PWMs */
+	/* configurre the F4BY driver for the right number of PWMs */
 
-    // ensure only valid values are set, rounding up
-    if (_pwm_count > 8) _pwm_count.set(8);
-    if (_pwm_count < 0) _pwm_count.set(0);
-    if (_pwm_count == 1) _pwm_count.set(2);
-    if (_pwm_count == 3) _pwm_count.set(4);
-    if (_pwm_count == 5) _pwm_count.set(6);
-    if (_pwm_count == 7) _pwm_count.set(8);
-
-    int fd = open("/dev/f4by", 0);
-    if (fd == -1) {
-        hal.scheduler->panic("Unable to open /dev/f4by");
-    }
-    if (ioctl(fd, PWM_SERVO_SET_COUNT, _pwm_count.get()) != 0) {
-        hal.console->printf("RCOutput: Unable to setup alt PWM to %u channels\n", _pwm_count.get());  
-    }   
-    close(fd);    
-
-    hal.uartC->set_flow_control((AP_HAL::UARTDriver::flow_control)_ser1_rtscts.get());
-    if (hal.uartD != NULL) {
-        hal.uartD->set_flow_control((AP_HAL::UARTDriver::flow_control)_ser2_rtscts.get());
-    }
-
-    if (_safety_enable.get() == 0) {
-        hal.rcout->force_safety_off();
-    }
 #elif CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
     /* configure the VRBRAIN driver for the right number of PWMs */
 
