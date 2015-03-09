@@ -567,11 +567,11 @@
 
 // Stabilize (angle controller) gains
 #ifndef STABILIZE_ROLL_P
- # define STABILIZE_ROLL_P          4.5f
+ # define STABILIZE_ROLL_P          3.5f
 #endif
 
 #ifndef STABILIZE_PITCH_P
- # define STABILIZE_PITCH_P         4.5f
+ # define STABILIZE_PITCH_P         3.5f
 #endif
 
 #ifndef  STABILIZE_YAW_P
@@ -729,15 +729,15 @@
 
 // RATE control
 #ifndef THROTTLE_RATE_P
- # define THROTTLE_RATE_P       5.0f
+ # define THROTTLE_RATE_P       6.0f
 #endif
 
 // Throttle Accel control
 #ifndef THROTTLE_ACCEL_P
- # define THROTTLE_ACCEL_P      0.50f
+ # define THROTTLE_ACCEL_P      0.75f
 #endif
 #ifndef THROTTLE_ACCEL_I
- # define THROTTLE_ACCEL_I      1.00f
+ # define THROTTLE_ACCEL_I      1.50f
 #endif
 #ifndef THROTTLE_ACCEL_D
  # define THROTTLE_ACCEL_D      0.0f
