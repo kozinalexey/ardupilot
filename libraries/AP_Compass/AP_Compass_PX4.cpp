@@ -38,6 +38,10 @@
 
 extern const AP_HAL::HAL& hal;
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+#define USE_ONLY_PRIMARY_COMPASS_FLAG 0x08
+#define PRIMARY_COMPASS_MASK 0x07
+#endif
 
 // Public Methods //////////////////////////////////////////////////////////////
 
@@ -155,9 +159,15 @@ void AP_Compass_PX4::accumulate(void)
 
 uint8_t AP_Compass_PX4::get_primary(void) const
 {
-    if (_primary < _num_instances && _healthy[_primary]) {
-        return _primary;
+    if ((_primary_comp & PRIMARY_COMPASS_MASK) < _num_instances && _healthy[(_primary_comp & PRIMARY_COMPASS_MASK)]) {
+        return (_primary_comp & PRIMARY_COMPASS_MASK);
     }
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+	if(_primary_comp & USE_ONLY_PRIMARY_COMPASS_FLAG)
+	{
+		return (_primary_comp & PRIMARY_COMPASS_MASK);
+	}
+#endif    
     for (uint8_t i=0; i<_num_instances; i++) {
         if (_healthy[i]) return i;
     }    

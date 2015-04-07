@@ -268,7 +268,7 @@ protected:
     AP_Int8 _auto_declination;                  ///<enable automatic declination code
     AP_Int8 _external;                          ///<compass is external
 #if COMPASS_MAX_INSTANCES > 1
-    AP_Int8 _primary;                           ///primary instance
+    AP_Int8 _primary_comp;                           ///primary instance
     AP_Int32 _dev_id[COMPASS_MAX_INSTANCES];    // device id detected at init.  saved to eeprom when offsets are saved allowing ram & eeprom values to be compared as consistency check
 #endif
 
