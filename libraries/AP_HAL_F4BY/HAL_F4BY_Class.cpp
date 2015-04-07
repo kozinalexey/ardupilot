@@ -44,7 +44,7 @@ static F4BYUtil utilInstance;
 static F4BYGPIO gpioDriver;
 
 #define UARTA_DEFAULT_DEVICE "/dev/ttyACM0"
-#define UARTB_DEFAULT_DEVICE "/dev/ttyS2"
+#define UARTB_DEFAULT_DEVICE "/dev/ttyS0"
 #define UARTC_DEFAULT_DEVICE "/dev/ttyS1"
 #define UARTD_DEFAULT_DEVICE "/dev/null"
 #define UARTE_DEFAULT_DEVICE "/dev/null"
