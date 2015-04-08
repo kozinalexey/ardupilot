@@ -163,7 +163,7 @@ public:
 
     /// return true if the compass should be used for yaw calculations
     bool use_for_yaw(void) const {
-        return _healthy[0] && _use_for_yaw;
+        return _healthy[get_primary()] && _use_for_yaw;
     }
 
     /// Sets the local magnetic field declination.

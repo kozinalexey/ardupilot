@@ -107,7 +107,7 @@ const AP_Param::GroupInfo Compass::var_info[] PROGMEM = {
     // @Description: If more than one compass is available this selects which compass is the primary. Normally 0=External, 1=Internal. If no External compass is attached this parameter is ignored
     // @Values: 0:FirstCompass,1:SecondCompass
     // @User: Advanced
-    AP_GROUPINFO("PRIMARY", 12, Compass, _primary_comp, 0),
+    AP_GROUPINFO("PRIMARY", 12, Compass, _primary_comp, 1),
 #endif
 
 #if COMPASS_MAX_INSTANCES > 2

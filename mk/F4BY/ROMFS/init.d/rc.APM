@@ -84,20 +84,20 @@ fi
 
 echo "Starting F4BY sensors"
 
-if hmc5883 -X -C start
-then
-	echo "External hmc5883 started OK"
-else
-	echo "External hmc5883 start failed"
-	echo "External hmc5883 start failed" >> $logfile
-fi
-
 if hmc5883 -I -C start
 then
 	echo "Internal hmc5883 started OK"
 else
 	echo "Internal hmc5883 start failed"
 	echo "Internal hmc5883 start failed" >> $logfile
+fi
+
+if hmc5883 -X -C start
+then
+	echo "External hmc5883 started OK"
+else
+	echo "External hmc5883 start failed"
+	echo "External hmc5883 start failed" >> $logfile
 fi
 
 if mpu6000 start

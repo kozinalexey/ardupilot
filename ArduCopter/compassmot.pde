@@ -133,7 +133,7 @@ static uint8_t mavlink_compassmot(mavlink_channel_t chan)
     last_send_time = millis();
 
     // main run while there is no user input and the compass is healthy
-    while (command_ack_start == command_ack_counter && compass.healthy(compass.get_primary()) && motors.armed()) {
+    while (command_ack_start == command_ack_counter && compass.healthy() && motors.armed()) {
         // 50hz loop
         if (millis() - last_run_time < 20) {
             // grab some compass values
