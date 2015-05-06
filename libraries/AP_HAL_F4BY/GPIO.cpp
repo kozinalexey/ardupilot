@@ -74,8 +74,11 @@ void F4BYGPIO::init()
 void F4BYGPIO::pinMode(uint8_t pin, uint8_t output)
 {
     switch (pin) {
-    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(7):
-        ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, 1U<<(pin-F4BY_GPIO_FMU_SERVO_PIN(0)));
+    case F4BY_GPIO_D1_PIN:
+        ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, GPIO_EXT_1);
+        break;
+    case F4BY_GPIO_D2_PIN:
+        ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, GPIO_EXT_2);
         break;
     }
 }
@@ -91,13 +94,13 @@ uint8_t F4BYGPIO::read(uint8_t pin) {
     switch (pin) {
 
 #ifdef GPIO_EXT_1
-        case F4BY_GPIO_EXT_FMU_RELAY1_PIN:
+        case F4BY_GPIO_D1_PIN:
             ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
             return (relays & GPIO_EXT_1)?HIGH:LOW;
 #endif
 
 #ifdef GPIO_EXT_2
-        case F4BY_GPIO_EXT_FMU_RELAY2_PIN:
+        case F4BY_GPIO_D2_PIN:
             ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
             return (relays & GPIO_EXT_2)?HIGH:LOW;
             break;
@@ -184,13 +187,13 @@ void F4BYGPIO::write(uint8_t pin, uint8_t value)
             break;
 
 #ifdef GPIO_EXT_1
-        case F4BY_GPIO_EXT_FMU_RELAY1_PIN:
+        case F4BY_GPIO_D1_PIN:
             ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, GPIO_EXT_1);
             break;
 #endif
 
 #ifdef GPIO_EXT_2
-        case F4BY_GPIO_EXT_FMU_RELAY2_PIN:
+        case F4BY_GPIO_D2_PIN:
             ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, GPIO_EXT_2);
             break;
 #endif
@@ -219,9 +222,9 @@ void F4BYGPIO::write(uint8_t pin, uint8_t value)
             break;
 #endif
 
-    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(7):
+    /*case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(7):
         ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, 1U<<(pin-F4BY_GPIO_FMU_SERVO_PIN(0)));
-        break;
+        break;*/
     }
 }
 

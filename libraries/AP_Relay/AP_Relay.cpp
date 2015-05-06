@@ -32,14 +32,14 @@ const AP_Param::GroupInfo AP_Relay::var_info[] PROGMEM = {
     // @DisplayName: First Relay Pin
     // @Description: Digital pin number for first relay control. This is the pin used for camera control.
     // @User: Standard
-    // @Values: -1:Disabled,13:APM2 A9 pin,47:APM1 relay,50:Pixhawk FMU AUX1,51:Pixhawk FMU AUX2,52:Pixhawk FMU AUX3,53:Pixhawk FMU AUX4,54:Pixhawk FMU AUX5,55:Pixhawk FMU AUX6,111:PX4 FMU Relay1,112:PX4 FMU Relay2,113:PX4IO Relay1,114:PX4IO Relay2,115:PX4IO ACC1,116:PX4IO ACC2
+    // @Values: -1:Disabled,13:APM2 A9 pin,47:APM1 relay,50:Pixhawk FMU AUX1,51:Pixhawk FMU AUX2,52:Pixhawk FMU AUX3,53:Pixhawk FMU AUX4,54:Pixhawk FMU AUX5,55:Pixhawk FMU AUX6,70:F4BY D1,71:F4BY D2,111:PX4 FMU Relay1,112:PX4 FMU Relay2,113:PX4IO Relay1,114:PX4IO Relay2,115:PX4IO ACC1,116:PX4IO ACC2
     AP_GROUPINFO("PIN",  0, AP_Relay, _pin[0], RELAY_PIN),
 
     // @Param: PIN2
     // @DisplayName: Second Relay Pin
     // @Description: Digital pin number for 2nd relay control.
     // @User: Standard
-    // @Values: -1:Disabled,13:APM2 A9 pin,47:APM1 relay,50:Pixhawk FMU AUX1,51:Pixhawk FMU AUX2,52:Pixhawk FMU AUX3,53:Pixhawk FMU AUX4,54:Pixhawk FMU AUX5,55:Pixhawk FMU AUX6,111:PX4 FMU Relay1,112:PX4 FMU Relay2,113:PX4IO Relay1,114:PX4IO Relay2,115:PX4IO ACC1,116:PX4IO ACC2
+    // @Values: -1:Disabled,13:APM2 A9 pin,47:APM1 relay,50:Pixhawk FMU AUX1,51:Pixhawk FMU AUX2,52:Pixhawk FMU AUX3,53:Pixhawk FMU AUX4,54:Pixhawk FMU AUX5,55:Pixhawk FMU AUX6,70:F4BY D1,71:F4BY D2,111:PX4 FMU Relay1,112:PX4 FMU Relay2,113:PX4IO Relay1,114:PX4IO Relay2,115:PX4IO ACC1,116:PX4IO ACC2
     AP_GROUPINFO("PIN2",  1, AP_Relay, _pin[1], -1),
 
 #if AP_RELAY_NUM_RELAYS > 2

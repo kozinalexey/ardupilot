@@ -6,8 +6,8 @@
 #include <AP_HAL_F4BY.h>
 
 #define F4BY_GPIO_PIEZO_PIN              110
-#define F4BY_GPIO_EXT_FMU_RELAY1_PIN     111
-#define F4BY_GPIO_EXT_FMU_RELAY2_PIN     112
+#define F4BY_GPIO_D1_PIN                 70
+#define F4BY_GPIO_D2_PIN                 71
 
 /*
   start servo channels used as GPIO at 50. Pin 50 is
