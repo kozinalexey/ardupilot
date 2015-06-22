@@ -64,11 +64,11 @@ extern const AP_HAL::HAL& hal;
 // MediaTek-based GPS.
 //
 #define MTK_INIT_MSG \
-    "$PMTK314,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n" /* GGA & VTG once every fix */ \
+    "$PMTK314,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n" /* RMC, GGA & VTG once every fix */ \
     "$PMTK397,0*23\r\n" /* Set Nav Threshold (the minimum speed the GPS must be moving to update the position) to 0 m/s */ \
     "$PMTK330,0*2E\r\n"                                 /* datum = WGS84 */ \
-    "$PMTK313,1*2E\r\n"                                 /* SBAS on */ \
-    "$PMTK301,2*2E\r\n"                                 /* use SBAS data for DGPS */ \
+    "$PMTK313,0*2F\r\n"                                 /* SBAS off */ \
+    "$PMTK301,0*2C\r\n"                                 /* DGPS off */ \
     "$PMTK319,0*25\r\n" /* SBAS_TEST_MODE */ \
     "$PMTK220,200*2C\r\n" /* Output at 5Hz */
 
@@ -90,9 +90,9 @@ const prog_char AP_GPS_NMEA::_initialisation_blob[] PROGMEM = SIRF_INIT_MSG MTK_
 
 // NMEA message identifiers ////////////////////////////////////////////////////
 //
-const char AP_GPS_NMEA::_gprmc_string[] PROGMEM = "GPRMC";
-const char AP_GPS_NMEA::_gpgga_string[] PROGMEM = "GPGGA";
-const char AP_GPS_NMEA::_gpvtg_string[] PROGMEM = "GPVTG";
+const char AP_GPS_NMEA::_gprmc_string[] PROGMEM = "RMC";
+const char AP_GPS_NMEA::_gpgga_string[] PROGMEM = "GGA";
+const char AP_GPS_NMEA::_gpvtg_string[] PROGMEM = "VTG";
 
 // Convenience macros //////////////////////////////////////////////////////////
 //
@@ -290,11 +290,11 @@ bool AP_GPS_NMEA::_term_complete()
 
     // the first term determines the sentence type
     if (_term_number == 0) {
-        if (!strcmp_P(_term, _gprmc_string)) {
+        if (!strcmp_P(_term+2, _gprmc_string)) {   // ignore gp gn gl prefixes detect rmc gga or vtg string
             _sentence_type = _GPS_SENTENCE_GPRMC;
-        } else if (!strcmp_P(_term, _gpgga_string)) {
+        } else if (!strcmp_P(_term+2, _gpgga_string)) {
             _sentence_type = _GPS_SENTENCE_GPGGA;
-        } else if (!strcmp_P(_term, _gpvtg_string)) {
+        } else if (!strcmp_P(_term+2, _gpvtg_string)) {
             _sentence_type = _GPS_SENTENCE_GPVTG;
             // VTG may not contain a data qualifier, presume the solution is good
             // unless it tells us otherwise.
