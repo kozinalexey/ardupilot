@@ -846,7 +846,7 @@ void DataFlash_Class::Log_Write_Message_P(const prog_char_t *message)
 // Write a POWR packet
 void DataFlash_Class::Log_Write_Power(void)
 {
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     struct log_POWR pkt = {
         LOG_PACKET_HEADER_INIT(LOG_POWR_MSG),
         time_ms : hal.scheduler->millis(),
