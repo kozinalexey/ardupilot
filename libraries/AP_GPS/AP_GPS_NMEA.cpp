@@ -51,7 +51,7 @@ extern const AP_HAL::HAL& hal;
         "$PSRF103,1,0,0,1*25\r\n"   /* GLL off */   \
         "$PSRF103,2,0,0,1*26\r\n"   /* GSA off */   \
         "$PSRF103,3,0,0,1*27\r\n"   /* GSV off */   \
-        "$PSRF103,4,0,1,1*20\r\n"   /* RMC off */   \
+        "$PSRF103,4,0,1,1*20\r\n"   /* RMC off it is bug */   \
         "$PSRF103,5,0,1,1*20\r\n"   /* VTG @ 1Hz */ \
         "$PSRF103,6,0,0,1*22\r\n"   /* MSS off */   \
         "$PSRF103,8,0,0,1*2C\r\n"   /* ZDA off */   \
@@ -84,7 +84,7 @@ extern const AP_HAL::HAL& hal;
 #define UBLOX_INIT_MSG \
     "$PUBX,40,gga,0,1,0,0,0,0*7B\r\n"   /* GGA on at one per fix */ \
     "$PUBX,40,vtg,0,1,0,0,0,0*7F\r\n"   /* VTG on at one per fix */ \
-    "$PUBX,40,rmc,0,0,0,0,0,0*67\r\n"   /* RMC off (XXX suppress other message types?) */
+    "$PUBX,40,rmc,0,0,0,0,0,0*67\r\n"   /* RMC off (XXX suppress other message types?) it is  bug */
 
 const prog_char AP_GPS_NMEA::_initialisation_blob[] PROGMEM = SIRF_INIT_MSG MTK_INIT_MSG UBLOX_INIT_MSG;
 
