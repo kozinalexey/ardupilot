@@ -263,6 +263,8 @@ bool AP_GPS_NMEA::_term_complete()
                     state.location.lng  = _new_longitude;
                     state.num_sats      = _new_satellite_count;
                     state.hdop          = _new_hdop;
+                    state.last_gps_time_ms = hal.scheduler->millis(); //gpgga bring new lat lon data, fix inav if gps receiver dont support rmc message
+
                     // To-Do: add support for proper reporting of 2D and 3D fix
                     state.status        = AP_GPS::GPS_OK_FIX_3D;
                     break;
