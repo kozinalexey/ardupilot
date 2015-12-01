@@ -1003,6 +1003,10 @@ static void fast_loop()
     // IMU DCM Algorithm
     // --------------------
     read_AHRS();
+    
+        // Inertial Nav
+    // decrease latency between ahrs and inertial calculations
+    read_inertia();
 
     // run low level rate controllers that only require IMU data
     attitude_control.rate_controller_run();
@@ -1015,9 +1019,7 @@ static void fast_loop()
     // ------------------------------
     set_servos_4();
 
-    // Inertial Nav
-    // --------------------
-    read_inertia();
+
 
     // run the attitude controllers
     update_flight_mode();
