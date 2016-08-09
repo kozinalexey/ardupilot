@@ -68,7 +68,7 @@ AP_Notify::AP_Notify()
 struct AP_Notify::notify_flags_type AP_Notify::flags;
 struct AP_Notify::notify_events_type AP_Notify::events;
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     AP_BoardLED boardled;
     ToshibaLED_PX4 toshibaled;
 

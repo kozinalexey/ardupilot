@@ -12,6 +12,7 @@
 #define HAL_BOARD_LINUX    7
 #define HAL_BOARD_VRBRAIN  8
 #define HAL_BOARD_QURT     9
+#define HAL_BOARD_F4BY    20
 #define HAL_BOARD_EMPTY   99
 
 /* Default board subtype is -1 */
@@ -66,6 +67,7 @@
 #define HAL_INS_QURT        16
 #define HAL_INS_BBBMINI     17
 #define HAL_INS_AERO        18
+#define HAL_INS_F4BY        19
 
 /* Barometer driver types */
 #define HAL_BARO_BMP085      1
@@ -96,6 +98,7 @@
 #define HAL_COMPASS_NAVIO2             14
 #define HAL_COMPASS_NAVIO              15
 #define HAL_COMPASS_AERO               16
+#define HAL_COMPASS_F4BY               17
 
 /* Heat Types */
 #define HAL_LINUX_HEAT_PWM 1
@@ -134,6 +137,8 @@
     #include <AP_HAL/board/qurt.h>
 #elif CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
     #include <AP_HAL/board/vrbrain.h>
+#elif CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+    #include <AP_HAL/board/f4by.h>
 #else
 #error "Unknown CONFIG_HAL_BOARD type"
 #endif

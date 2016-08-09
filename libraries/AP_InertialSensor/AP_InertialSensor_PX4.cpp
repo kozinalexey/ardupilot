@@ -1,5 +1,5 @@
 #include <AP_HAL/AP_HAL.h>
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 
 #include "AP_InertialSensor_PX4.h"
 
@@ -158,6 +158,8 @@ bool AP_InertialSensor_PX4::_init_sensor(void)
 
 #if  CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
     _product_id = AP_PRODUCT_ID_VRBRAIN;
+#elif  CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+    _product_id = AP_PRODUCT_ID_F4BY;
 #else
 #if defined(CONFIG_ARCH_BOARD_PX4FMU_V2)
     _product_id = AP_PRODUCT_ID_PX4_V2;
