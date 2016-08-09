@@ -27,6 +27,7 @@ help:
 	@echo "  navio - the RaspberryPi + NavIO cape combination"
 	@echo "  linux - a generic Linux build"
 	@echo "  vrbrain - the VRBrain boards"
+	@echo "  f4by - the F4BY"
 	@echo "  sitl - the SITL Software In The Loop simulation"
 	@echo "  bbbmini - the Beagle Bone Black mini"
 	@echo "  bebop - the Parrot Bebop"
