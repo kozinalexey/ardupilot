@@ -1,0 +1,162 @@
+#!nsh
+
+# APM startup script for NuttX on PX4
+
+# To disable APM startup add a /fs/microsd/APM/nostart file
+# To enable mkblctrl startup add a /fs/microsd/APM/mkblctrl file
+# To enable PWM on FMUv1 on ttyS1 add a /fs/microsd/APM/AUXPWM.en file
+
+set deviceA /dev/ttyACM0
+
+# check for an old file called APM, caused by 
+# a bug in an earlier firmware release
+if [ -f /fs/microsd/APM ]
+then
+   echo "APM file found - renaming"
+   mv /fs/microsd/APM /fs/microsd/APM.old
+fi
+
+if [ -f /fs/microsd/APM/nostart ]
+then
+   echo "APM/nostart found - skipping APM startup"
+   sh /etc/init.d/rc.error
+fi
+
+# mount binfs so we can find the built-in apps
+if [ -f /bin/reboot ]
+then
+	echo "binfs already mounted"
+else
+	echo "Mounting binfs"
+        if mount -t binfs /dev/null /bin
+        then
+                echo "binfs mounted OK"
+        else
+                sh /etc/init.d/rc.error
+        fi
+fi
+
+set sketch NONE
+if rm /fs/microsd/APM/boot.log
+then
+   echo "removed old boot.log"
+fi
+set logfile /fs/microsd/APM/BOOT.LOG
+
+if [ ! -f /bin/ArduPilot ]
+then
+   echo "/bin/ardupilot not found"
+   sh /etc/init.d/rc.error
+fi
+
+if mkdir /fs/microsd/APM > /dev/null
+then
+     echo "Created APM directory"
+fi
+
+
+set deviceC /dev/ttyS1
+set deviceE /dev/ttyS2
+set deviceD /dev/ttyS3
+set deviceE /dev/ttyS2
+
+
+if uorb start
+then
+    echo "uorb started OK"
+else
+    sh /etc/init.d/rc.error
+fi
+
+echo "Setting FMU mode_pwm"
+fmu mode_pwm
+
+echo "Starting APM sensors"
+if ms5611 start
+then
+    echo "ms5611 started OK"
+else
+    sh /etc/init.d/rc.error
+fi
+
+if adc start
+then
+    echo "adc started OK"
+else
+    sh /etc/init.d/rc.error
+fi
+
+echo "Starting F4BY sensors"
+
+if hmc5883 -I -C start
+then
+	echo "Internal hmc5883 started OK"
+else
+	echo "Internal hmc5883 start failed"
+	echo "Internal hmc5883 start failed" >> $logfile
+fi
+
+if hmc5883 -X -C start
+then
+	echo "External hmc5883 started OK"
+else
+	echo "External hmc5883 start failed"
+	echo "External hmc5883 start failed" >> $logfile
+fi
+
+if mpu6000 start
+then
+   echo "mpu6000  started OK"
+else
+   sh /etc/init.d/rc.error
+fi
+
+# optional ETS airspeed sensor
+if ets_airspeed start
+then
+    echo "Found ETS airspeed sensor"
+fi
+
+if meas_airspeed start
+then
+    echo "Found MEAS airspeed sensor"
+fi
+
+if mtd start /fs/mtd
+then
+    echo "started mtd driver OK"
+else
+    echo "failed to start mtd driver"
+    echo "failed to start mtd driver" >> $logfile
+    sh /etc/init.d/rc.error           
+fi
+
+if mtd readtest /fs/mtd
+then
+    echo "mtd readtest OK"
+else
+    echo "failed to read mtd"
+    echo "failed to read mtd" >> $logfile
+    sh /etc/init.d/rc.error           
+fi
+
+echo "Starting F4BY_INPUT driver"
+if f4by_input start
+then
+	echo "started F4BY_INPUT driver"
+else
+    echo "failed to start F4BY_INPUT driver"
+    echo "failed to start F4BY_INPUT driver" >> $logfile
+    sh /etc/init.d/rc.error           
+fi
+
+echo Starting ArduPilot $deviceA $deviceC $deviceD $deviceE
+if ArduPilot -d $deviceA -d2 $deviceC -d3 $deviceD -d4 $deviceE start
+then
+    echo ArduPilot started OK
+else
+    sh /etc/init.d/rc.error
+fi
+
+echo "rc.APM finished"
+

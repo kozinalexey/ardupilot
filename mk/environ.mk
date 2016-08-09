@@ -87,6 +87,12 @@ ifneq ($(findstring px4, $(MAKECMDGOALS)),)
 BUILDROOT		:=	$(SKETCHBOOK)/Build.$(SKETCH)
 endif
 
+ifneq ($(findstring f4by, $(MAKECMDGOALS)),)
+# when building f4by we need all sources to be inside the sketchbook directory
+# as the NuttX build system relies on it
+BUILDROOT		:=	$(SKETCHBOOK)/Build.$(SKETCH)
+endif
+
 ifneq ($(findstring vrbrain, $(MAKECMDGOALS)),)
 # when building vrbrain we need all sources to be inside the sketchbook directory
 # as the NuttX build system relies on it
@@ -208,6 +214,11 @@ endif
 
 ifneq ($(findstring vrcore, $(MAKECMDGOALS)),)
 HAL_BOARD = HAL_BOARD_VRBRAIN
+HAL_BOARD_SUBTYPE = HAL_BOARD_SUBTYPE_NONE
+endif
+
+ifneq ($(findstring f4by, $(MAKECMDGOALS)),)
+HAL_BOARD = HAL_BOARD_F4BY
 HAL_BOARD_SUBTYPE = HAL_BOARD_SUBTYPE_NONE
 endif
 

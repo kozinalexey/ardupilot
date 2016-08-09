@@ -118,6 +118,7 @@ BOARDS += vrbrain
 BOARDS += vrbrain-v51 vrbrain-v52 vrbrain-v54
 BOARDS += vrcore-v10
 BOARDS += vrubrain-v51 vrubrain-v52
+BOARDS += f4by
 
 define frame_template
 $(1)-$(2) : EXTRAFLAGS += "-DFRAME_CONFIG=$(shell echo $(2) | tr a-z A-Z | sed s/-/_/g)_FRAME "
