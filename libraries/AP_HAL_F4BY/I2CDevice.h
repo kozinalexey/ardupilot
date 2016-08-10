@@ -55,13 +55,20 @@ public:
                                  uint32_t recv_len, uint8_t times) override;
 
     /* See AP_HAL::Device::register_periodic_callback() */
-    AP_HAL::Device::PeriodicHandle *register_periodic_callback(
-        uint32_t period_usec, AP_HAL::MemberProc) override
+    AP_HAL::Device::PeriodicHandle register_periodic_callback(
+        uint32_t period_usec, AP_HAL::Device::PeriodicCb) override
     {
         /* Not implemented yet */
         return nullptr;
     };
 
+	/* See AP_HAL::Device::adjust_periodic_callback() */
+    bool adjust_periodic_callback(AP_HAL::Device::PeriodicHandle h, uint32_t period_usec) override
+    {
+        /* Not implemented yet */
+        return false;
+    }
+    
     // this makes no sense on F4BY 
     int get_fd() override { return -1; }
 

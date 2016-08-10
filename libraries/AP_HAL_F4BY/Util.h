@@ -9,8 +9,8 @@ public:
     size_t write(uint8_t);
     size_t write(const uint8_t *buffer, size_t size);
     int16_t read();
-    int16_t available();
-    int16_t txspace();
+    uint32_t available();
+    uint32_t txspace();
 private:
     int shell_stdin = -1;
     int shell_stdout = -1;

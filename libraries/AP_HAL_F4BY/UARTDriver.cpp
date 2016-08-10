@@ -236,7 +236,7 @@ bool F4BYUARTDriver::tx_pending() { return false; }
 /*
   return number of bytes available to be read from the buffer
  */
-int16_t F4BYUARTDriver::available() 
+uint32_t F4BYUARTDriver::available() 
 { 
 	if (!_initialised) {
         try_initialise();
@@ -249,7 +249,7 @@ int16_t F4BYUARTDriver::available()
 /*
   return number of bytes that can be added to the write buffer
  */
-int16_t F4BYUARTDriver::txspace() 
+uint32_t F4BYUARTDriver::txspace() 
 { 
 	if (!_initialised) {
         try_initialise();

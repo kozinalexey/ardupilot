@@ -21,8 +21,6 @@
 
 namespace F4BY {
 
-static const AP_HAL::HAL &hal = AP_HAL::get_HAL();
-
 uint8_t F4BY::F4BY_I2C::instance;
 
 /*
