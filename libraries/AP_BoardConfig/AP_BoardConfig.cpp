@@ -22,7 +22,7 @@
 #include <AP_Common/AP_Common.h>
 #include "AP_BoardConfig.h"
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN ||CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -30,6 +30,11 @@
 #include <drivers/drv_pwm_output.h>
 #include <drivers/drv_sbus.h>
 #endif
+
+
+
+
+
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
 # define BOARD_SAFETY_ENABLE_DEFAULT 1
@@ -60,13 +65,16 @@
 # elif defined(CONFIG_ARCH_BOARD_VRBRAIN_V54)
 #  define BOARD_TYPE_DEFAULT VRX_BOARD_BRAIN54
 # endif
+#elif CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+# define BOARD_SAFETY_ENABLE_DEFAULT 0
+# define BOARD_PWM_COUNT_DEFAULT 12
 #endif
 
 extern const AP_HAL::HAL& hal;
 
 // table of user settable parameters
 const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     // @Param: PWM_COUNT
     // @DisplayName: Auxiliary pin config
     // @Description: Control assigning of FMU pins to PWM output, timer capture and GPIO. All unassigned pins can be used for GPIO
@@ -91,7 +99,7 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
     AP_GROUPINFO("SER2_RTSCTS",    2, AP_BoardConfig, px4.ser2_rtscts, 2),
 #endif
     
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     // @Param: SAFETYENABLE
     // @DisplayName: Enable use of safety arming switch
     // @Description: This controls the default state of the safety switch at startup. When set to 1 the safety switch will start in the safe state (flashing) at boot. When set to zero the safety switch will start in the unsafe state (solid) at startup. Note that if a safety switch is fitted the user can still control the safety state after startup using the switch. The safety state can also be controlled in software using a MAVLink message.
@@ -134,6 +142,16 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
     AP_GROUPINFO("SAFETY_MASK", 7, AP_BoardConfig, px4.ignore_safety_channels, 0),
 #endif
 
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+    // @Param: SAFETY_MASK
+    // @DisplayName: Channels to which ignore the safety switch state
+    // @Description: A bitmask which controls what channels can move while the safety switch has not been pressed
+    // @Values: 0:Disabled,1:Enabled
+    // @Bitmask: 0:Ch1,1:Ch2,2:Ch3,3:Ch4,4:Ch5,5:Ch6,6:Ch7,7:Ch8,8:Ch9,9:Ch10,10:Ch11,11:Ch12
+    // @RebootRequired: True
+    AP_GROUPINFO("SAFETY_MASK", 11, AP_BoardConfig, px4.ignore_safety_channels, 0),
+#endif
+
 #if HAL_HAVE_IMU_HEATER
     // @Param: IMU_TARGTEMP
     // @DisplayName: Target IMU temperature
@@ -143,7 +161,7 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
     AP_GROUPINFO("IMU_TARGTEMP", 8, AP_BoardConfig, _imu_target_temperature, HAL_IMU_TEMP_DEFAULT),
 #endif
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN 
     // @Param: TYPE
     // @DisplayName: Board type
     // @Description: This allows selection of a PX4 or VRBRAIN board type. If set to zero then the board type is auto-detected (PX4)
@@ -157,7 +175,7 @@ const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
 
 void AP_BoardConfig::init()
 {
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     px4_setup();
 #endif
     

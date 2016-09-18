@@ -29,7 +29,7 @@ using namespace F4BY;
 void F4BYRCOutput::init()
 {
     _perf_rcout = perf_alloc(PC_ELAPSED, "APM_rcout");
-    _pwm_fd = open(PWM_OUTPUT0_DEVICE_PATH "0", O_RDWR);
+    _pwm_fd = open(PWM_OUTPUT0_DEVICE_PATH, O_RDWR);
     if (_pwm_fd == -1) {
         AP_HAL::panic("Unable to open " PWM_OUTPUT0_DEVICE_PATH);
     }
@@ -120,9 +120,9 @@ void F4BYRCOutput::set_freq_fd(int fd, uint32_t chmask, uint16_t freq_hz)
 
     /* work out the new rate mask. The outputs have 3 groups of servos. 
 
-       Group 0: channels 0 1
+       Group 0: channels 0 1 2 3
        Group 1: channels 4 5 6 7
-       Group 2: channels 2 3
+       Group 2: channels 8 9 10 11
 
        Channels within a group must be set to the same rate.
 
@@ -131,26 +131,26 @@ void F4BYRCOutput::set_freq_fd(int fd, uint32_t chmask, uint16_t freq_hz)
      */
     if (freq_hz > 50 || freq_hz == 1) {
         // we are setting high rates on the given channels
-        _rate_mask |= chmask & 0xFF;
-        if (_rate_mask & 0x3) {
-            _rate_mask |= 0x3;
-        }
-        if (_rate_mask & 0xc) {
-            _rate_mask |= 0xc;
+        _rate_mask |= chmask & 0xFFF;
+        if (_rate_mask & 0xF) {
+            _rate_mask |= 0xF;
         }
         if (_rate_mask & 0xF0) {
             _rate_mask |= 0xF0;
         }
+        if (_rate_mask & 0xF00) {
+            _rate_mask |= 0xF00;
+        }
     } else {
         // we are setting low rates on the given channels
-        if (chmask & 0x3) {
-            _rate_mask &= ~0x3;
+        if (chmask & 0xF) {
+            _rate_mask &= ~0xF;
         }
         if (chmask & 0xc) {
-            _rate_mask &= ~0xc;
+            _rate_mask &= ~0xF0;
         }
         if (chmask & 0xf0) {
-            _rate_mask &= ~0xf0;
+            _rate_mask &= ~0xf00;
         }
     }
 
@@ -411,8 +411,8 @@ void F4BYRCOutput::_publish_actuators(void)
     // don't publish more than 8 actuators for now, as the uavcan ESC
     // driver refuses to update any motors if you try to publish more
     // than 8
-    if (actuators.nvalues > 8) {
-        actuators.nvalues = 8;
+    if (actuators.nvalues > 12) {
+        actuators.nvalues = 12;
     }
     bool armed = hal.util->get_soft_armed();
 	actuators.timestamp = hrt_absolute_time();
