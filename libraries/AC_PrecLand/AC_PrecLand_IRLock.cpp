@@ -4,7 +4,7 @@
 extern const AP_HAL::HAL& hal;
 
 // this only builds for PX4 so far
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY || CONFIG_HAL_BOARD == HAL_BOARD_SITL
 
 // Constructor
 AC_PrecLand_IRLock::AC_PrecLand_IRLock(const AC_PrecLand& frontend, AC_PrecLand::precland_state& state)

@@ -21,7 +21,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include "OpticalFlow.h"
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 
 #include <AP_BoardConfig/AP_BoardConfig.h>
 #include <sys/types.h>
@@ -43,7 +43,7 @@ extern "C" int px4flow_main(int, char **);
 
 void AP_OpticalFlow_PX4::init(void)
 {
-#if defined(CONFIG_ARCH_BOARD_PX4FMU_V1) || defined(CONFIG_ARCH_BOARD_PX4FMU_V2) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V51) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V52) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V54) || defined(CONFIG_ARCH_BOARD_VRUBRAIN_V51) || defined(CONFIG_ARCH_BOARD_VRUBRAIN_V52) || defined(CONFIG_ARCH_BOARD_VRCORE_V10)
+#if defined(CONFIG_ARCH_BOARD_PX4FMU_V1) || defined(CONFIG_ARCH_BOARD_PX4FMU_V2) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V51) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V52) || defined(CONFIG_ARCH_BOARD_VRBRAIN_V54) || defined(CONFIG_ARCH_BOARD_VRUBRAIN_V51) || defined(CONFIG_ARCH_BOARD_VRUBRAIN_V52) || defined(CONFIG_ARCH_BOARD_VRCORE_V10) || defined(CONFIG_ARCH_BOARD_F4BY)
     if (!AP_BoardConfig::px4_start_driver(px4flow_main, "px4flow", "start")) {
         hal.console->printf("Unable to start px4flow driver\n");
     } else {

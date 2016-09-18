@@ -139,7 +139,7 @@ uint8_t F4BYGPIO::read(uint8_t pin) {
         }
 #endif
 
-    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(7): {
+    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(11): {
         uint32_t relays = 0;
         ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
         return (relays & (1U<<(pin-F4BY_GPIO_FMU_SERVO_PIN(0))))?HIGH:LOW;
@@ -225,7 +225,7 @@ void F4BYGPIO::write(uint8_t pin, uint8_t value)
             break;
 #endif
 
-    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(7):
+    case F4BY_GPIO_FMU_SERVO_PIN(0) ... F4BY_GPIO_FMU_SERVO_PIN(11):
         ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, 1U<<(pin-F4BY_GPIO_FMU_SERVO_PIN(0)));
         break;
     }

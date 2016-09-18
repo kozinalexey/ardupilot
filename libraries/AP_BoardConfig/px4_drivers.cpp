@@ -20,7 +20,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_BoardConfig.h"
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 #include <GCS_MAVLink/GCS.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -82,7 +82,7 @@ void AP_BoardConfig::px4_setup_pwm()
         { 4, PWM_SERVO_MODE_4PWM, 2 },
         { 6, PWM_SERVO_MODE_6PWM, 0 },
         { 7, PWM_SERVO_MODE_3PWM1CAP, 2 },
-#if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
         { 8, PWM_SERVO_MODE_12PWM, 0 },
 #endif
     };

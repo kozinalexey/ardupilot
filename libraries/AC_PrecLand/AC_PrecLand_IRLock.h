@@ -10,7 +10,7 @@
 #endif
 
 // this only builds for PX4 so far
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_SITL
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY || CONFIG_HAL_BOARD == HAL_BOARD_SITL
 
 /*
  * AC_PrecLand_IRLock - implements precision landing using target vectors provided

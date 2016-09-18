@@ -174,7 +174,7 @@ void Copter::read_aux_switches()
         do_aux_switch_function(g.ch11_option, aux_con.CH11_flag);
     }
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     // check if Ch12 switch has changed position
     switch_position = read_3pos_switch(g.rc_12.get_radio_in());
     if (aux_con.CH12_flag != switch_position) {

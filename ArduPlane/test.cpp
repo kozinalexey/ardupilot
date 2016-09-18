@@ -24,7 +24,7 @@ static const struct Menu::command test_menu_commands[] = {
     {"airpressure",         MENU_FUNC(test_pressure)},
     {"compass",             MENU_FUNC(test_mag)},
     {"logging",             MENU_FUNC(test_logging)},
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     {"shell", 				MENU_FUNC(test_shell)},
 #endif
 
@@ -299,7 +299,7 @@ int8_t Plane::test_logging(uint8_t argc, const Menu::arg *argv)
     return 0;
 }
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 /*
  *  run a debug shell
  */

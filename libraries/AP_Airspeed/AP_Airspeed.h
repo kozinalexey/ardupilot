@@ -180,7 +180,7 @@ private:
     void update_calibration(float raw_pressure);
 
     AP_Airspeed_Analog analog{_pin, _psi_range};
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     AP_Airspeed_PX4    digital{_psi_range};
 #else
     AP_Airspeed_I2C    digital{_psi_range};

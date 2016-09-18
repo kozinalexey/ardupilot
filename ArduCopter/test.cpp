@@ -14,7 +14,7 @@ static const struct Menu::command test_menu_commands[] = {
     {"ins",                 MENU_FUNC(test_ins)},
     {"optflow",             MENU_FUNC(test_optflow)},
     {"relay",               MENU_FUNC(test_relay)},
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     {"shell", 				MENU_FUNC(test_shell)},
 #endif
 #if HIL_MODE == HIL_MODE_DISABLED
@@ -226,7 +226,7 @@ int8_t Copter::test_relay(uint8_t argc, const Menu::arg *argv)
     }
 }
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 /*
  *  run a debug shell
  */

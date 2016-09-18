@@ -32,7 +32,7 @@ public:
 
     static const struct AP_Param::GroupInfo var_info[];
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     // public method to start a driver
     static bool px4_start_driver(main_fn_t main_function, const char *name, const char *arguments);
 
@@ -55,6 +55,9 @@ public:
         VRX_BOARD_CORE10   = 11,
         VRX_BOARD_BRAIN54  = 12,
 #endif
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+        PX4_BOARD_F4BY     = 13,
+#endif
     };
 #endif
 
@@ -64,7 +67,7 @@ public:
 private:
     AP_Int16 vehicleSerialNumber;
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     struct {
         AP_Int8 pwm_count;
         AP_Int8 safety_enable;

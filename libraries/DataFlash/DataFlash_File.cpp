@@ -74,6 +74,8 @@ DataFlash_File::DataFlash_File(DataFlash_Class &front,
     _writebuf_chunk(512),
 #elif defined(CONFIG_ARCH_BOARD_VRHERO_V10)
     _writebuf_chunk(512),
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+    _writebuf_chunk(512),
 #else
     _writebuf_chunk(4096),
 #endif
@@ -101,7 +103,7 @@ void DataFlash_File::Init()
         return;
     }
     
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     // try to cope with an existing lowercase log directory
     // name. NuttX does not handle case insensitive VFAT well
     DIR *d = opendir("/fs/microsd/APM");
