@@ -92,9 +92,17 @@ if hmc5883 -I -C start
 then
 	echo "Internal hmc5883 started OK"
 else
-	echo "Internal hmc5883 start failed"
-	echo "Internal hmc5883 start failed" >> $logfile
+   echo "Warming Internal hmc5883 15sec"
+   sleep 15
+    if hmc5883 -I -C start
+		then
+		echo "Internal hmc5883 started after warming"
+		else
+   			echo "Internal hmc5883 start failed 2 times"
+			echo "Internal hmc5883 start failed 2 times" >> $logfile
+	fi
 fi
+
 
 if hmc5883 -X -C start
 then
