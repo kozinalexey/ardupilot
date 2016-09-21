@@ -253,13 +253,14 @@ void F4BYAnalogIn::_timer_tick(void)
     if (ret > 0) {
         // match the incoming channels to the currently active pins
         for (uint8_t i=0; i<ret/sizeof(buf_adc[0]); i++) {
-#if defined(CONFIG_ARCH_BOARD_PX4FMU_V2) || defined(CONFIG_ARCH_BOARD_PX4FMU_V4)
-            if (buf_adc[i].am_channel == 4) {
-                // record the Vcc value for later use in
-                // voltage_average_ratiometric()
-                _board_voltage = buf_adc[i].am_data * 6.6f / 4096;
-            }
-#endif
+            if(buf_adc[i].am_channel == 15)
+            {
+             _servorail_voltage = buf_adc[i].am_data * F4BY_VOLTAGE_SCALING * 2;
+             }
+             else if(buf_adc[i].am_channel == 14)
+             {
+             _board_voltage = buf_adc[i].am_data * F4BY_VOLTAGE_SCALING * 2;
+             }
         }
         for (uint8_t i=0; i<ret/sizeof(buf_adc[0]); i++) {
             Debug("chan %u value=%u\n",
