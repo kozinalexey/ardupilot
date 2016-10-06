@@ -314,6 +314,7 @@ void Plane::set_mode(enum FlightMode mode)
         // don't switch modes if we are already in the correct mode.
         return;
     }
+	AP_Notify::set_control_mode(mode); //for onboard ssd1306 oled display
     if(g.auto_trim > 0 && control_mode == MANUAL)
         trim_control_surfaces();
 
