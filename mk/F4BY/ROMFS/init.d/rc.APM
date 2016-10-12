@@ -104,7 +104,7 @@ else
 fi
 
 
-if hmc5883 -X -C start
+if hmc5883 -X -C start 
 then
 	echo "External hmc5883 started OK"
 else
@@ -119,15 +119,22 @@ else
    sh /etc/init.d/rc.error
 fi
 
-# optional ETS airspeed sensor
-if ets_airspeed start
+if [ -f /fs/microsd/APM/ETS ]
 then
-    echo "Found ETS airspeed sensor"
+ echo "APM/ETS file found - try to startup ETS airspeed sensor"
+ if ets_airspeed start
+ then
+     echo "Found ETS airspeed sensor"
+ fi
 fi
 
-if meas_airspeed start
+if [ -f /fs/microsd/APM/MEAS ]
 then
-    echo "Found MEAS airspeed sensor"
+ echo "APM/MEAS file found - try to startup MEAS airspeed sensor"
+ if meas_airspeed start
+ then
+     echo "Found MEAS airspeed sensor"
+ fi
 fi
 
 if mtd start /fs/mtd
