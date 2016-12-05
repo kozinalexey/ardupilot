@@ -341,3 +341,5 @@
 #define HAL_OPTFLOW_PX4FLOW_I2C_BUS 1
 #endif
 
+#define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
+#define TOSHIBA_LED_I2C_BUS  1

@@ -621,6 +621,10 @@ void Compass::_detect_backends(void)
 #elif HAL_COMPASS_DEFAULT == HAL_COMPASS_HMC5843
     ADD_BACKEND(AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(HAL_COMPASS_HMC5843_I2C_BUS, HAL_COMPASS_HMC5843_I2C_ADDR)),
                  AP_Compass_HMC5843::name, false);
+ #ifdef HAL_COMPASS_HMC5843_I2C_EXT_BUS
+    _add_backend(AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(HAL_COMPASS_HMC5843_I2C_EXT_BUS, HAL_COMPASS_HMC5843_I2C_ADDR)),
+                 AP_Compass_HMC5843::name, false);
+ #endif
 #elif HAL_COMPASS_DEFAULT == HAL_COMPASS_HMC5843_MPU6000
     ADD_BACKEND(AP_Compass_HMC5843::probe_mpu6000(*this),
                  AP_Compass_HMC5843::name, false);

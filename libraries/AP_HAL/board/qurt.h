@@ -13,3 +13,5 @@
 #define HAL_OS_POSIX_IO 1
 #define HAL_SERIAL0_BAUD_DEFAULT 115200
 
+#define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
+#define TOSHIBA_LED_I2C_BUS  1

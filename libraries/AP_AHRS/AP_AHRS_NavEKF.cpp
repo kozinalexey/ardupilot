@@ -22,7 +22,9 @@
 #include "AP_AHRS.h"
 #include <AP_Vehicle/AP_Vehicle.h>
 #include <GCS_MAVLink/GCS.h>
+#if CONFIG_HAL_BOARD != HAL_BOARD_REVOMINI
 #include <AP_Module/AP_Module.h>
+#endif
 
 #if AP_AHRS_NAVEKF_AVAILABLE
 
@@ -92,8 +94,10 @@ void AP_AHRS_NavEKF::update(void)
     update_SITL();
 #endif
 
+#if CONFIG_HAL_BOARD != HAL_BOARD_REVOMINI
     // call AHRS_update hook if any
     AP_Module::call_hook_AHRS_update(*this);
+#endif
 }
 
 void AP_AHRS_NavEKF::update_DCM(void)

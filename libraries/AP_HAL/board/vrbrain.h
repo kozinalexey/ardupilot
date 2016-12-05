@@ -44,3 +44,5 @@
 #define EXTERNAL_LED_MOTOR1       30    // Motor1 LED - AN8
 #define EXTERNAL_LED_MOTOR2       31    // Motor2 LED - AN12
 
+#define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
+#define TOSHIBA_LED_I2C_BUS  1

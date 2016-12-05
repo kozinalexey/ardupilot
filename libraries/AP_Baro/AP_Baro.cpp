@@ -107,10 +107,11 @@ void AP_Baro::calibrate()
     // the MS5611 reads quite a long way off for the first second,
     // leading to about 1m of error if we don't wait
     for (uint8_t i = 0; i < 10; i++) {
-        uint32_t tstart = AP_HAL::millis();
+        volatile uint32_t tstart = AP_HAL::millis();
         do {
             update();
-            if (AP_HAL::millis() - tstart > 500) {
+            uint32_t t=AP_HAL::millis();
+            if (t - tstart > 500) {
                 AP_HAL::panic("PANIC: AP_Baro::read unsuccessful "
                         "for more than 500ms in AP_Baro::calibrate [2]\r\n");
             }
@@ -130,7 +131,9 @@ void AP_Baro::calibrate()
         uint32_t tstart = AP_HAL::millis();
         do {
             update();
-            if (AP_HAL::millis() - tstart > 500) {
+            uint32_t t=AP_HAL::millis();
+            
+            if (t - tstart > 500) {
                 AP_HAL::panic("PANIC: AP_Baro::read unsuccessful "
                         "for more than 500ms in AP_Baro::calibrate [3]\r\n");
             }
@@ -401,7 +404,10 @@ void AP_Baro::update(void)
     // last 0.5 seconds
     uint32_t now = AP_HAL::millis();
     for (uint8_t i=0; i<_num_sensors; i++) {
-        sensors[i].healthy = (now - sensors[i].last_update_ms < 500) && !is_zero(sensors[i].pressure);
+        if((now - sensors[i].last_update_ms < 3000) && !is_zero(sensors[i].pressure) )
+            sensors[i].healthy = true;
+        else
+            sensors[i].healthy = false;
     }
 
     for (uint8_t i=0; i<_num_sensors; i++) {

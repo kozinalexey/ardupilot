@@ -1,0 +1,31 @@
+* near a half of code is fully rewritten
+* external I2C bus moved out from FlexiPort by Soft_I2C driver so we always has at least 3 UARTs
+* added 1 full-functional UART (only for quads) and 1 RX-only UART for DSM satellite receiver on OpLink connector
+* added buzzer support
+* stack now in CCM memory
+* PPM and PWM inputs works via Timer's driver handlers
+* added DSM and SBUS parsing on PPM input
+* high-frequency (8kHz) advancel scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
+* all hardware description tables are now 'const' and locates in flash
+* more reliable reset for I2C bus on hangups
+* all drivers support set_retries()
+* all delays - even microseconds - are very presize by using hardware clock counter (DWT_CYCCNT) in free-running mode
+* separated USB and UART drivers
+* new SoftwareSerial driver based on ST appnote
+* now it uses MPU6000 DRDY output
+* removed all compiler's warnings
+* ported and slightly altered bootloader to support flashing and start firmware automatically at addresses 8010000 and 8020000 
+  (2 low 16k flash pages are used to emulate EEPROM)
+* EEPROM emulation altered to ensure the reliability of data storage at power failures
+* optimized EEPROM usage by changing from 1-byte to 2-byte writes
+* all internal calls use static private methods
+* removed unused files from "wirish" folder
+* ...
+* a lot of minor enhancements
+
+
+--------
+расклад времени
+25.7 опрос датчиков, из них 7.7% ожидание
+остается 74.3%, из них 65% ожидание
+собственно на расчет с частотой 400 раз в секунду уходит около 10% всего времени

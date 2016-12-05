@@ -48,7 +48,7 @@ public:
     /*
       get system clock in UTC milliseconds
      */
-    uint64_t get_system_clock_ms() const;
+    virtual uint64_t get_system_clock_ms() const;
 
     /*
       get system time in UTC hours, minutes, seconds and milliseconds

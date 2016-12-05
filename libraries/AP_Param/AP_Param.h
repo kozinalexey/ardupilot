@@ -29,6 +29,8 @@
 
 #include "float.h"
 
+# include <ext_interrupts.h>
+
 #define AP_MAX_NAME_SIZE 16
 
 /*
