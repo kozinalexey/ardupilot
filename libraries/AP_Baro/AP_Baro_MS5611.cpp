@@ -97,13 +97,16 @@ bool AP_Baro_MS56XX::_init()
     
     uint16_t prom[8];
     bool prom_read_ok = false;
-    
+
+    const char *name = "MS5611";
     switch (_ms56xx_type) {
     case BARO_MS5607:
+        name = "MS5607";
     case BARO_MS5611:
         prom_read_ok = _read_prom_5611(prom);
         break;
     case BARO_MS5637:
+        name = "MS5637";
         prom_read_ok = _read_prom_5637(prom);
         break;
     }
@@ -112,6 +115,8 @@ bool AP_Baro_MS56XX::_init()
         sem->give();
         return false;
     }
+
+    printf("%s found on bus %u address 0x%02x\n", name, _dev->bus_num(), _dev->get_bus_address());
 
     _dev->transfer(&CMD_MS56XX_RESET, 1, nullptr, 0);
     hal.scheduler->delay(4);
