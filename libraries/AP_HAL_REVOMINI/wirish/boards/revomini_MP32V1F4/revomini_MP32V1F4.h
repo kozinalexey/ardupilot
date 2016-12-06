@@ -32,12 +32,20 @@
 
 #define BOARD_USART5_RX_PIN     26  // PD2  EXTI_RFM22B / UART5_RX
 //#define BOARD_BUTTON_PIN        103 // PA15 CS_RFM22B
+
+#define BOARD_SPEKTRUM_RX_PIN   BOARD_RFM22B_INT_PIN // PD2
+#define BOARD_SPEKTRUM_PWR_PIN  BOARD_RFM22B_CS_PIN // PA15
+#define BOARD_SPEKTRUM_PWR_ON   1
+#define BOARD_SPEKTRUM_PWR_OFF  0
+
+
+
 #define BOARD_BUTTON_PIN     254
 
 #define BOARD_RFM22B_CS_PIN     103 // PA15 CS_RFM22B
 #define BOARD_RFM22B_INT_PIN    26  // PD2
 
-#define BUZZER_PIN    5 // PB15, PWM2
+#define BUZZER_PIN              5 // PB15, PWM2
    
 #define BOARD_NR_SPI            3
 #define BOARD_SPI1_NSS_PIN      D51
@@ -55,16 +63,11 @@
 #define BOARD_SPI3_CS_DF_PIN    104
 #define BOARD_SPI3_SCK_PIN      16
 
-#define BOARD_SPEKTRUM_PWR_PIN  103 // PA15 CS_RFM22B
-#define BOARD_SPEKTRUM_PWR_ON   1
-#define BOARD_SPEKTRUM_PWR_OFF  0
-#define BOARD_SPEKTRUM_RX_PIN   26 // PD2 EXTI_RFM22B
-
 
 #define BOARD_HMC5883_DRDY_PIN  38  // PB7 - but it not used by driver
 
 #define MPU6000_CS_PIN		51
-#define BOARD_MPU6000_DRDY_PIN	10  // PC4 - but it not used by driver
+#define BOARD_MPU6000_DRDY_PIN	10  // PC4
 
 #define BOARD_NR_GPIO_PINS      108
 

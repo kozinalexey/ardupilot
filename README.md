@@ -1,5 +1,32 @@
 #ArduPilot Project port for Revolution/RevoMini boards#
 
+* near a half of code is fully rewritten
+* external I2C bus moved out from FlexiPort by Soft_I2C driver so we always has at least 3 UARTs
+* added 1 full-functional UART (only for quads) and 1 RX-only UART for DSM satellite receiver on OpLink connector
+* Unlike many other boards, fully implemented registerPeriodicCallback & Co calls
+* added buzzer support
+* stack now in CCM memory
+* PPM and PWM inputs works via Timer's driver handlers
+* added DSM and SBUS parsing on PPM input
+* high-frequency (8kHz) advancel scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
+* all hardware description tables are now 'const' and locates in flash
+* more reliable reset for I2C bus on hangups
+* all drivers support set_retries()
+* all delays - even microseconds - are very presize by using hardware clock counter (DWT_CYCCNT) in free-running mode
+* separated USB and UART drivers
+* new SoftwareSerial driver based on ST appnote
+* now it uses MPU6000 DRDY output
+* removed all compiler's warnings
+* ported and slightly altered bootloader to support flashing and start firmware automatically at addresses 8010000 and 8020000
+  (2 low 16k flash pages are used to emulate EEPROM)           
+* EEPROM emulation altered to ensure the reliability of data storage at power failures
+* optimized EEPROM usage by changing from 1-byte to 2-byte writes
+* all internal calls use static private methods                
+* removed unused files from "wirish" folder
+* ...
+* a lot of minor enhancements
+
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ArduPilot/ardupilot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build SemaphoreCI](https://semaphoreci.com/api/v1/projects/4d28a40d-b6a6-4bfb-9780-95d92aabb178/667563/badge.svg)](https://semaphoreci.com/diydrones/ardupilot)
