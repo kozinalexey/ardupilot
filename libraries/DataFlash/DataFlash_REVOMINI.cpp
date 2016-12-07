@@ -80,7 +80,8 @@ void DataFlash_REVOMINI::Init(void)
     hal.scheduler->delay(1);
     hal.gpio->write(DF_RESET,1);
 
-    _spi = std::move(hal.spi->get_device(HAL_DATAFLASH_NAME) );
+    //_spi = std::move(hal.spi->get_device(HAL_DATAFLASH_NAME) );
+    _spi = hal.spi->get_device(HAL_DATAFLASH_NAME);
 
     if (!_spi) {
         AP_HAL::panic("PANIC: DataFlash SPIDeviceDriver not found");

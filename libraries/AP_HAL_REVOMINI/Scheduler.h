@@ -8,11 +8,24 @@
 #include <boards.h>
 #include <timer.h>
 #include <AP_HAL/AP_HAL.h>
+#include <setjmp.h>
 
 #define REVOMINI_SCHEDULER_MAX_TIMER_PROCS 10
-
+#define REVOMINI_SCHEDULER_MAX_IO_PROCS 10
 #define REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS 32
 
+
+/** Default stack size and stack max. */
+#define DEFAULT_STACK_SIZE  1024
+#define MAIN_STACK_SIZE  16384
+#define STACK_MAX  65535
+
+extern "C" {
+    extern unsigned _estack; // defined by link script
+    extern uint32_t us_ticks;
+}
+
+#define RAMEND ((size_t)&_estack)
 
 typedef enum {
     SCHED_CANCEL=0,
@@ -21,7 +34,8 @@ typedef enum {
 } SchedState;
 
 
-#define SHED_PROF
+#define SHED_PROF // profiling
+#define MTASK_PROF
 
 typedef struct RevoTimer {
     uint32_t period;
@@ -45,6 +59,8 @@ union Revo_cb { // кровь кишки ассемблер :) преобраз�
 
 class REVOMINI::REVOMINIScheduler : public AP_HAL::Scheduler {
 public:
+    typedef void (*func_t)();
+
     REVOMINIScheduler();
     void     init();
     void     delay(uint16_t ms) { _delay(ms); }
@@ -81,7 +97,97 @@ public:
     static bool           unregister_timer_task(AP_HAL::Device::PeriodicHandle h);
     void                  loop();      // to add ability to print out scheduler's stats in main thread
 
+
+    static void _do_io_process();
+
+
+//{ this functions do a cooperative multitask and inspired by Arduino-Scheduler (Mikael Patel)
+    
+  /**
+   * Initiate scheduler and main task with given stack size. Should
+   * be called before start of any tasks if the main task requires a
+   * stack size other than the default size. Returns true if
+   * successful otherwise false.
+   * @param[in] stackSize in bytes.
+   * @return bool.
+   */
+    static bool adjust_stack(size_t stackSize);
+    
+  /**
+   * Start a task with given functions and stack size. Should be
+   * called from main task (in setup). The functions are executed by
+   * the task. The taskSetup function (if provided) is run once.
+   * The taskLoop function is repeatedly called. The taskSetup may be
+   * omitted (NULL). Returns true if successful otherwise false.
+   * @param[in] taskSetup function (may be NULL).
+   * @param[in] taskLoop function (may not be NULL).
+   * @param[in] stackSize in bytes.
+   * @return bool.
+   */
+  static bool start_task(func_t taskSetup, func_t taskLoop,
+                    size_t stackSize = DEFAULT_STACK_SIZE);
+
+  /**               
+   * Context switch to next task in run queue.
+   */
+  static void yield();
+  
+  /**
+   * Return current task stack size.
+   * @return bytes
+   */
+  static size_t task_stack();
+  
+  static bool is_main_task() { return s_running == &s_main; }
+
+//}
+
 //    bool                  _run_1khz_procs();
+
+protected:
+
+/**
+   * Initiate a task with the given functions and stack. When control
+   * is yield to the task the setup function is first called and then
+   * the loop function is repeatedly called.
+   * @param[in] setup task function (may be NULL).
+   * @param[in] loop task function (may not be NULL).
+   * @param[in] stack top reference.
+   */
+  static void init_task(func_t setup, func_t loop, const uint8_t* stack);
+  
+  /**
+   * Task run-time structure.
+   */
+  struct task_t {
+    task_t* next;               //!< Next task
+    task_t* prev;               //!< Previous task
+    jmp_buf context;            //!< Task context
+    const uint8_t* stack;       //!< Task stack
+    uint16_t id;                // id of task
+#ifdef MTASK_PROF
+    uint32_t ticks; // ticks of CPU to calculate context switch time
+    uint32_t start; // microseconds of timeslice start
+    uint64_t time;  // full time
+    uint32_t delay; // maximal execution time of task
+#endif
+  };
+  
+  /** Main task. */
+  static task_t s_main;
+
+  /** Running task. */
+  static task_t* s_running;
+  
+  /** Task stack allocation top. */
+  static size_t s_top;
+  
+  static uint16_t task_n; // counter
+  
+ 
+#define await(cond) while(!(cond)) yield()
+  
+//} end of multitask
     
 private:
 
@@ -97,7 +203,7 @@ private:
      * called from an interrupt. */
     static void _timer_isr_event(TIM_TypeDef *tim);
     static void _run_timer_procs(bool called_from_isr);
-
+    
     static AP_HAL::Proc _failsafe;
 
     static volatile bool _timer_suspended;
@@ -105,8 +211,9 @@ private:
 //    static AP_HAL::MemberProc _timer_proc[REVOMINI_SCHEDULER_MAX_TIMER_PROCS];
 //    static uint8_t _num_timer_procs;
     static uint32_t _scheduler_last_call;
-    static uint32_t _armed_last_call;
-    static uint16_t _scheduler_led;
+
+    static AP_HAL::MemberProc _io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS];
+    static uint8_t _num_io_proc;
 
     static revo_timer _timers[REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS];
     static uint8_t    _num_timers;
@@ -124,6 +231,12 @@ private:
     
     bool _set_10s_flag();
 #endif
+
+#ifdef MTASK_PROF
+    static uint64_t yield_time;
+    static uint32_t yield_count;
+#endif
+
 };
 
 #endif // __AP_HAL_REVOMINI_SCHEDULER_H__

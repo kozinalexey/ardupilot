@@ -34,43 +34,14 @@ void panic(const char *errormsg, ...)
     for(;;);
 }
 
-/*
-uint32_t systick_micros()
-{
-
-    uint32_t fms, lms;
-    uint32_t cycle_cnt;
-    uint32_t res;
-    do {
-        // make sure millis() return the same value before and after
-        // getting the systick count
-        fms = millis();
-        cycle_cnt = systick_get_count();
-        lms = millis();
-    } while (lms != fms);
-
-#define US_PER_MS               1000
-    // SYSTICK_RELOAD_VAL is 1 less than the number of cycles it
-    //   actually takes to complete a SysTick reload 
-    res = (fms * US_PER_MS) +
-        (SYSTICK_RELOAD_VAL + 1 - cycle_cnt) / CYCLES_PER_MICROSECOND;
-
-    return res;
-#undef US_PER_MS
-
-
-    return ::systick_micros();
-}
-*/
-
 uint32_t millis()
 {
     // Use function provided by libmaple.
-    return systick_uptime();
+    return ::systick_uptime();
 }
 
 uint64_t millis64(){
-    return systick_uptime();
+    return ::systick_uptime();
 }
 
 uint32_t micros() {

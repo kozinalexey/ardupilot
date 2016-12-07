@@ -23,15 +23,16 @@
 
 # define HAL_GPIO_A_LED_PIN        36  // BLUE
 //# define HAL_GPIO_B_LED_PIN        37  // YELLOW OPTIONAL (not included)
-//# define HAL_GPIO_B_LED_PIN        26   //  EXTI_RFM22B \
+//# define HAL_GPIO_B_LED_PIN        26   //  EXTI_RFM22B /
 //# define HAL_GPIO_B_LED_PIN        103  //  RFM22 CS    /  already occupied by BOARD_SPEKTRUM_**_PIN
+# define HAL_GPIO_B_LED_PIN        9      //  frequency select - resistor to VCC or ground
 # define HAL_GPIO_C_LED_PIN        105 // RED
 
 # define HAL_GPIO_LED_ON           LOW
 # define HAL_GPIO_LED_OFF          HIGH
 
 
-#undef TOSHIBA_LED_I2C_BUS
+#undef TOSHIBA_LED_I2C_BUS // someone placed this not in board config
 #define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
 #define TOSHIBA_LED_I2C_BUS  2       // external I2C
 

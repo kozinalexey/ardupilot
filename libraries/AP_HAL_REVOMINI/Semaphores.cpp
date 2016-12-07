@@ -53,18 +53,23 @@ bool Semaphore::_take_from_mainloop(uint32_t timeout_ms) {
         return false;
     }
 
-    uint16_t timeout_ticks = timeout_ms*100;
+
+    uint32_t t=systick_micros(); 
+    uint32_t to = t + timeout_ms*1000; // timeout time
+
     do {
-        /* Delay 10us until we can successfully take, or we timed out */
-        REVOMINIScheduler::_delay_microseconds(10);
-#ifdef SEM_PROF 
-        sem_time+=10; // calculate semaphore wait time
-#endif
-        timeout_ticks--;
+        REVOMINIScheduler::yield(); // this is more useful  // REVOMINIScheduler::_delay_microseconds(10);
         if (_take_nonblocking()) {
+#ifdef SEM_PROF 
+            sem_time += systick_micros()-t; // calculate semaphore wait time
+#endif
             return true;
         }
-    } while(timeout_ticks > 0);
+    } while(systick_micros() < to);
+
+#ifdef SEM_PROF 
+    sem_time += systick_micros()-t; // calculate semaphore wait time
+#endif
 
     return false;
 }

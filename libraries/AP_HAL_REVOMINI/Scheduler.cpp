@@ -17,16 +17,40 @@ volatile bool REVOMINIScheduler::_timer_event_missed = false;
 volatile bool REVOMINIScheduler::_in_timer_proc = false;
 //AP_HAL::MemberProc REVOMINIScheduler::_timer_proc[REVOMINI_SCHEDULER_MAX_TIMER_PROCS] IN_CCM;
 //uint8_t REVOMINIScheduler::_num_timer_procs = 0;
-uint32_t REVOMINIScheduler::_scheduler_last_call = 0;
-uint32_t REVOMINIScheduler::_armed_last_call = 0;
-uint16_t REVOMINIScheduler::_scheduler_led = 0;
 
 revo_timer REVOMINIScheduler::_timers[REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS] IN_CCM;
 uint8_t    REVOMINIScheduler::_num_timers = 0;
 
+AP_HAL::MemberProc REVOMINIScheduler::_io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS];
+uint8_t            REVOMINIScheduler::_num_io_proc=0;
+
 AP_HAL::Proc REVOMINIScheduler::_delay_cb=NULL;
-uint16_t REVOMINIScheduler::_min_delay_cb_ms=65535;
+uint16_t REVOMINIScheduler::_min_delay_cb_ms=0;
+
 bool REVOMINIScheduler::_initialized=false;
+
+// Main task and run queue
+REVOMINIScheduler::task_t REVOMINIScheduler::s_main = {
+  &REVOMINIScheduler::s_main,
+  &REVOMINIScheduler::s_main,
+  { 0 },
+  NULL,
+  0,    // id
+#ifdef MTASK_PROF
+    0, // task_ticks
+    0, // task_start
+    0, // task_time
+    0, // task_delay
+#endif
+};
+
+// Reference running task
+REVOMINIScheduler::task_t* REVOMINIScheduler::s_running = &REVOMINIScheduler::s_main;
+
+// Initial top stack for task allocation
+size_t REVOMINIScheduler::s_top = MAIN_STACK_SIZE;
+
+uint16_t REVOMINIScheduler::task_n=0;
 
 #ifdef SHED_PROF
 uint64_t REVOMINIScheduler::shed_time = 0;
@@ -36,8 +60,20 @@ uint64_t REVOMINIScheduler::delay_time = 0;
 uint64_t REVOMINIScheduler::delay_int_time = 0;
 #endif
 
+
+#ifdef MTASK_PROF
+ uint64_t REVOMINIScheduler::yield_time=0;
+ uint32_t REVOMINIScheduler::yield_count=0;
+#endif
+
 REVOMINIScheduler::REVOMINIScheduler()
-{}
+{
+
+#ifdef MTASK_PROF
+    s_main.start=systick_micros();
+#endif
+
+}
 
 
 #define SHED_FREQ 8000 // in Hz
@@ -54,15 +90,15 @@ void REVOMINIScheduler::init()
     
 //    memset(_timer_proc, 0, sizeof(_timer_proc) );
     memset(_timers,     0, sizeof(_timers) );
+    memset(_io_process,     0, sizeof(_io_process));
     
     timer_attach_interrupt(TIMER7, TIMER_UPDATE_INTERRUPT, _timer_isr_event, 7); // low priority
 //    NVIC_SetPriority(TIM7_IRQn,5); priority in the above call
     timer_resume(TIMER7);
 
-    //systick_attach_callback(_timer_isr_event); // 1kHz is too slow :(
-
     // run standard Ardupilot tasks on 1kHz 
 //    register_timer_task(1000, FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::_run_1khz_procs, bool), NULL); now in the same scheduler
+    
     
 #ifdef SHED_PROF
 // set flag for stats output each 10 seconds
@@ -73,27 +109,47 @@ void REVOMINIScheduler::init()
 void REVOMINIScheduler::_delay(uint16_t ms)
 {
     uint32_t start = systick_micros();
+#ifdef SHED_PROF
+    uint32_t t=start;
+#endif
     
     while (ms > 0) {
+        if(!_in_timer_proc)  // not switch context in interrupts
+            yield();
+            
         while ((systick_micros() - start) >= 1000) {
             ms--;
             if (ms == 0) break;
             start += 1000;
         }
-        if (_min_delay_cb_ms <= ms) {
+        if (_min_delay_cb_ms <= ms) { // MAVlink callback uses 5ms
             if (_delay_cb) {
                 _delay_cb();
             }
         }
     }
+
+#ifdef SHED_PROF
+    uint32_t us=systick_micros()-t;
+    if(_in_timer_proc)
+        delay_int_time +=us;
+    else
+        delay_time     +=us;
+#endif
 }
 
 
 void REVOMINIScheduler::_delay_microseconds(uint16_t us)
 {
+#ifdef SHED_PROF
+    uint32_t t = systick_micros();
+#endif
+
     stopwatch_delay_us((uint32_t)us); // it not a stopwatch anymore - @NG
 
 #ifdef SHED_PROF
+    us=systick_micros()-t; // real time
+    
     if(_in_timer_proc)
         delay_int_time +=us;
     else
@@ -117,10 +173,39 @@ void REVOMINIScheduler::register_timer_process(AP_HAL::MemberProc proc)
     _register_timer_task(1000, r.h, NULL, 1);
 }
 
+void do_io_process();
+
+void REVOMINIScheduler::_do_io_process(){
+    for (int i = 0; i < _num_io_proc; i++) {
+        if (_io_process[i]) {
+            _io_process[i]();
+        }
+        yield(); // one in a time
+    }
+}
+
+void do_io_process(){
+    REVOMINIScheduler::_do_io_process();
+}
 
 void REVOMINIScheduler::register_io_process(AP_HAL::MemberProc proc)
 {
-    // IO processes not supported
+    if(_num_io_proc>=REVOMINI_SCHEDULER_MAX_IO_PROCS) return;
+
+    _io_process[_num_io_proc]=proc;
+
+    if(_num_io_proc==0) { // the 1st
+        //        setup  loop
+        start_task(NULL, do_io_process);
+    } else {
+        for (int i = 0; i < _num_io_proc; i++) {
+            if (_io_process[i] == proc) {
+                return;
+            }
+        }
+    
+    }
+    _num_io_proc++;
 }
 
 void REVOMINIScheduler::register_timer_failsafe(AP_HAL::Proc failsafe, uint32_t period_us) {
@@ -235,6 +320,22 @@ void REVOMINIScheduler::loop(){    // executes in main thread
                 hal.console->printf("task 0x%llX tim %8.1f int %5.3f%% tot %6.4f%% mean time %5.1f\n", _timers[i].proc, _timers[i].fulltime/1000.0, _timers[i].fulltime*100.0 / task_time, (_timers[i].fulltime / 10.0) / t, (float)_timers[i].fulltime/_timers[i].count  );
             }
         }
+
+#ifdef MTASK_PROF
+    
+        task_t* ptr = &s_main;
+
+        hal.console->printf("task switch time %7.3f count %d mean %6.3f \n", yield_time/(float)us_ticks, yield_count, yield_time /(float)us_ticks / (float)yield_count );
+        
+        do {
+            hal.console->printf("task %d times: full %d max %d \n",  ptr->id, ptr->time, ptr->delay );
+        
+            ptr = ptr->next;
+        } while(ptr != &s_main);
+
+#endif
+
+
     }
     
 #endif
@@ -368,4 +469,105 @@ void REVOMINIScheduler::_run_timers(){
 }
 
 // ]
+
+
+//[ realization of cooperative multitasking
+
+bool REVOMINIScheduler::adjust_stack(size_t stackSize)
+{  // Set main task stack size
+  s_top = stackSize;
+  return true;
+}
+
+void REVOMINIScheduler::init_task(func_t t_setup, func_t t_loop, const uint8_t* stack)
+{
+  // Add task last in run queue (main task)
+    task_t task;
+    task.next = &s_main;
+    task.prev = s_main.prev;
+    s_main.prev->next = &task;
+    s_main.prev = &task;
+    task.stack = stack;
+    task.id = ++task_n; // counter
+
+#ifdef MTASK_PROF
+    task.time=0;   // total time
+    task.delay=0;  // max execution time
+    task.start=systick_micros(); 
+#endif
+
+  // Create context for new task, caller will return
+  if (setjmp(task.context)) {
+    // we comes via longjmp
+    if (t_setup != NULL) {
+         t_setup();
+         yield();
+    }
+    while (1) {
+        t_loop();
+        yield();        // in case that function not uses dalay();
+    }
+  }
+  // caller returns
+}
+
+
+bool REVOMINIScheduler::start_task(func_t taskSetup, func_t taskLoop, size_t stackSize)
+{
+  // Check called from main task and valid task loop function
+  if (!is_main_task() || (taskLoop == NULL)) return false;
+
+  // Adjust stack size with size of task context
+  stackSize += sizeof(task_t);
+
+  // Allocate stack(s) and check if main stack top should be set
+  size_t frame = RAMEND - (size_t) &frame;
+  volatile uint8_t stack[s_top - frame]; // should be volatile else it will be optimized out
+  if (s_main.stack == NULL) s_main.stack = (const uint8_t*)stack; // remember on first call stack of main task
+
+  // Check that the task can be allocated
+  if (s_top + stackSize > STACK_MAX) return false;
+
+  // Adjust stack top for next task allocation
+  s_top += stackSize;
+
+  // Initiate task with given functions and stack top
+  init_task(taskSetup, taskLoop, (const uint8_t*)(stack - stackSize));
+  return true;
+}
+
+void REVOMINIScheduler::yield()
+{
+#ifdef MTASK_PROF
+    uint32_t t =  systick_micros();
+    uint32_t dt =  t - s_running->start; // time in task
+    s_running->time+=dt;                    // calculate sum
+    if(dt>s_running->delay) s_running->delay = dt; // and remember maximum
+    
+    uint64_t ticks = stopwatch_getticks();
+#endif
+    if (setjmp(s_running->context)) {
+        // we come here via longjmp - context switch is over
+        yield_time += stopwatch_getticks() - s_running->ticks; // time of longjmp
+        yield_count++;
+        return;
+    }
+    // begin of context switch
+    yield_time += stopwatch_getticks()-ticks; // time of setjmp
+
+    // Next task in run queue will continue
+    s_running = s_running->next;
+
+#ifdef MTASK_PROF
+    s_running->start = systick_micros();
+    s_running->ticks = stopwatch_getticks();
+#endif
+    longjmp(s_running->context, true);
+    // never comes here
+}
+
+size_t REVOMINIScheduler::task_stack(){
+  unsigned char marker;
+  return (&marker - s_running->stack);
+}
 
