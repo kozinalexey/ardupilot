@@ -284,7 +284,7 @@ bool Soft_I2C::wait_scl(){
     uint32_t dt    = rtime + us_ticks * 1000; // 1000uS
 
     while (stopwatch_getticks()  < dt) {
-        if (SCL_read)  return true;
+        if (SCL_read)  return true; // line released
     }
     
     return false;
@@ -302,7 +302,8 @@ again:
     while (!SDA_read) {
         /* Wait for any clock stretching to finish */
         while (!SCL_read)
-            ;
+            SCL_H_NW; // may be another thread causes LOW
+            
         delay_10us();   // 50kHz
 
         /* Pull low */
@@ -310,8 +311,9 @@ again:
         delay_10us();
 
         /* Release high again */
-        SCL_L;
+        SCL_H_NW;
         delay_10us();
+        SDA_H;
     }
 
     /* Generate start then stop condition */

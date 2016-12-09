@@ -16,7 +16,9 @@
 #include <usart.h>
 #include <i2c.h>
 
-
+#if defined(USE_SOFTSERIAL)
+#include "UART_SoftDriver.h"
+#endif
 
 
 using namespace AP_HAL;

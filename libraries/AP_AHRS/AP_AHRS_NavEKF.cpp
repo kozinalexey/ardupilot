@@ -22,7 +22,7 @@
 #include "AP_AHRS.h"
 #include <AP_Vehicle/AP_Vehicle.h>
 #include <GCS_MAVLink/GCS.h>
-#if CONFIG_HAL_BOARD != HAL_BOARD_REVOMINI
+#if AP_MODULE_SUPPORTED
 #include <AP_Module/AP_Module.h>
 #endif
 

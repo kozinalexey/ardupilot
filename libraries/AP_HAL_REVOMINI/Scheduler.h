@@ -63,8 +63,9 @@ public:
 
     REVOMINIScheduler();
     void     init();
-    void     delay(uint16_t ms) { _delay(ms); }
+    void     delay(uint16_t ms) { _delay(ms); } // uses internal static methods
     void     delay_microseconds(uint16_t us) { _delay_microseconds(us); }
+    void     delay_microseconds_boost(uint16_t us) override { _delay_microseconds_boost(us); }
     
     inline uint32_t millis() {    return systick_uptime(); }
     inline uint32_t micros() {    return systick_micros(); }
@@ -91,6 +92,7 @@ public:
 
     static void _delay(uint16_t ms);
     static void _delay_microseconds(uint16_t us);
+    static void _delay_microseconds_boost(uint16_t us);
     static inline bool _in_timerprocess() {   return _in_timer_proc; }
     
     static bool           adjust_timer_task(AP_HAL::Device::PeriodicHandle h, uint32_t period_us);

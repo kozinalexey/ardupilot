@@ -24,13 +24,16 @@ bool SerialDriver::_inverse=false;
 bool SerialDriver::_blocking=true;
 
 uint16_t                SerialDriver::bitPeriod;
-//uint16_t                SerialDriver::startBitPeriod;
 
 /*
 volatile uint16_t       SerialDriver::rxTimingCount;
 volatile uint16_t       SerialDriver::txTimingCount;
 volatile uint8_t        SerialDriver::bufferOverflow;
 */
+
+#ifdef SS_DEBUG
+    static volatile uint8_t          SerialDriver::bufferOverflow;
+#endif
 
 volatile int8_t         SerialDriver::rxBitCount;
 volatile uint16_t       SerialDriver::receiveBufferWrite;

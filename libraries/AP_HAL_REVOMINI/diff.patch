@@ -1,0 +1,1149 @@
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/0_Done /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/0_Done
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/0_Done	2016-11-17 10:42:36.904948393 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/0_Done	2016-12-07 11:19:37.889556767 +0500
+@@ -1,6 +1,8 @@
+ * near a half of code is fully rewritten
+ * external I2C bus moved out from FlexiPort by Soft_I2C driver so we always has at least 3 UARTs
+ * added 1 full-functional UART (only for quads) and 1 RX-only UART for DSM satellite receiver on OpLink connector
++* Unlike many other boards, fully implemented registerPeriodicCallback & Co calls
++* implemented register_io_process via simple cooperative multitasking
+ * added buzzer support
+ * stack now in CCM memory
+ * PPM and PWM inputs works via Timer's driver handlers
+@@ -8,6 +10,7 @@
+ * high-frequency (8kHz) advancel scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
+ * all hardware description tables are now 'const' and locates in flash
+ * more reliable reset for I2C bus on hangups
++* all drivers support set_retries()
+ * all delays - even microseconds - are very presize by using hardware clock counter (DWT_CYCCNT) in free-running mode
+ * separated USB and UART drivers
+ * new SoftwareSerial driver based on ST appnote
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/diff.patch /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/diff.patch
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/diff.patch	1970-01-01 05:00:00.000000000 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/diff.patch	2016-12-08 00:40:57.773280511 +0500
+@@ -0,0 +1,20 @@
++diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/0_Done /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/0_Done
++--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/0_Done	2016-11-17 10:42:36.904948393 +0500
+++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/0_Done	2016-12-07 11:19:37.889556767 +0500
++@@ -1,6 +1,8 @@
++ * near a half of code is fully rewritten
++ * external I2C bus moved out from FlexiPort by Soft_I2C driver so we always has at least 3 UARTs
++ * added 1 full-functional UART (only for quads) and 1 RX-only UART for DSM satellite receiver on OpLink connector
+++* Unlike many other boards, fully implemented registerPeriodicCallback & Co calls
+++* implemented register_io_process via simple cooperative multitasking
++ * added buzzer support
++ * stack now in CCM memory
++ * PPM and PWM inputs works via Timer's driver handlers
++@@ -8,6 +10,7 @@
++ * high-frequency (8kHz) advancel scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
++ * all hardware description tables are now 'const' and locates in flash
++ * more reliable reset for I2C bus on hangups
+++* all drivers support set_retries()
++ * all delays - even microseconds - are very presize by using hardware clock counter (DWT_CYCCNT) in free-running mode
++ * separated USB and UART drivers
++ * new SoftwareSerial driver based on ST appnote
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/HAL_REVOMINI_Class.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/HAL_REVOMINI_Class.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/HAL_REVOMINI_Class.cpp	2016-12-02 14:42:07.856618532 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/HAL_REVOMINI_Class.cpp	2016-12-07 12:39:17.266516768 +0500
+@@ -16,7 +16,9 @@
+ #include <usart.h>
+ #include <i2c.h>
+ 
+-
++#if defined(USE_SOFTSERIAL)
++#include "UART_SoftDriver.h"
++#endif
+ 
+ 
+ using namespace AP_HAL;
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/adc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/adc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/exti.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/exti.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/gpio_hal.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/gpio_hal.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/i2c.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/i2c.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/nvic.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/nvic.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/pwm_in.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/pwm_in.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/spi.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/spi.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/stopwatch.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/stopwatch.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/syscalls.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/syscalls.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/systick.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/systick.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/timer.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/timer.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/usart.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/usart.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/hal/usb.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/hal/usb.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/misc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_adc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_adc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_can.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_can.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_crc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_crc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_aes.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_aes.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_des.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_des.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_cryp_tdes.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dac.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dac.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dbgmcu.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dbgmcu.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dcmi.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dcmi.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_dma.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_exti.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fsmc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_fsmc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_md5.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_md5.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_hash_sha1.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_i2c.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_iwdg.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_iwdg.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_pwr.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rng.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rng.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rtc.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rtc.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_sdio.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_syscfg.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_wwdg.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32F4xx_DSP_StdPeriph_Lib_V1.1.0/Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_wwdg.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_core.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_core.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_cdc_core.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_cdc_core.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_dcd_int.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_dcd_int.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_dcd.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usb_dcd.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_core.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_core.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_ioreq.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_ioreq.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_req.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/hardware/STM32_USB_Driver/usbd_req.o differ
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/I2CDevice.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/I2CDevice.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/I2CDevice.cpp	2016-11-29 10:44:00.806714595 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/I2CDevice.cpp	2016-12-05 14:09:26.319827502 +0500
+@@ -13,10 +13,7 @@
+ 
+ using namespace REVOMINI;
+ 
+-extern const AP_HAL::HAL& hal;
+-
+-
+-REVOMINI::Semaphore REVOI2CDevice::_semaphores[3];
++REVOMINI::Semaphore REVOI2CDevice::_semaphores[3]; // 2 HW and 1 SW
+ 
+ #ifdef I2C_DEBUG
+ uint8_t REVOI2CDevice::last_addr, REVOI2CDevice::last_op, REVOI2CDevice::last_send_len, REVOI2CDevice::last_recv_len, REVOI2CDevice::busy, REVOI2CDevice::last_status;
+@@ -25,6 +22,9 @@ uint8_t REVOI2CDevice::last_addr, REVOI2
+ bool REVOI2CDevice::transfer(const uint8_t *send, uint32_t send_len, uint8_t *recv, uint32_t recv_len)
+ {
+ 
++    uint16_t retries=_retries;
++    
++again:
+ 
+ #ifdef I2C_DEBUG
+     uint8_t was_addr=last_addr, was_send_len=last_send_len, was_recv_len=last_recv_len, was_busy=busy, was_status=last_status;
+@@ -69,6 +70,8 @@ bool REVOI2CDevice::transfer(const uint8
+             
+             s_i2c.bus_reset();    
+ 
++            if(retries--) goto again;
++
+             return false;
+         }
+ 
+@@ -112,6 +115,9 @@ bool REVOI2CDevice::transfer(const uint8
+     _lockup_count ++;  
+ 	    
+     reset();
++
++    if(retries--) goto again;
++
+     return false;
+ }
+ 
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/i2c_soft.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/i2c_soft.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/i2c_soft.cpp	2016-11-29 10:43:37.872661644 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/i2c_soft.cpp	2016-12-07 11:57:28.216487143 +0500
+@@ -10,7 +10,7 @@ using namespace REVOMINI;
+ extern const AP_HAL::HAL& hal;
+ 
+ #define SCL_H_NW      {scl_port->BSRRL = scl_pin; }
+-#define SCL_H         {scl_port->BSRRL = scl_pin; while(!SCL_read) /* wait for extended clock done */ ; _delay();}
++#define SCL_H         {scl_port->BSRRL = scl_pin; if(!wait_scl()) /* wait for extended clock done failed */ goto abort ; _delay();}
+ #define SCL_L_NW      {scl_port->BSRRH = scl_pin; }
+ #define SCL_L         {scl_port->BSRRH = scl_pin; _delay();}
+ 
+@@ -44,41 +44,54 @@ bool Soft_I2C::_Start(void)
+     return true;
+ }
+ 
+-void Soft_I2C::_Stop(void)
++bool  Soft_I2C::_Stop(void)
+ {
+     SCL_L_NW;           // just in case
+     SDA_L_NW;
+     SCL_H;
+     SDA_H;
++    return true;
++
++abort: return false;
+ }
+ 
+-void Soft_I2C::_Ack(void)
++bool  Soft_I2C::_Ack(void)
+ {
+     SCL_L_NW;
+     SDA_L;
+     SCL_H;
+     SCL_L;
++    return true;
++
++abort: return false;
+ }
+ 
+-void Soft_I2C::_NoAck(void)
++bool  Soft_I2C::_NoAck(void)
+ {
+     SCL_L_NW;
+     SDA_H;
+     SCL_H;
+     SCL_L;
++    return true;
++
++abort: return false;
+ }
+ 
+ bool Soft_I2C::_WaitAck(void)
+ {
++    bool ret;
++    
+     SCL_L_NW;
+     SDA_H;
+     SCL_H;
+-    bool ret = SDA_read?false:true;
++    ret = SDA_read?false:true;
+     SCL_L;
+     return ret;
++
++abort: return false;
+ }
+ 
+-void Soft_I2C::_SendByte(uint8_t bt)
++bool Soft_I2C::_SendByte(uint8_t bt)
+ {
+     for(uint8_t i = 8;i--;bt <<= 1) {
+         SCL_L;
+@@ -87,9 +100,12 @@ void Soft_I2C::_SendByte(uint8_t bt)
+         SCL_H;
+     }
+     SCL_L;
++    return true;
++
++abort: return false;
+ }
+ 
+-uint8_t Soft_I2C::_ReceiveByte(void)
++bool Soft_I2C::_ReceiveByte(uint8_t *bp)
+ {
+     uint8_t bt = 0;
+ 
+@@ -101,7 +117,10 @@ uint8_t Soft_I2C::_ReceiveByte(void)
+         if (SDA_read) bt |= 0x01;
+     }
+     SCL_L;
+-    return bt;
++    *bp=bt;
++    return true;
++
++abort: return false;
+ }
+ 
+ 
+@@ -141,108 +160,135 @@ uint32_t  Soft_I2C::writeBuffer( uint8_t
+         i2cErrorCount++;
+         return I2C_ERROR;
+     }
+-    _SendByte(addr << 1 | I2C_Direction_Transmitter);
+-    if (!_WaitAck()) {
++    bool f;
++    
++    f= _SendByte(addr << 1 | I2C_Direction_Transmitter);
++    if (!f || !_WaitAck()) {
+         _Stop();
+         return I2C_NO_DEVICE;
+     }
+-    _SendByte(reg);
+-    _WaitAck();
++    f = f && _SendByte(reg);
++    f = f && _WaitAck();
+     for (i = 0; i < len; i++) {
+-        _SendByte(data[i]);
+-        if (!_WaitAck()) {
++        f = f && _SendByte(data[i]);
++        if (!f || !_WaitAck()) {
+             _Stop();
+             i2cErrorCount++;
+             return I2C_ERROR;
+         }
+     }
+     _Stop();
++    if(f)
+     return I2C_OK;
++    else
++        return I2C_ERROR;
+ }
+ 
+ uint32_t Soft_I2C::write( uint8_t addr, uint8_t reg, uint8_t data)
+ {
+     if (!_Start()) {
++        i2cErrorCount++;
+         return I2C_ERROR;
+     }
+-    _SendByte(addr << 1 | I2C_Direction_Transmitter);
+-    if (!_WaitAck()) {
++    bool f = _SendByte(addr << 1 | I2C_Direction_Transmitter);
++    if (!f || !_WaitAck()) {
+         _Stop();
+-        i2cErrorCount++;
+         return I2C_NO_DEVICE;
+     }
+-    _SendByte(reg);
+-    _WaitAck();
+-    _SendByte(data);
+-    _WaitAck();
++    f = f && _SendByte(reg);
++    f = f && _WaitAck();
++    f = f && _SendByte(data);
++    f = f && _WaitAck();
+     _Stop();
++    if(f)
+     return I2C_OK;
++    else
++        return I2C_ERROR;
+ }
+ 
+ uint32_t Soft_I2C::read( uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf)
+ {
+     if (!_Start()) {
++        i2cErrorCount++;
+         return I2C_ERROR;
+     }
+-    _SendByte(addr << 1 | I2C_Direction_Transmitter);
++    bool f = _SendByte(addr << 1 | I2C_Direction_Transmitter);
+     if (!_WaitAck()) {
+         _Stop();
+-        i2cErrorCount++;
+         return I2C_NO_DEVICE;
+     }
+-    _SendByte(reg);
+-    _WaitAck();
+-    _Start();
+-    _SendByte(addr << 1 | I2C_Direction_Receiver);
+-    _WaitAck();
++    f = f && _SendByte(reg);
++    f = f && _WaitAck();
++    f = f && _Start();
++    f = f && _SendByte(addr << 1 | I2C_Direction_Receiver);
++    f = f && _WaitAck();
+     uint8_t cnt=0;
+-    while (len) {
+-        buf[cnt++] = _ReceiveByte();
+-        if (len == 1) _NoAck();
+-        else          _Ack();
++    while (len && f) {
++        f = f && _ReceiveByte(&buf[cnt++]);
++        if (len == 1) f = f && _NoAck();
++        else          f = f && _Ack();
+ 
+         len--;
+     }
+     _Stop();
++
++    if(f)
+     return I2C_OK;
++    else
++        return I2C_ERROR;
+ }
+ 
+ 
+ uint32_t Soft_I2C::transfer(uint8_t  addr, uint8_t  send_len, const uint8_t *send, uint8_t len, uint8_t *buf){
+     if (!_Start()) {
++        i2cErrorCount++;
+         return I2C_ERROR;
+     }
+-    _SendByte(addr << 1 | I2C_Direction_Transmitter);
+-    if (!_WaitAck()) {
++    bool f = _SendByte(addr << 1 | I2C_Direction_Transmitter);
++    if (!f || !_WaitAck()) {
+         _Stop();
+-        i2cErrorCount++;
+         return I2C_NO_DEVICE;
+     }
+     uint8_t cnt=0;
+-    while(send_len++){
+-        _SendByte(send[cnt++]);
+-        if (!_WaitAck()) {
++    while(send_len++ && f){
++        f = f && _SendByte(send[cnt++]);
++        if (!f || !_WaitAck()) {
+             _Stop();
+             i2cErrorCount++;
+             return I2C_ERROR;
+         }
+     }
+ 
+-    _Start();
+-    _SendByte(addr << 1 | I2C_Direction_Receiver);
+-    _WaitAck();
++    f = f && _Start();
++    f = f && _SendByte(addr << 1 | I2C_Direction_Receiver);
++    f = f && _WaitAck();
+     cnt=0;
+-    while (len) {
+-        buf[cnt++] = _ReceiveByte();
+-        if(len == 1) _NoAck();
+-        else         _Ack();
++    while (len && f) {
++        f = f && _ReceiveByte(&buf[cnt++]);
++        if(len == 1) f = f && _NoAck();
++        else         f = f && _Ack();
+         len--;
+     }
+     _Stop();
++
++    if(f)
+     return I2C_OK;
++    else
++        return I2C_ERROR;
+ 
+ }
+ 
++// wait for bus release
++bool Soft_I2C::wait_scl(){
++    uint32_t rtime = stopwatch_getticks();
++    uint32_t dt    = rtime + us_ticks * 1000; // 1000uS
++
++    while (stopwatch_getticks()  < dt) {
++        if (SCL_read)  return true; // line released
++    }
++    
++    return false;
++}
+ 
+ 
+ void Soft_I2C::bus_reset(void) {
+@@ -273,7 +319,7 @@ again:
+     delay_10us();
+     SCL_L;
+     delay_10us();
+-    SCL_H;
++    SCL_H_NW;
+     delay_10us();
+     SDA_H;
+     
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/i2c_soft.h /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/i2c_soft.h
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/i2c_soft.h	2016-11-17 10:11:45.973511050 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/i2c_soft.h	2016-12-05 14:39:15.004760889 +0500
+@@ -40,27 +41,28 @@ public:
+     void bus_reset(void);
+ 
+ private:
++    const gpio_dev *_scl_dev;
++    uint8_t         _scl_bit;
++    const gpio_dev *_sda_dev;
++    uint8_t         _sda_bit;
+ 
+-    volatile GPIO_TypeDef *scl_port;
++    volatile GPIO_TypeDef *scl_port; // for quick direct access to hardware
+     uint16_t               scl_pin;
+     volatile GPIO_TypeDef *sda_port;
+     uint16_t               sda_pin;
+     
+ 
+-    const gpio_dev *_scl_dev;
+-    uint8_t         _scl_bit;
+-    const gpio_dev *_sda_dev;
+-    uint8_t         _sda_bit;
+ 
+     volatile uint16_t i2cErrorCount = 0;
+ 
+     bool _Start(void);
+-    void _Stop(void);
+-    void _Ack(void);
+-    void _NoAck(void);
++    bool  _Stop(void);
++    bool  _Ack(void);
++    bool  _NoAck(void);
+     bool _WaitAck(void);
+-    void _SendByte(uint8_t bt);
+-    uint8_t _ReceiveByte(void);
++    bool  _SendByte(uint8_t bt);
++    bool _ReceiveByte(uint8_t *bp);
+     
++    bool wait_scl();
+ };
+ 
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Scheduler.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Scheduler.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Scheduler.cpp	2016-12-04 23:31:38.709727342 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Scheduler.cpp	2016-12-07 19:28:54.292686553 +0500
+@@ -17,17 +17,41 @@ volatile bool REVOMINIScheduler::_timer_
+ volatile bool REVOMINIScheduler::_in_timer_proc = false;
+ //AP_HAL::MemberProc REVOMINIScheduler::_timer_proc[REVOMINI_SCHEDULER_MAX_TIMER_PROCS] IN_CCM;
+ //uint8_t REVOMINIScheduler::_num_timer_procs = 0;
+-uint32_t REVOMINIScheduler::_scheduler_last_call = 0;
+-uint32_t REVOMINIScheduler::_armed_last_call = 0;
+-uint16_t REVOMINIScheduler::_scheduler_led = 0;
+ 
+ revo_timer REVOMINIScheduler::_timers[REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS] IN_CCM;
+ uint8_t    REVOMINIScheduler::_num_timers = 0;
+ 
++AP_HAL::MemberProc REVOMINIScheduler::_io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS];
++uint8_t            REVOMINIScheduler::_num_io_proc=0;
++
+ AP_HAL::Proc REVOMINIScheduler::_delay_cb=NULL;
+-uint16_t REVOMINIScheduler::_min_delay_cb_ms=65535;
++uint16_t REVOMINIScheduler::_min_delay_cb_ms=0;
++
+ bool REVOMINIScheduler::_initialized=false;
+ 
++// Main task and run queue
++REVOMINIScheduler::task_t REVOMINIScheduler::s_main = {
++  &REVOMINIScheduler::s_main,
++  &REVOMINIScheduler::s_main,
++  { 0 },
++  NULL,
++  0,    // id
++#ifdef MTASK_PROF
++    0, // task_ticks
++    0, // task_start
++    0, // task_time
++    0, // task_delay
++#endif
++};
++
++// Reference running task
++REVOMINIScheduler::task_t* REVOMINIScheduler::s_running = &REVOMINIScheduler::s_main;
++
++// Initial top stack for task allocation
++size_t REVOMINIScheduler::s_top = MAIN_STACK_SIZE;
++
++uint16_t REVOMINIScheduler::task_n=0;
++
+ #ifdef SHED_PROF
+ uint64_t REVOMINIScheduler::shed_time = 0;
+ bool     REVOMINIScheduler::flag_10s = false;
+@@ -36,8 +60,20 @@ uint64_t REVOMINIScheduler::delay_time =
+ uint64_t REVOMINIScheduler::delay_int_time = 0;
+ #endif
+ 
++
++#ifdef MTASK_PROF
++ uint64_t REVOMINIScheduler::yield_time=0;
++ uint32_t REVOMINIScheduler::yield_count=0;
++#endif
++
+ REVOMINIScheduler::REVOMINIScheduler()
+-{}
++{
++
++#ifdef MTASK_PROF
++    s_main.start=systick_micros();
++#endif
++
++}
+ 
+ 
+ #define SHED_FREQ 8000 // in Hz
+@@ -54,13 +90,12 @@ void REVOMINIScheduler::init()
+     
+ //    memset(_timer_proc, 0, sizeof(_timer_proc) );
+     memset(_timers,     0, sizeof(_timers) );
++    memset(_io_process,     0, sizeof(_io_process));
+     
+     timer_attach_interrupt(TIMER7, TIMER_UPDATE_INTERRUPT, _timer_isr_event, 7); // low priority
+ //    NVIC_SetPriority(TIM7_IRQn,5); priority in the above call
+     timer_resume(TIMER7);
+ 
+-    //systick_attach_callback(_timer_isr_event); // 1kHz is too slow :(
+-
+     // run standard Ardupilot tasks on 1kHz 
+ //    register_timer_task(1000, FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::_run_1khz_procs, bool), NULL); now in the same scheduler
+     
+@@ -73,27 +109,47 @@ void REVOMINIScheduler::init()
+ void REVOMINIScheduler::_delay(uint16_t ms)
+ {
+     uint32_t start = systick_micros();
++#ifdef SHED_PROF
++    uint32_t t=start;
++#endif
+     
+     while (ms > 0) {
++        if(!_in_timer_proc)  // not switch context in interrupts
++            yield();
++            
+         while ((systick_micros() - start) >= 1000) {
+             ms--;
+             if (ms == 0) break;
+             start += 1000;
+         }
+-        if (_min_delay_cb_ms <= ms) {
++        if (_min_delay_cb_ms <= ms) { // MAVlink callback uses 5ms
+             if (_delay_cb) {
+                 _delay_cb();
+             }
+         }
+     }
++
++#ifdef SHED_PROF
++    uint32_t us=systick_micros()-t;
++    if(_in_timer_proc)
++        delay_int_time +=us;
++    else
++        delay_time     +=us;
++#endif
+ }
+ 
+ 
+ void REVOMINIScheduler::_delay_microseconds(uint16_t us)
+ {
++#ifdef SHED_PROF
++    uint32_t t = systick_micros();
++#endif
++
+     stopwatch_delay_us((uint32_t)us); // it not a stopwatch anymore - @NG
+ 
+ #ifdef SHED_PROF
++    us=systick_micros()-t; // real time
++    
+     if(_in_timer_proc)
+         delay_int_time +=us;
+     else
+@@ -117,10 +173,39 @@ void REVOMINIScheduler::register_timer_p
+     _register_timer_task(1000, r.h, NULL, 1);
+ }
+ 
++void do_io_process();
++
++void REVOMINIScheduler::_do_io_process(){
++    for (int i = 0; i < _num_io_proc; i++) {
++        if (_io_process[i]) {
++            _io_process[i]();
++        }
++        yield(); // one in a time
++    }
++}
++
++void do_io_process(){
++    REVOMINIScheduler::_do_io_process();
++}
+ 
+ void REVOMINIScheduler::register_io_process(AP_HAL::MemberProc proc)
+ {
+-    // IO processes not supported
++    if(_num_io_proc>=REVOMINI_SCHEDULER_MAX_IO_PROCS) return;
++
++    _io_process[_num_io_proc]=proc;
++
++    if(_num_io_proc==0) { // the 1st
++        //        setup  loop
++        start_task(NULL, do_io_process);
++    } else {
++        for (int i = 0; i < _num_io_proc; i++) {
++            if (_io_process[i] == proc) {
++                return;
++            }
++        }
++    
++    }
++    _num_io_proc++;
+ }
+ 
+ void REVOMINIScheduler::register_timer_failsafe(AP_HAL::Proc failsafe, uint32_t period_us) {
+@@ -235,6 +320,22 @@ void REVOMINIScheduler::loop(){    // ex
+                 hal.console->printf("task 0x%llX tim %8.1f int %5.3f%% tot %6.4f%% mean time %5.1f\n", _timers[i].proc, _timers[i].fulltime/1000.0, _timers[i].fulltime*100.0 / task_time, (_timers[i].fulltime / 10.0) / t, (float)_timers[i].fulltime/_timers[i].count  );
+             }
+         }
++
++#ifdef MTASK_PROF
++    
++        task_t* ptr = &s_main;
++
++        hal.console->printf("task switch time %7.3f count %ld mean %6.3f \n", yield_time/(float)us_ticks, yield_count, yield_time /(float)us_ticks / (float)yield_count );
++        
++        do {
++            hal.console->printf("task %d times: full %lld max %ld \n",  ptr->id, ptr->time, ptr->delay );
++        
++            ptr = ptr->next;
++        } while(ptr != &s_main);
++
++#endif
++
++
+     }
+     
+ #endif
+@@ -260,7 +361,9 @@ AP_HAL::Device::PeriodicHandle REVOMINIS
+             goto store;        
+ 
+         } else if (_timers[i].proc == proc /* the same */ ) {
++            noInterrupts();            // 64-bits should be 
+             _timers[i].proc = 0L; // clear proc - temporary disable task
++            interrupts();
+             goto store;
+         }
+     }
+@@ -343,7 +446,8 @@ void REVOMINIScheduler::_run_timers(){
+ #endif                
+                 if(_timers[i].sem) _timers[i].sem->give(); //  semaphore active? give back ASAP!
+ #ifdef SHED_PROF
+-                _timers[i].micros    =  t;          // last time
++                if(_timers[i].micros < t)
++                    _timers[i].micros    =  t;      // max time
+                 _timers[i].count     += 1;          // number of calls
+                 _timers[i].fulltime  += t;          // full time, mean time = full / count
+                 job_t += t;                  // time of all jobs
+@@ -369,3 +473,110 @@ void REVOMINIScheduler::_run_timers(){
+ 
+ // ]
+ 
++
++//[ realization of cooperative multitasking
++
++bool REVOMINIScheduler::adjust_stack(size_t stackSize)
++{  // Set main task stack size
++  s_top = stackSize;
++  return true;
++}
++
++void REVOMINIScheduler::init_task(func_t t_setup, func_t t_loop, const uint8_t* stack)
++{
++  // Add task last in run queue (main task)
++    task_t task;
++    task.next = &s_main;
++    task.prev = s_main.prev;
++    s_main.prev->next = &task;
++    s_main.prev = &task;
++    task.stack = stack;
++    task.id = ++task_n; // counter
++
++#ifdef MTASK_PROF
++    task.time=0;   // total time
++    task.delay=0;  // max execution time
++    task.start=systick_micros(); 
++#endif
++
++  // Create context for new task, caller will return
++  if (setjmp(task.context)) {
++    // we comes via longjmp
++    if (t_setup != NULL) {
++         t_setup();
++         yield();
++    }
++    while (1) {
++        t_loop();
++        yield();        // in case that function not uses dalay();
++    }
++  }
++  // caller returns
++}
++
++
++bool REVOMINIScheduler::start_task(func_t taskSetup, func_t taskLoop, size_t stackSize)
++{
++  // Check called from main task and valid task loop function
++  if (!is_main_task() || (taskLoop == NULL)) return false;
++
++  // Adjust stack size with size of task context
++  stackSize += sizeof(task_t);
++
++  // Allocate stack(s) and check if main stack top should be set
++  size_t frame = RAMEND - (size_t) &frame;
++  volatile uint8_t stack[s_top - frame]; // should be volatile else it will be optimized out
++  if (s_main.stack == NULL) s_main.stack = (const uint8_t*)stack; // remember on first call stack of main task
++
++  // Check that the task can be allocated
++  if (s_top + stackSize > STACK_MAX) return false;
++
++  // Adjust stack top for next task allocation
++  s_top += stackSize;
++
++  // Initiate task with given functions and stack top
++  init_task(taskSetup, taskLoop, (const uint8_t*)(stack - stackSize));
++  return true;
++}
++
++void REVOMINIScheduler::yield()
++{
++    if(task_n==0) return;
++
++#ifdef MTASK_PROF
++    uint32_t t =  systick_micros();
++    uint32_t dt =  t - s_running->start; // time in task
++    s_running->time+=dt;                    // calculate sum
++    if(dt>s_running->delay) s_running->delay = dt; // and remember maximum
++    
++    uint64_t ticks = stopwatch_getticks();
++#endif
++    if (setjmp(s_running->context)) {
++        // we come here via longjmp - context switch is over
++#ifdef MTASK_PROF
++        yield_time += stopwatch_getticks() - s_running->ticks; // time of longjmp
++        yield_count++;                  // count each context switch
++#endif
++        return;
++    }
++    // begin of context switch
++    yield_time += stopwatch_getticks()-ticks; // time of setjmp
++
++next:
++    // Next task in run queue will continue
++    s_running = s_running->next;
++//  if(!s_running->active) goto next; // a way to skip unneeded tasks
++
++#ifdef MTASK_PROF
++    s_running->start = systick_micros();
++    s_running->ticks = stopwatch_getticks();
++#endif
++    longjmp(s_running->context, true);
++    // never comes here
++}
++
++size_t REVOMINIScheduler::task_stack(){
++  unsigned char marker;
++  return (&marker - s_running->stack);
++}
++
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Scheduler.h /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Scheduler.h
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Scheduler.h	2016-11-17 10:37:46.346712800 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Scheduler.h	2016-12-06 15:10:21.206413104 +0500
+@@ -8,12 +8,25 @@
+ #include <boards.h>
+ #include <timer.h>
+ #include <AP_HAL/AP_HAL.h>
++#include <setjmp.h>
+ 
+ #define REVOMINI_SCHEDULER_MAX_TIMER_PROCS 10
+-
++#define REVOMINI_SCHEDULER_MAX_IO_PROCS 10
+ #define REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS 32
+ 
+ 
++/** Default stack size and stack max. */
++#define DEFAULT_STACK_SIZE  1024
++#define MAIN_STACK_SIZE  16384
++#define STACK_MAX  65535
++
++extern "C" {
++    extern unsigned _estack; // defined by link script
++    extern uint32_t us_ticks;
++}
++
++#define RAMEND ((size_t)&_estack)
++
+ typedef enum {
+     SCHED_CANCEL=0,
+     SCHED_OK=1,
+@@ -21,7 +34,8 @@ typedef enum {
+ } SchedState;
+ 
+ 
+-#define SHED_PROF
++#define SHED_PROF // profiling
++#define MTASK_PROF
+ 
+ typedef struct RevoTimer {
+     uint32_t period;
+@@ -45,6 +59,8 @@ union Revo_cb { // кровь кишки
+ 
+ class REVOMINI::REVOMINIScheduler : public AP_HAL::Scheduler {
+ public:
++    typedef void (*func_t)();
++
+     REVOMINIScheduler();
+     void     init();
+     void     delay(uint16_t ms) { _delay(ms); }
+@@ -81,8 +97,98 @@ public:
+     static bool           unregister_timer_task(AP_HAL::Device::PeriodicHandle h);
+     void                  loop();      // to add ability to print out scheduler's stats in main thread
+ 
++
++    static void _do_io_process();
++
++
++//{ this functions do a cooperative multitask and inspired by Arduino-Scheduler (Mikael Patel)
++    
++  /**
++   * Initiate scheduler and main task with given stack size. Should
++   * be called before start of any tasks if the main task requires a
++   * stack size other than the default size. Returns true if
++   * successful otherwise false.
++   * @param[in] stackSize in bytes.
++   * @return bool.
++   */
++    static bool adjust_stack(size_t stackSize);
++    
++  /**
++   * Start a task with given functions and stack size. Should be
++   * called from main task (in setup). The functions are executed by
++   * the task. The taskSetup function (if provided) is run once.
++   * The taskLoop function is repeatedly called. The taskSetup may be
++   * omitted (NULL). Returns true if successful otherwise false.
++   * @param[in] taskSetup function (may be NULL).
++   * @param[in] taskLoop function (may not be NULL).
++   * @param[in] stackSize in bytes.
++   * @return bool.
++   */
++  static bool start_task(func_t taskSetup, func_t taskLoop,
++                    size_t stackSize = DEFAULT_STACK_SIZE);
++
++  /**               
++   * Context switch to next task in run queue.
++   */
++  static void yield();
++  
++  /**
++   * Return current task stack size.
++   * @return bytes
++   */
++  static size_t task_stack();
++  
++  static bool is_main_task() { return s_running == &s_main; }
++
++//}
++
+ //    bool                  _run_1khz_procs();
+     
++protected:
++
++/**
++   * Initiate a task with the given functions and stack. When control
++   * is yield to the task the setup function is first called and then
++   * the loop function is repeatedly called.
++   * @param[in] setup task function (may be NULL).
++   * @param[in] loop task function (may not be NULL).
++   * @param[in] stack top reference.
++   */
++  static void init_task(func_t setup, func_t loop, const uint8_t* stack);
++  
++  /**
++   * Task run-time structure.
++   */
++  struct task_t {
++    task_t* next;               //!< Next task
++    task_t* prev;               //!< Previous task
++    jmp_buf context;            //!< Task context
++    const uint8_t* stack;       //!< Task stack
++    uint16_t id;                // id of task
++#ifdef MTASK_PROF
++    uint32_t ticks; // ticks of CPU to calculate context switch time
++    uint32_t start; // microseconds of timeslice start
++    uint64_t time;  // full time
++    uint32_t delay; // maximal execution time of task
++#endif
++  };
++  
++  /** Main task. */
++  static task_t s_main;
++
++  /** Running task. */
++  static task_t* s_running;
++  
++  /** Task stack allocation top. */
++  static size_t s_top;
++  
++  static uint16_t task_n; // counter
++  
++ 
++#define await(cond) while(!(cond)) yield()
++  
++//} end of multitask
++    
+ private:
+ 
+     static AP_HAL::Device::PeriodicHandle _register_timer_task(uint32_t period_us, uint64_t proc, REVOMINI::Semaphore *sem, uint8_t mode=0);
+@@ -105,8 +211,9 @@ private:
+ //    static AP_HAL::MemberProc _timer_proc[REVOMINI_SCHEDULER_MAX_TIMER_PROCS];
+ //    static uint8_t _num_timer_procs;
+     static uint32_t _scheduler_last_call;
+-    static uint32_t _armed_last_call;
+-    static uint16_t _scheduler_led;
++
++    static AP_HAL::MemberProc _io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS];
++    static uint8_t _num_io_proc;
+ 
+     static revo_timer _timers[REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS];
+     static uint8_t    _num_timers;
+@@ -124,6 +231,12 @@ private:
+     
+     bool _set_10s_flag();
+ #endif
++
++#ifdef MTASK_PROF
++    static uint64_t yield_time;
++    static uint32_t yield_count;
++#endif
++
+ };
+ 
+ #endif // __AP_HAL_REVOMINI_SCHEDULER_H__
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Semaphores.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Semaphores.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/Semaphores.cpp	2016-11-18 21:56:02.504095423 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/Semaphores.cpp	2016-12-06 14:49:54.414589206 +0500
+@@ -53,18 +53,23 @@ bool Semaphore::_take_from_mainloop(uint
+         return false;
+     }
+ 
+-    uint16_t timeout_ticks = timeout_ms*100;
++
++    uint32_t t=systick_micros(); 
++    uint32_t to = t + timeout_ms*1000; // timeout time
++
+     do {
+-        /* Delay 10us until we can successfully take, or we timed out */
+-        REVOMINIScheduler::_delay_microseconds(10);
++        REVOMINIScheduler::yield(); // this is more useful  // REVOMINIScheduler::_delay_microseconds(10);
++        if (_take_nonblocking()) {
+ #ifdef SEM_PROF 
+-        sem_time+=10; // calculate semaphore wait time
++            sem_time += systick_micros()-t; // calculate semaphore wait time
+ #endif
+-        timeout_ticks--;
+-        if (_take_nonblocking()) {
+             return true;
+         }
+-    } while(timeout_ticks > 0);
++    } while(systick_micros() < to);
++
++#ifdef SEM_PROF 
++    sem_time += systick_micros()-t; // calculate semaphore wait time
++#endif
+ 
+     return false;
+ }
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/SPIDevice.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/SPIDevice.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/SPIDevice.cpp	2016-12-04 23:34:06.305886878 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/SPIDevice.cpp	2016-12-07 20:31:42.800320551 +0500
+@@ -17,7 +17,7 @@ REVOMINI::Semaphore SPIDevice::_semaphor
+ 
+ SPIDesc SPIDeviceManager::_device[] = {    // different SPI tables per board subtype
+     //          name                device   bus mode       cs_pin                             speed_low    speed_high
+-    SPIDesc(HAL_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, MPU6000_CS_PIN       /* pa4 */, SPI_1_125MHZ,  SPI_1_125MHZ), // 400ns SCK time
++    SPIDesc(HAL_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, MPU6000_CS_PIN       /* pa4 */, SPI_562_500KHZ,  SPI_1_125MHZ), // 400ns SCK time
+     SPIDesc(HAL_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, BOARD_SPI3_CS_DF_PIN /* pb3 */, SPI_1_125MHZ,  SPI_18MHZ),
+ };
+ 
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/DEBUG-STLINK.sh /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/DEBUG-STLINK.sh
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/DEBUG-STLINK.sh	1970-01-01 05:00:00.000000000 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/DEBUG-STLINK.sh	2016-11-18 20:52:24.000000000 +0500
+@@ -0,0 +1,6 @@
++#!/bin/sh
++
++#/usr/local/stlink/st-flash  --reset write /tmp/ArduCopter.build/revomini_MP32V1F4.bin 0x08010000
++/usr/local/stlink/st-util -m
++
++
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/MMM.sh /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/MMM.sh
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/MMM.sh	1970-01-01 05:00:00.000000000 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/MMM.sh	2016-11-17 10:12:00.000000000 +0500
+@@ -0,0 +1,10 @@
++#git submodule init && git submodule update
++export TOOLCHAIN
++
++export PATH=/usr/local/bin:$PATH
++
++cd ArduCopter
++make revomini VERBOSE=1
++
++
++# at 4e017bf5b3da4f2a9ffc2e1cc0a37b94edac2bdc
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-DFU.sh /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-DFU.sh
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-DFU.sh	1970-01-01 05:00:00.000000000 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-DFU.sh	2016-12-07 11:21:27.489764955 +0500
+@@ -0,0 +1,8 @@
++#!/bin/sh
++
++#production binary for bootloader
++#dfu-util -a 0 --dfuse-address 0x08010000 -D /tmp/ArduCopter.build/revomini_MP32V1F4.bin
++
++# bare metal binary
++dfu-util -a 0 --dfuse-address 0x08000000 -D /tmp/ArduCopter.build/revomini_MP32V1F4.bin
++
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-STLINK.sh /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-STLINK.sh
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-STLINK.sh	1970-01-01 05:00:00.000000000 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/support/UPLOAD-STLINK.sh	2016-12-07 11:22:18.460861776 +0500
+@@ -0,0 +1,10 @@
++#!/bin/sh
++
++# production binary with bootloader
++#/usr/local/stlink/st-flash  --reset write /tmp/ArduCopter.build/revomini_MP32V1F4.bin 0x08010000
++
++#bare metal binary
++/usr/local/stlink/st-flash  --reset write /tmp/ArduCopter.build/revomini_MP32V1F4.bin 0x08000000
++/usr/local/stlink/st-util -m
++
++
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/system.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/system.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/system.cpp	2016-11-17 10:11:45.979511055 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/system.cpp	2016-12-06 13:35:01.823572037 +0500
+@@ -34,43 +34,14 @@ void panic(const char *errormsg, ...)
+     for(;;);
+ }
+ 
+-/*
+-uint32_t systick_micros()
+-{
+-
+-    uint32_t fms, lms;
+-    uint32_t cycle_cnt;
+-    uint32_t res;
+-    do {
+-        // make sure millis() return the same value before and after
+-        // getting the systick count
+-        fms = millis();
+-        cycle_cnt = systick_get_count();
+-        lms = millis();
+-    } while (lms != fms);
+-
+-#define US_PER_MS               1000
+-    // SYSTICK_RELOAD_VAL is 1 less than the number of cycles it
+-    //   actually takes to complete a SysTick reload 
+-    res = (fms * US_PER_MS) +
+-        (SYSTICK_RELOAD_VAL + 1 - cycle_cnt) / CYCLES_PER_MICROSECOND;
+-
+-    return res;
+-#undef US_PER_MS
+-
+-
+-    return ::systick_micros();
+-}
+-*/
+-
+ uint32_t millis()
+ {
+     // Use function provided by libmaple.
+-    return systick_uptime();
++    return ::systick_uptime();
+ }
+ 
+ uint64_t millis64(){
+-    return systick_uptime();
++    return ::systick_uptime();
+ }
+ 
+ uint32_t micros() {
+diff -x '*.d' -BburpN /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/UART_SoftDriver.cpp /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/UART_SoftDriver.cpp
+--- /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/UART_SoftDriver.cpp	2016-12-04 23:23:09.723177179 +0500
++++ /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/UART_SoftDriver.cpp	2016-12-07 12:43:25.669785266 +0500
+@@ -24,7 +24,6 @@ bool SerialDriver::_inverse=false;
+ bool SerialDriver::_blocking=true;
+ 
+ uint16_t                SerialDriver::bitPeriod;
+-//uint16_t                SerialDriver::startBitPeriod;
+ 
+ /*
+ volatile uint16_t       SerialDriver::rxTimingCount;
+@@ -32,6 +31,10 @@ volatile uint16_t       SerialDriver::tx
+ volatile uint8_t        SerialDriver::bufferOverflow;
+ */
+ 
++#ifdef SS_DEBUG
++    static volatile uint8_t          SerialDriver::bufferOverflow;
++#endif
++
+ volatile int8_t         SerialDriver::rxBitCount;
+ volatile uint16_t       SerialDriver::receiveBufferWrite;
+ volatile uint16_t       SerialDriver::receiveBufferRead;
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/revomini_MP32V1F4.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/revomini_MP32V1F4.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/revomini_MP32V1F4_startup.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/revomini_MP32V1F4_startup.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/system_stm32f4xx.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/wirish/boards/revomini_MP32V1F4/system_stm32f4xx.o differ
+Binary files /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2/ardupilot.revomini4.build/libraries/AP_HAL_REVOMINI/wirish/boards.o and /mnt/disk_d/src/quad-copter/ardu-copter/3.4.2-git/ardupilot.revomini.build/libraries/AP_HAL_REVOMINI/wirish/boards.o differ

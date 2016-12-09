@@ -6,6 +6,7 @@
 #include <systick.h>
 #include <AP_Notify/AP_Notify.h>
 #include "GPIO.h"
+#include <AP_Math/AP_Math.h>
 
 using namespace REVOMINI;
 
@@ -138,13 +139,32 @@ void REVOMINIScheduler::_delay(uint16_t ms)
 #endif
 }
 
+void REVOMINIScheduler::_delay_microseconds_boost(uint16_t us){
+    uint32_t t = systick_micros();
+    uint32_t dt= t + us;
+
+    while(systick_micros()<dt){
+        if(!_in_timer_proc)  // not switch context in interrupts
+            yield();
+    }    
+
+#ifdef SHED_PROF
+    us=systick_micros()-t; // real time
+    
+    if(_in_timer_proc)
+        delay_int_time +=us;
+    else
+        delay_time     +=us;
+#endif
+
+
+}
 
 void REVOMINIScheduler::_delay_microseconds(uint16_t us)
 {
 #ifdef SHED_PROF
     uint32_t t = systick_micros();
 #endif
-
     stopwatch_delay_us((uint32_t)us); // it not a stopwatch anymore - @NG
 
 #ifdef SHED_PROF
@@ -309,7 +329,7 @@ void REVOMINIScheduler::loop(){    // executes in main thread
         
         static float shed_eff=0;
     
-        if(shed_eff==0.0) shed_eff = eff;
+        if(is_zero(shed_eff)) shed_eff = eff;
         else              shed_eff = shed_eff*(1 - 1/Kf) + eff*(1/Kf);
 
         hal.console->printf("\nScheduler stats:\n  %% of full time: %5.2f  Efficiency %5.3f \n", (task_time/10.0)/t /* in percent*/ , shed_eff );
@@ -325,10 +345,10 @@ void REVOMINIScheduler::loop(){    // executes in main thread
     
         task_t* ptr = &s_main;
 
-        hal.console->printf("task switch time %7.3f count %d mean %6.3f \n", yield_time/(float)us_ticks, yield_count, yield_time /(float)us_ticks / (float)yield_count );
+        hal.console->printf("task switch time %7.3f count %ld mean %6.3f \n", yield_time/(float)us_ticks, yield_count, yield_time /(float)us_ticks / (float)yield_count );
         
         do {
-            hal.console->printf("task %d times: full %d max %d \n",  ptr->id, ptr->time, ptr->delay );
+            hal.console->printf("task %d times: full %lld max %ld \n",  ptr->id, ptr->time, ptr->delay );
         
             ptr = ptr->next;
         } while(ptr != &s_main);
@@ -361,7 +381,9 @@ AP_HAL::Device::PeriodicHandle REVOMINIScheduler::_register_timer_task(uint32_t 
             goto store;        
 
         } else if (_timers[i].proc == proc /* the same */ ) {
+            noInterrupts();            // 64-bits should be 
             _timers[i].proc = 0L; // clear proc - temporary disable task
+            interrupts();
             goto store;
         }
     }
@@ -444,7 +466,8 @@ void REVOMINIScheduler::_run_timers(){
 #endif                
                 if(_timers[i].sem) _timers[i].sem->give(); //  semaphore active? give back ASAP!
 #ifdef SHED_PROF
-                _timers[i].micros    =  t;          // last time
+                if(_timers[i].micros < t)
+                    _timers[i].micros    =  t;      // max time
                 _timers[i].count     += 1;          // number of calls
                 _timers[i].fulltime  += t;          // full time, mean time = full / count
                 job_t += t;                  // time of all jobs
@@ -538,6 +561,8 @@ bool REVOMINIScheduler::start_task(func_t taskSetup, func_t taskLoop, size_t sta
 
 void REVOMINIScheduler::yield()
 {
+    if(task_n==0) return;
+
 #ifdef MTASK_PROF
     uint32_t t =  systick_micros();
     uint32_t dt =  t - s_running->start; // time in task
@@ -548,15 +573,19 @@ void REVOMINIScheduler::yield()
 #endif
     if (setjmp(s_running->context)) {
         // we come here via longjmp - context switch is over
+#ifdef MTASK_PROF
         yield_time += stopwatch_getticks() - s_running->ticks; // time of longjmp
-        yield_count++;
+        yield_count++;                  // count each context switch
+#endif
         return;
     }
     // begin of context switch
     yield_time += stopwatch_getticks()-ticks; // time of setjmp
 
+next:
     // Next task in run queue will continue
     s_running = s_running->next;
+//  if(!s_running->active) goto next; // a way to skip unneeded tasks
 
 #ifdef MTASK_PROF
     s_running->start = systick_micros();

@@ -16,9 +16,9 @@ extern const AP_HAL::HAL& hal;
 REVOMINI::Semaphore SPIDevice::_semaphores[3]; // per bus
 
 SPIDesc SPIDeviceManager::_device[] = {    // different SPI tables per board subtype
-    //          name                device   bus mode       cs_pin                             speed_low    speed_high
-    SPIDesc(HAL_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, MPU6000_CS_PIN       /* pa4 */, SPI_1_125MHZ,  SPI_1_125MHZ), // 400ns SCK time
-    SPIDesc(HAL_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, BOARD_SPI3_CS_DF_PIN /* pb3 */, SPI_1_125MHZ,  SPI_18MHZ),
+    //          name                device   bus mode       cs_pin                             speed_low      speed_high
+    SPIDesc(HAL_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, MPU6000_CS_PIN       /* pa4 */, SPI_562_500KHZ,  SPI_1_125MHZ), // 400ns SCK time
+    SPIDesc(HAL_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, BOARD_SPI3_CS_DF_PIN /* pb3 */, SPI_1_125MHZ,    SPI_18MHZ),
 };
 
 
@@ -51,6 +51,7 @@ SPIDeviceManager::get_device(const char *name)
 
 SPIDevice::SPIDevice(SPIDesc &device_desc)
     : _desc(device_desc)
+    , _initialized(false)
 {
     _cs = REVOMINIGPIO::get_channel(_desc.cs_pin);
     if (!_cs) {
@@ -77,6 +78,12 @@ void SPIDevice::init(){
 
 bool SPIDevice::set_speed(AP_HAL::Device::Speed speed)
 {
+
+    if(!_initialized) {
+        init();
+        _initialized=true;
+    }
+
     switch (speed) {
     case AP_HAL::Device::SPEED_HIGH:
         _speed = _desc.highspeed;

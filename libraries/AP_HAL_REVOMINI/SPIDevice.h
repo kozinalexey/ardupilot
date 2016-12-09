@@ -145,7 +145,6 @@ public:
 
     bool unregister_callback(PeriodicHandle h) { return REVOMINIScheduler::unregister_timer_task(h); }
 
-    void init(void);
 
 
 protected:
@@ -155,6 +154,9 @@ protected:
     SPIFrequency _speed;
 
     static REVOMINI::Semaphore _semaphores[3]; // per bus
+
+    bool _initialized;
+    void init(void);
 
     void _cs_assert(){    _cs->write(0); } // Select device 
     void _cs_release(){   _cs->write(1); } // Deselect device
