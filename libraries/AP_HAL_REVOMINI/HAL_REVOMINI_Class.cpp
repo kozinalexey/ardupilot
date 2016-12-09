@@ -87,7 +87,7 @@ HAL_REVOMINI::HAL_REVOMINI() :
         &uart1Driver,  /* uartB - main port  - for telemetry */
         &uart3Driver,  /* uartC - flexi port - for OSD */
 #if FRAME_CONFIG == QUAD_FRAME
-        &uart4Driver,  /* uartE */
+        &uart4Driver,  /* uartE  - PWM pins 5&6 */
 #else
         NULL,          /* no uartE */
 #endif

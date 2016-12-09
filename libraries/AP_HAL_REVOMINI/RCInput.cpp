@@ -11,6 +11,16 @@ using namespace AP_HAL;
 using namespace REVOMINI;
 
 
+/*
+    DSM satellite connection
+        1   2   3   4
+pins    *   *   *   *   *   *   *
+use    gnd vcc 26  103 xxx xxx xxx
+DSM    GND     rx  en
+
+*/
+
+
 extern const AP_HAL::HAL& hal;
 
 #define RISING_EDGE 1

@@ -19,6 +19,14 @@
 #define STM32_PCLK1   (CYCLES_PER_MICROSECOND*1000000/4)
 #define STM32_PCLK2   (CYCLES_PER_MICROSECOND*1000000/2)
 
+#define BOARD_BUTTON_PIN     254
+
+#define BOARD_RFM22B_CS_PIN     103 // PA15 CS_RFM22B
+#define BOARD_RFM22B_INT_PIN    26  // PD2
+
+#define BUZZER_PIN              5 // PB15, PWM2
+
+
 #define BOARD_NR_USARTS         5
 #define BOARD_USART1_TX_PIN     23 
 #define BOARD_USART1_RX_PIN     24 
@@ -40,12 +48,6 @@
 
 
 
-#define BOARD_BUTTON_PIN     254
-
-#define BOARD_RFM22B_CS_PIN     103 // PA15 CS_RFM22B
-#define BOARD_RFM22B_INT_PIN    26  // PD2
-
-#define BUZZER_PIN              5 // PB15, PWM2
    
 #define BOARD_NR_SPI            3
 #define BOARD_SPI1_NSS_PIN      D51
