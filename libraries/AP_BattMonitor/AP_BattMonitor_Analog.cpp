@@ -36,9 +36,15 @@ AP_BattMonitor_Analog::read()
 
         // this copes with changing the pin at runtime
         _curr_pin_analog_source->set_pin(_mon._curr_pin[_state.instance]);
+        float allegroOfsetComp = 1.0f;
+if  (_mon._alegro_off_comp[_state.instance] == 1){
+        float alegroVCC = hal.analogin->board_voltage();
+        allegroOfsetComp =  alegroVCC /5.0f ; //5v default
+		}
+
 
         // read current
-        _state.current_amps = (_curr_pin_analog_source->voltage_average()-_mon._curr_amp_offset[_state.instance])*_mon._curr_amp_per_volt[_state.instance];
+        _state.current_amps = (_curr_pin_analog_source->voltage_average()  -_mon._curr_amp_offset[_state.instance] * allegroOfsetComp)*_mon._curr_amp_per_volt[_state.instance];
 
         // update total current drawn since startup
         if (_state.last_time_micros != 0 && dt < 2000000.0f) {
