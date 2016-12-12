@@ -306,7 +306,7 @@ static const char * _modename[] = {
 		"GNGP" //     GUIDED_NOGPS = 20,  // guided mode but only accepts attitude and altitude
 
 };
-#else
+#elif APM_BUILD_TYPE(APM_BUILD_ArduPlane)
 static const char * _modename[] = {
 
 "MANU", //  = 0,
@@ -332,7 +332,33 @@ static const char * _modename[] = {
 "QLND", //  = 20,
 "QRTL" //   = 21
 };
+
+#else  //rover
+static const char * _modename[] = {
+
+		"MANU",
+		"----",
+		"LERN",
+		"STER",
+		"HOLD",
+		"----",
+		"----",
+		"----",
+		"----",
+		"----",
+		"AUTO",
+		"RTL",
+		"----",
+		"----",
+		"----",
+		"GUID",
+		"INIT"
+
+};
 #endif
+
+
+
 
 bool Display::init(void)
 {
@@ -534,5 +560,6 @@ void Display::update_text(uint8_t r)
 			movedelay--;
 			mstartpos = 0;
 		}
-		draw_text(COLUMN(0), ROW(0), msg);
+
+		draw_text(COLUMN(0), ROW(r), msg);
  }

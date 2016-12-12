@@ -23,6 +23,9 @@
 #include <AP_Math/AP_Math.h>
 #include "AP_MotorsTri.h"
 
+#define CUSTOM_TRI 1
+
+
 extern const AP_HAL::HAL& hal;
 
 const AP_Param::GroupInfo AP_MotorsTri::var_info[] = {
@@ -82,7 +85,8 @@ const AP_Param::GroupInfo AP_MotorsTri::var_info[] = {
 // init
 void AP_MotorsTri::Init()
 {
-    add_motor_num(AP_MOTORS_MOT_1);
+#if CUSTOM_TRI == 0
+	add_motor_num(AP_MOTORS_MOT_1);
     add_motor_num(AP_MOTORS_MOT_2);
     add_motor_num(AP_MOTORS_MOT_4);
     
@@ -96,6 +100,29 @@ void AP_MotorsTri::Init()
 
     // allow mapping of motor7
     add_motor_num(AP_MOTORS_CH_TRI_YAW);
+#else
+	add_motor_num(AP_MOTORS_MOT_1);
+    add_motor_num(AP_MOTORS_MOT_2);
+    add_motor_num(AP_MOTORS_MOT_4);
+
+    add_motor_num(AP_MOTORS_MOT_5);
+    add_motor_num(AP_MOTORS_MOT_6);
+
+    // set update rate for the 5 motors (but not the servo on channel 7)
+    set_update_rate(_speed_hz);
+
+    // set the motor_enabled flag so that the ESCs can be calibrated like other frame types
+    motor_enabled[AP_MOTORS_MOT_1] = true;
+    motor_enabled[AP_MOTORS_MOT_2] = true;
+    motor_enabled[AP_MOTORS_MOT_4] = true;
+    motor_enabled[AP_MOTORS_MOT_5] = true;
+    motor_enabled[AP_MOTORS_MOT_6] = true;
+
+    // allow mapping of motor7
+    add_motor_num(AP_MOTORS_CH_TRI_YAW);
+
+
+#endif
 }
 
 // set update rate to motors - a value in hertz
@@ -105,25 +132,41 @@ void AP_MotorsTri::set_update_rate( uint16_t speed_hz )
     _speed_hz = speed_hz;
 
     // set update rate for the 3 motors (but not the servo on channel 7)
+#if CUSTOM_TRI == 0
     uint32_t mask = 
 	    1U << AP_MOTORS_MOT_1 |
 	    1U << AP_MOTORS_MOT_2 |
 	    1U << AP_MOTORS_MOT_4;
-    rc_set_freq(mask, _speed_hz);
+
+#else
+    uint32_t mask =
+	    1U << AP_MOTORS_MOT_1 |
+	    1U << AP_MOTORS_MOT_2 |
+	    1U << AP_MOTORS_MOT_4 |
+	    1U << AP_MOTORS_MOT_5 |
+	    1U << AP_MOTORS_MOT_6;
+#endif
+rc_set_freq(mask, _speed_hz);
 }
 
 // enable - starts allowing signals to be sent to motors
 void AP_MotorsTri::enable()
 {
+
     // enable output channels
     rc_enable_ch(AP_MOTORS_MOT_1);
     rc_enable_ch(AP_MOTORS_MOT_2);
     rc_enable_ch(AP_MOTORS_MOT_4);
     rc_enable_ch(AP_MOTORS_CH_TRI_YAW);
+#if CUSTOM_TRI != 0
+    rc_enable_ch(AP_MOTORS_MOT_5);
+    rc_enable_ch(AP_MOTORS_MOT_6);
+#endif
 }
 
 void AP_MotorsTri::output_to_motors()
 {
+#if CUSTOM_TRI == 0
     switch (_spool_mode) {
         case SHUT_DOWN:
             // sends minimum values out to the motors
@@ -155,17 +198,67 @@ void AP_MotorsTri::output_to_motors()
             hal.rcout->push();
             break;
     }
+#else
+    switch (_spool_mode) {
+         case SHUT_DOWN:
+             // sends minimum values out to the motors
+             hal.rcout->cork();
+             rc_write(AP_MOTORS_MOT_1, get_pwm_output_min());
+             rc_write(AP_MOTORS_MOT_2, get_pwm_output_min());
+             rc_write(AP_MOTORS_MOT_4, get_pwm_output_min());
+             rc_write(AP_MOTORS_MOT_5, get_pwm_output_min());
+             rc_write(AP_MOTORS_MOT_6, get_pwm_output_min());
+             rc_write(AP_MOTORS_CH_TRI_YAW, _yaw_servo_trim);
+             hal.rcout->push();
+             break;
+         case SPIN_WHEN_ARMED:
+             // sends output to motors when armed but not flying
+             hal.rcout->cork();
+             rc_write(AP_MOTORS_MOT_1, calc_spin_up_to_pwm());
+             rc_write(AP_MOTORS_MOT_2, calc_spin_up_to_pwm());
+             rc_write(AP_MOTORS_MOT_4, calc_spin_up_to_pwm());
+             rc_write(AP_MOTORS_MOT_5, calc_spin_up_to_pwm());
+             rc_write(AP_MOTORS_MOT_6, calc_spin_up_to_pwm());
+             rc_write(AP_MOTORS_CH_TRI_YAW, _yaw_servo_trim);
+             hal.rcout->push();
+             break;
+         case SPOOL_UP:
+         case THROTTLE_UNLIMITED:
+         case SPOOL_DOWN:
+             // set motor output based on thrust requests
+             hal.rcout->cork();
+             rc_write(AP_MOTORS_MOT_1, calc_thrust_to_pwm(_thrust_right));
+             rc_write(AP_MOTORS_MOT_2, calc_thrust_to_pwm(_thrust_left));
+             rc_write(AP_MOTORS_MOT_4, calc_thrust_to_pwm(_thrust_rear)); //front
+             rc_write(AP_MOTORS_MOT_5, calc_thrust_to_pwm(_thrust_cw));
+             rc_write(AP_MOTORS_MOT_6, calc_thrust_to_pwm(_thrust_ccw));
+
+             rc_write(AP_MOTORS_CH_TRI_YAW, calc_yaw_radio_output(_pivot_angle, radians(_yaw_servo_angle_max_deg)));
+             hal.rcout->push();
+             break;
+     }
+
+#endif
 }
 
 // get_motor_mask - returns a bitmask of which outputs are being used for motors or servos (1 means being used)
 //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict
 uint16_t AP_MotorsTri::get_motor_mask()
 {
+#if CUSTOM_TRI == 0
     // tri copter uses channels 1,2,4 and 7
     return rc_map_mask((1U << AP_MOTORS_MOT_1) |
                        (1U << AP_MOTORS_MOT_2) |
                        (1U << AP_MOTORS_MOT_4) |
                        (1U << AP_MOTORS_CH_TRI_YAW));
+#else
+    return rc_map_mask((1U << AP_MOTORS_MOT_1) |
+                       (1U << AP_MOTORS_MOT_2) |
+                       (1U << AP_MOTORS_MOT_4) |
+                       (1U << AP_MOTORS_MOT_5) |
+                       (1U << AP_MOTORS_MOT_6) |
+                       (1U << AP_MOTORS_CH_TRI_YAW));
+#endif
 }
 
 // output_armed - sends commands to the motors
@@ -220,8 +313,13 @@ void AP_MotorsTri::output_armed_stabilizing()
 
     _thrust_right = roll_thrust * -0.5f + pitch_thrust * 0.5f;
     _thrust_left = roll_thrust * 0.5f + pitch_thrust * 0.5f;
+#if CUSTOM_TRI == 0
     _thrust_rear = pitch_thrust * -0.5f;
-
+#else
+    _thrust_rear = pitch_thrust * 0.5f; //front =rear * -1
+    _thrust_cw = throttle_thrust + yaw_thrust * 0.5f;
+    _thrust_ccw = throttle_thrust - yaw_thrust * 0.5f;
+#endif
     // calculate roll and pitch for each motor
     // set rpy_low and rpy_high to the lowest and highest values of the motors
 
@@ -289,6 +387,13 @@ void AP_MotorsTri::output_armed_stabilizing()
     _thrust_right = constrain_float(_thrust_right, 0.0f, 1.0f);
     _thrust_left = constrain_float(_thrust_left, 0.0f, 1.0f);
     _thrust_rear = constrain_float(_thrust_rear, 0.0f, 1.0f);
+
+
+#if CUSTOM_TRI != 0
+    _thrust_cw = constrain_float(_thrust_cw, 0.0f, 1.0f);
+    _thrust_ccw = constrain_float(_thrust_ccw, 0.0f, 1.0f);
+#endif
+
 }
 
 // output_test - spin a motor at the pwm value specified
@@ -300,7 +405,7 @@ void AP_MotorsTri::output_test(uint8_t motor_seq, int16_t pwm)
     if (!armed()) {
         return;
     }
-
+#if CUSTOM_TRI == 0
     // output to motors and servos
     switch (motor_seq) {
         case 1:
@@ -323,6 +428,38 @@ void AP_MotorsTri::output_test(uint8_t motor_seq, int16_t pwm)
             // do nothing
             break;
     }
+#else
+    switch (motor_seq) {
+        case 1:
+            // front right motor
+            rc_write(AP_MOTORS_MOT_1, pwm);
+            break;
+        case 2:
+            // front motor
+            rc_write(AP_MOTORS_MOT_4, pwm);
+            break;
+        case 3:
+            //  servo
+            rc_write(AP_MOTORS_CH_TRI_YAW, pwm);
+            break;
+        case 4:
+            // back left motor
+            rc_write(AP_MOTORS_MOT_2, pwm);
+            break;
+        case 5:
+            // center cw motor
+            rc_write(AP_MOTORS_MOT_5, pwm);
+            break;
+        case 6:
+            // center ccw motor
+            rc_write(AP_MOTORS_MOT_6, pwm);
+            break;
+        default:
+            // do nothing
+            break;
+    }
+
+#endif
 }
 
 // calc_yaw_radio_output - calculate final radio output for yaw channel

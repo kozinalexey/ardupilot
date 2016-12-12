@@ -3,8 +3,8 @@
 
 #include "NotifyDevice.h"
 
-#define ROW(Y) ((Y * 11) + 2)
-#define COLUMN(X) ((X * 7) + 1)
+#define ROW(Y) ((Y * 10) + 6)
+#define COLUMN(X) ((X * 7) )
 
 class Display: public NotifyDevice {
 public:

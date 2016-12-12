@@ -25,7 +25,7 @@
 #else
 #define SSD1306_I2C_BUS 1
 #endif
-#define SSD1306_I2C_ADDR 0x3C    // default I2C bus address
+#define SSD1306_I2C_ADDR 0x3C    // default I2C bus address 0x3C match jumper 0x78 on display board
 
 static const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 

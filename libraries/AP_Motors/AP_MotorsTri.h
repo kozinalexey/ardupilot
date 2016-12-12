@@ -70,4 +70,7 @@ protected:
     float           _thrust_right;
     float           _thrust_rear;
     float           _thrust_left;
+    float           _thrust_cw;
+    float           _thrust_ccw;
+
 };
