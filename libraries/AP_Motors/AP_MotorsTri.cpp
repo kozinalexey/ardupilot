@@ -15,6 +15,20 @@
  */
 
 /*
+ 1 -передний
+2 -левый
+3 -правый
+4 -центральный верхний CW
+5 -центральный нижний CCW
+
+    add_motor_raw(AP_MOTORS_MOT_1,  0.0f,  -1.333f, 0.0f, 1);
+        add_motor_raw(AP_MOTORS_MOT_2,  1.0f,  0.666f, 0.0f,  2);
+        add_motor_raw(AP_MOTORS_MOT_3, -1.0f,  0.666f, 0.0f, 3);
+        add_motor_raw(AP_MOTORS_MOT_4,  0.0f, 0.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
+        add_motor_raw(AP_MOTORS_MOT_5,  0.0f,  0.0f, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  5);
+  */
+
+/*
  *       AP_MotorsTri.cpp - ArduCopter motors library
  *       Code by RandyMackay. DIYDrones.com
  *
