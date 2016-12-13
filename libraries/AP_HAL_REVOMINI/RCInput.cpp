@@ -5,6 +5,7 @@
 #include <AP_HAL/utility/dsm.h>
 #include "sbus.h"
 #include "GPIO.h"
+#include "ring_buffer_pulse.h"
 
 // Constructors ////////////////////////////////////////////////////////////////
 using namespace AP_HAL;
@@ -22,6 +23,8 @@ DSM    GND     rx  en
 
 
 extern const AP_HAL::HAL& hal;
+
+extern pulse_buffer pulses; // PPM data from interrupt
 
 #define RISING_EDGE 1
 #define FALLING_EDGE 0
@@ -67,6 +70,9 @@ struct REVOMINIRCInput::DSM_State  REVOMINIRCInput::dsm_state;
 bool REVOMINIRCInput::_got_ppm = false;
 bool REVOMINIRCInput::_got_dsm = false;
 
+bool REVOMINIRCInput::_was_ppm = false;
+bool REVOMINIRCInput::_was_dsm = false;
+
 uint16_t REVOMINIRCInput::_override[8];
 
 uint64_t REVOMINIRCInput::_last_read;
@@ -85,8 +91,8 @@ static inline uint16_t constrain_pulse(uint16_t p) {
 }
 
 
-// ISR callback
-void REVOMINIRCInput::rxIntRC(uint8_t state, uint16_t value0, uint16_t value1)
+
+void REVOMINIRCInput::rxIntRC(uint16_t value0, uint16_t value1)
 {
 
     if(!_process_ppmsum_pulse(value0 + value1) ) {
@@ -129,6 +135,15 @@ bool REVOMINIRCInput::_process_ppmsum_pulse(uint16_t value)
     }
 }
 
+
+void REVOMINIRCInput::parse_pulses(){
+    while(!pb_is_empty(&pulses)){
+        Pulse p = pb_remove(&pulses);
+        
+        rxIntRC(p.low, p.high);
+    }
+
+}
 
 
 
@@ -394,9 +409,7 @@ gnd    +5      26      103
     } else 
 #endif    
     { //PPMSUM
-    	// Init Radio In
-//	hal.console->println("Init Default PPM");
-	attachPWMCaptureCallback(rxIntRC);
+//	attachPWMCaptureCallback(rxIntRC); now all data are in Pulse_Buffer
     }
 
     clear_overrides();
@@ -423,6 +436,8 @@ uint8_t REVOMINIRCInput::valid_channels()
 
 bool REVOMINIRCInput::new_input()
 {
+    parse_pulses();
+
     return _override_valid || _new_ppm_input() || _new_dsm_input();
 }
 
@@ -432,6 +447,7 @@ bool REVOMINIRCInput::_new_ppm_input()
     //bool valid = _ppm_last_signal !=0 &&  _ppm_last_signal != _last_read;
     bool valid = _got_ppm;
 //    interrupts();
+    if(valid) _was_ppm=true;
     return valid;
 }
 
@@ -440,8 +456,9 @@ bool REVOMINIRCInput::_new_dsm_input()
 {
 //    noInterrupts();
 //    bool valid = _dsm_last_signal !=0 && _dsm_last_signal != _last_read;
-    bool valid = _got_ppm;
+    bool valid = _got_dsm;
 //    interrupts();
+    if(valid) _was_dsm=true;
     return valid;
 }
 
@@ -470,9 +487,11 @@ uint16_t REVOMINIRCInput::read(uint8_t ch)
     uint16_t data=0;
     uint32_t pulse=0;
     
+    parse_pulses();
+    
     if(ch>=REVOMINI_RC_INPUT_NUM_CHANNELS) return 0;
 
-    if(_new_ppm_input()){
+    if(_was_ppm){
 
         noInterrupts();
     
@@ -493,7 +512,7 @@ uint16_t REVOMINIRCInput::read(uint8_t ch)
         interrupts();
     }
     
-    if(_new_dsm_input()){
+    if(_was_dsm){
         noInterrupts();
         _last_read = _dsm_last_signal;
         data = _dsm_val[ch];
@@ -516,9 +535,11 @@ uint8_t REVOMINIRCInput::read(uint16_t* periods, uint8_t len)
 {
     uint32_t pulse=0;
     
+    parse_pulses();
+    
     if(len > REVOMINI_RC_INPUT_NUM_CHANNELS) len = REVOMINI_RC_INPUT_NUM_CHANNELS; // limit count
     
-    if(_new_ppm_input()){
+    if(_was_ppm){
 
         noInterrupts(); // to not interfere with ISR for full data
 
@@ -541,7 +562,7 @@ uint8_t REVOMINIRCInput::read(uint16_t* periods, uint8_t len)
         interrupts();
     }
 
-    if(_new_dsm_input()){
+    if(_was_dsm){
         noInterrupts();
         _last_read = _dsm_last_signal;
         for (uint8_t i = 0; i < len; i++) 

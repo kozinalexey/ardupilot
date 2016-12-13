@@ -44,11 +44,16 @@ typedef void (*rcc_clockcmd)(uint32_t, FunctionalState);
   extern "C" {
 #endif
 
+typedef struct PULSE {
+    uint16_t low;
+    uint16_t high;
+} Pulse;
+
 
 struct PWM_State  {
         uint8_t state;
-        uint16_t rise;
-        uint16_t fall;
+        uint16_t lower; //rise;
+        uint16_t upper; //fall;
         uint16_t last_val;
         uint16_t capture;
         uint16_t error;

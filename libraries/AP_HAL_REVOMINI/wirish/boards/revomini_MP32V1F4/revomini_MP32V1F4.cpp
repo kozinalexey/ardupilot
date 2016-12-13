@@ -145,7 +145,7 @@ void boardInit(void) {
 /* we don't use RFM22! this pins are used for other needs so will be initialized in respective places
 
     // Init RFM22B SC pin and set to HI
-    gpio_set_mode(PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_device, PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_bit, GPIO_OUTPUT_PP);
+    gpio_set_mode( PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_device, PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_bit, GPIO_OUTPUT_PP);
     gpio_write_bit(PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_device, PIN_MAP[BOARD_RFM22B_CS_PIN].gpio_bit, 1);
     
     // Init RFM22B EXT_INT pin
@@ -157,6 +157,12 @@ void boardInit(void) {
 
     // Init MPU6000 DRDY pin - but it not used by driver
     gpio_set_mode(PIN_MAP[BOARD_MPU6000_DRDY_PIN].gpio_device, PIN_MAP[BOARD_MPU6000_DRDY_PIN].gpio_bit, GPIO_INPUT_PU);
+
+
+// it is not necessary because of 10K resistor to ground
+    gpio_set_mode( PIN_MAP[BOARD_SBUS_INVERTER].gpio_device, PIN_MAP[BOARD_SBUS_INVERTER].gpio_bit, GPIO_OUTPUT_PP);
+    gpio_write_bit(PIN_MAP[BOARD_SBUS_INVERTER].gpio_device, PIN_MAP[BOARD_SBUS_INVERTER].gpio_bit, 0); // not inverted
+
 
 
 //*///    enable clock in sleep for debugging

@@ -71,6 +71,10 @@
 #define MPU6000_CS_PIN		51
 #define BOARD_MPU6000_DRDY_PIN	10  // PC4
 
+
+#define BOARD_SBUS_INVERTER     6
+
+
 #define BOARD_NR_GPIO_PINS      108
 
 #endif

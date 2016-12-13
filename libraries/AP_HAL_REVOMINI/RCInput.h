@@ -31,11 +31,13 @@ public:
     bool rc_bind(int dsmMode) override;
     
 private:
-    static void rxIntRC(uint8_t state, uint16_t value0, uint16_t value1);
+    static void rxIntRC(uint16_t value0, uint16_t value1);
     static bool _process_ppmsum_pulse(uint16_t value);
     static void _process_dsm_pulse(uint16_t width_s0, uint16_t width_s1);
     static void _process_sbus_pulse(uint16_t width_s0, uint16_t width_s1);
 
+    static void parse_pulses();
+    
     static unsigned int ppm_sum_channel;
 
     static bool is_PPM;
@@ -62,6 +64,9 @@ private:
 
     static bool _got_ppm;
     static bool _got_dsm;
+
+    static bool _was_ppm;
+    static bool _was_dsm;
 
     static volatile uint64_t _dsm_last_signal;
     static volatile uint16_t _dsm_val[REVOMINI_RC_INPUT_NUM_CHANNELS];

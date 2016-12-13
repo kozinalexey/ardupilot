@@ -2,7 +2,7 @@ I tried to maintain compatibility with the OpenPilot documentation. The main dif
 always Serial and external I2C port is on pins 7&8 of Input port.
 
 
-Main Port - telemetry, Serial1
+Main Port - telemetry, Serial1. As a variant it can be used as SBUS input with hardware inverter (requires recompilation)
 FlexiPort - OSD, Serial2
 
 pin 1 of Input port is GND
@@ -11,6 +11,7 @@ pin 3 of Input port is PPM/SBUS (sbus copied as is and still not tested)
 pin 4 of Input port is a Buzzer pin (requires additional transistor!)
 pins 5&6 of Input port are Tx and Rx of Serial3 (for GPS)
 pins 7&8 of Input port are SCL and SDA of external I2C
+
 
 MOTORs
 Connect to PWM output pins

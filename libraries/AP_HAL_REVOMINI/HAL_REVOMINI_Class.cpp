@@ -132,13 +132,12 @@ void HAL_REVOMINI::run(int argc,char* const argv[], Callbacks* callbacks) const
     extern void usb_init();
     usb_init(); // moved from boards.cpp
 
-    /* uartA is the USB serial port used for the console, so lets make sure
-     * it is initialized at boot */
+    /* uartA is the USB serial port used for the console, so lets make sure it is initialized at boot */
     uartA->begin(115200);
 
     rcin->init();
 
-    storage->init(); // Uses EEPROM.*, flash_stm* copied from AeroQuad_v3.2
+    storage->init(); // Uses EEPROM.*, flash_stm* reworked
     analogin->init();
 
     callbacks->setup();
