@@ -155,9 +155,9 @@ void UsageFault_Handler(void)
 
 uint32_t systick_micros(void)
 {
-    uint32_t fms, lms;
+    volatile uint32_t fms, lms;
     uint32_t cycle_cnt;
-    uint32_t res;
+     
     do {
         // make sure systick_uptime() return the same value before and after
         // getting the systick count
@@ -169,7 +169,7 @@ uint32_t systick_micros(void)
 #define US_PER_MS               1000
     /* SYSTICK_RELOAD_VAL is 1 less than the number of cycles it
        actually takes to complete a SysTick reload */
-    res = (fms * US_PER_MS) +
+    uint32_t res = (fms * US_PER_MS) +
         (SYSTICK_RELOAD_VAL + 1 - cycle_cnt) / CYCLES_PER_MICROSECOND;
 
     return res;

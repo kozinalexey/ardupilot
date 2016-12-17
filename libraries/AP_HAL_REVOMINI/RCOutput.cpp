@@ -4,16 +4,96 @@
 extern const AP_HAL::HAL& hal;
 using namespace REVOMINI;
 
-static const uint8_t output_channels[]= {  // pin assignment
-    46, //Timer3/3
-    45, //Timer3/4
-    50, //Timer2/3
-    49, //Timer2/2
+/*
+    OpenPilot motor order (nose up, from top)
+    
+    1 2
+    4 3
+    
+    ArduCopter motor order
+    
+    3 1
+    2 4
+
+    Cleanflight motor order
+    
+    4 2 
+    3 1
+    
+
+so to mimics Arducopter motors should be changed as 
+    1 -> 3
+    2 -> 1
+    3 -> 4
+    4 -> 2
+
+so to mimics Cleanflight motors should be changed as 
+    1 -> 4
+    2 -> 2
+    3 -> 1
+    4 -> 3
+
+
+*/
+
+#define REVOMINI_OUT_CHANNELS 6
+
+// #if FRAME_CONFIG == QUAD_FRAME // this is only QUAD layouts
+
+// ArduCopter
+static const uint8_t output_channels_arducopter[]= {  // pin assignment
+    50, //Timer2/3  - 3
+    46, //Timer3/3  - 1
+    49, //Timer2/2  - 4
+    45, //Timer3/4  - 2
     48, //Timer2/1
-    47  //Timer2/0
+    47, //Timer2/0
 };
 
-#define REVOMINI_OUT_CHANNELS (sizeof(output_channels)/sizeof(uint8_t))
+// OpenPilot
+static const uint8_t output_channels_openpilot[]= {  // pin assignment
+    46, //Timer3/3  - 1
+    45, //Timer3/4  - 2
+    50, //Timer2/3  - 3
+    49, //Timer2/2  - 4
+    48, //Timer2/1
+    47, //Timer2/0
+};
+
+// Cleanflight
+static const uint8_t output_channels_cleanflight[]= {  // pin assignment
+    49, //Timer2/2  - 4
+    45, //Timer3/4  - 2
+    46, //Timer3/3  - 1
+    50, //Timer2/3  - 3
+    48, //Timer2/1
+    47, //Timer2/0
+};
+
+// Arducopter,shifted 2 pins right to use up to 2 servos
+static const uint8_t output_channels_servo[]= {  // pin assignment
+    48, //Timer2/1  - 3
+    50, //Timer2/3  - 1
+    47, //Timer2/0  - 4
+    49, //Timer2/2  - 2
+    46, //Timer3/3      servo1
+    45, //Timer3/4      servo2
+};
+
+// #endif
+
+
+static const uint8_t * const revo_motor_map[]={
+    output_channels_arducopter,
+    output_channels_openpilot,
+    output_channels_cleanflight,
+    output_channels_servo,
+};
+
+static const uint8_t *output_channels = output_channels_arducopter;  // current pin assignment
+
+
+
 
 #define _BV(bit) (1U << (bit))
 
@@ -23,14 +103,22 @@ void REVOMINIRCOutput::init()
 
     memset(&_period[0], 0, sizeof(_period));
 
-    InitPWM();
     _used_channels=0;
 }
 
 
+void REVOMINIRCOutput::lateInit(uint8_t map){ // 2nd stage with loaded parameters
+    
+    if(map >= ARRAY_SIZE(revo_motor_map)) return; // don't initialize if parameter is wrong
+    
+    output_channels = revo_motor_map[map];
+    
+    InitPWM();
+}
+
 void REVOMINIRCOutput::InitPWM()
 {
-    for(uint8_t i = 0; i < REVOMINI_MAX_OUTPUT_CHANNELS && i<sizeof(output_channels); i++) {
+    for(uint8_t i = 0; i < REVOMINI_MAX_OUTPUT_CHANNELS && i < REVOMINI_OUT_CHANNELS; i++) {
         REVOMINIGPIO::_pinMode(output_channels[i], PWM);
     }
 }
@@ -42,35 +130,25 @@ uint32_t inline REVOMINIRCOutput::_timer_period(uint16_t speed_hz) {
 
 // channels 1&2, 3&4&5&6 can has a different rates
 void REVOMINIRCOutput::set_freq(uint32_t chmask, uint16_t freq_hz) {          
-    uint32_t icr = _timer_period(freq_hz);
-
-    if ((chmask & ( _BV(CH_1) | _BV(CH_2) )) != 0) {
-	TIM3->ARR = icr;
+    uint32_t mask=1;
+    
+    for(uint8_t i=0; i< REVOMINI_OUT_CHANNELS; i++) { // кто последний тот и папа
+        if(chmask & mask) {
+            const timer_dev *dev = PIN_MAP[output_channels[i]].timer_device;
+            (dev->regs)->ARR =  _timer_period(freq_hz); 
+        }
+        mask <<= 1;
     }
-
-    if ((chmask & ( _BV(CH_3) | _BV(CH_4) |  _BV(CH_5) | _BV(CH_6))) != 0) {
-	TIM2->ARR = icr;
-    }
-
 }
 
 uint16_t REVOMINIRCOutput::get_freq(uint8_t ch) {
-    uint32_t icr;
-    switch (ch) {
-    case CH_1:
-    case CH_2:
-        icr = (TIMER3->regs)->ARR;
-        break;
-    case CH_3:
-    case CH_4:
-    case CH_5:
-    case CH_6:
-        icr = (TIMER2->regs)->ARR;
-        break;
-    default:
-        return 0;
-    }
-    /* transform to period by inverse of _time_period(icr). */
+    if(ch >= REVOMINI_OUT_CHANNELS) return 0;
+    
+    const timer_dev *dev = PIN_MAP[output_channels[ch]].timer_device;
+
+    uint32_t icr = (dev->regs)->ARR;
+
+    /* transform to period by inverse of _time_period(icr) */
     return (uint16_t)(2000000UL / icr);
 }
 
@@ -90,9 +168,6 @@ void REVOMINIRCOutput::set_pwm(uint8_t ch, uint16_t pwm){
     if (pin >= BOARD_NR_GPIO_PINS) return;
     
     const timer_dev *dev = PIN_MAP[pin].timer_device;
-
-    // if(dev == NULL || dev->type == TIMER_BASIC) return; we init const structure at compile time
-
     timer_set_compare(dev, PIN_MAP[pin].timer_channel, pwm);
     TIM_Cmd(dev->regs, ENABLE);
 }
@@ -137,8 +212,6 @@ uint16_t REVOMINIRCOutput::read(uint8_t ch)
         return RC_INPUT_MIN_PULSEWIDTH;
     
     const timer_dev *dev = PIN_MAP[pin].timer_device;
-
-//    if(dev == NULL || dev->type == TIMER_BASIC) return RC_INPUT_MIN_PULSEWIDTH; this can't be
 
     uint16_t pwm = timer_get_compare(dev, PIN_MAP[pin].timer_channel);
     return pwm >> 1;
@@ -187,6 +260,7 @@ void REVOMINIRCOutput::disable_ch(uint8_t ch)
     const timer_dev *dev = PIN_MAP[pin].timer_device;
     TIM_Cmd(dev->regs, DISABLE);
 */  // we shouldn't disable ALL timer but only one pin, it will be better to change it's mode from PWM to output
+
     REVOMINIGPIO::_pinMode(output_channels[ch], OUTPUT);
     REVOMINIGPIO::_write(output_channels[ch], 0);
 
@@ -200,6 +274,5 @@ void REVOMINIRCOutput::push()
     for (uint16_t ch = 0; ch < _used_channels; ch++) {
         set_pwm(ch, _period[ch]);
     }
-
 }
 

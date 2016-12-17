@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AP_HAL_Namespace.h"
+//#include <AP_Param/AP_Param.h>
 
 #include "AnalogIn.h"
 #include "GPIO.h"
@@ -64,7 +65,9 @@ public:
         void setup() override { _setup(); }
         void loop() override { _loop(); }
 
-    private:
+//    static const struct AP_Param::GroupInfo var_info[];
+
+private:
         void (*_setup)(void);
         void (*_loop)(void);
     };

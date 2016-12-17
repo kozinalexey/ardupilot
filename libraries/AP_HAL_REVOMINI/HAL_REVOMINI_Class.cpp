@@ -24,6 +24,28 @@
 using namespace AP_HAL;
 using namespace REVOMINI;
 
+/*
+const AP_Param::GroupInfo HAL_REVOMINI::var_info[] = {
+
+    // @Param: MOTOR_LAYOUT
+    // @DisplayName: Motor layout scheme
+    // @Description: Selects how motors are numbered
+    // @Values: 0:ArduCopter,1:OpenPilot,2:CleanFlight
+    // @User: Advanced
+    AP_GROUPINFO("_MOTOR_LAYOUT", 0,  HAL_REVOMINI, _motor_layout, REVO_MOTORS_ARDUCOPTER),
+
+    // @Param: USE_SOFTSERIAL
+    // @DisplayName: Use SoftwareSerial driver
+    // @Description: Use SoftwareSerial driver instead SoftwareI2C on Input Port pins 7 & 8
+    // @Values: 0:disabled,1:enabled
+    // @User: Advanced
+    AP_GROUPINFO("_USE_SOFTSERIAL", 1,  HAL_REVOMINI, _use_softserial, 0),
+
+    AP_GROUPEND
+};
+
+*/
+
 static REVOMINI::I2CDeviceManager i2c_mgr_instance;
 
 // XXX make sure these are assigned correctly
@@ -141,13 +163,31 @@ void HAL_REVOMINI::run(int argc,char* const argv[], Callbacks* callbacks) const
     analogin->init();
 
     callbacks->setup();
+
+#if 0 //[ here is too late :( so we need a small hack and call lateInit from REVOMINIScheduler::register_delay_callback 
+//         which called when parameters already initialized
+
+    AP_Param::setup_object_defaults(this, var_info); // setup all params
     
+    //((REVOMINI::REVOMINIRCOutput *)rcout)->lateInit(_motor_layout); // 2nd stage - now with loaded parameters
+    REVOMINIRCOutput::lateInit(_motor_layout); // 2nd stage - now with loaded parameters
+#endif //]
+
     scheduler->system_initialized(); // clear bootloader flag
 
     for (;;) {
         callbacks->loop();
         ((REVOMINI::REVOMINIScheduler *)scheduler)->loop(); // to execute stats in main loop
     }
+}
+
+
+void HAL_REVOMINI::lateInit(){
+//    AP_Param::setup_object_defaults(this, var_info); // setup all params
+    
+    //((REVOMINI::REVOMINIRCOutput *)rcout)->lateInit(_motor_layout); // 2nd stage - now with loaded parameters
+//    REVOMINIRCOutput::lateInit(_motor_layout); // 2nd stage - now with loaded parameters
+    REVOMINIRCOutput::lateInit(0); // 2nd stage - now with loaded parameters
 }
 
 //const HAL_REVOMINI AP_HAL_REVOMINI;

@@ -99,7 +99,7 @@ void REVOMINIAnalogSource::set_pin(uint8_t pin) {
             REVOMINIGPIO::_pinMode(pin, INPUT_ANALOG);
 	}
 	
-	if (pin != ANALOG_INPUT_NONE) {
+	if (pin != ANALOG_INPUT_NONE && pin < BOARD_NR_GPIO_PINS) {
             const adc_dev *dev = _find_device();
 
             if(dev) {
@@ -141,10 +141,12 @@ float REVOMINIAnalogSource::_read_average()
 
 
 void REVOMINIAnalogSource::setup_read() {
-    if (_stop_pin != ANALOG_INPUT_NONE) {
+    if (_stop_pin != ANALOG_INPUT_NONE && _stop_pin < BOARD_NR_GPIO_PINS) {
+
         uint8_t pin = REVOMINIGPIO::analogPinToDigital(_stop_pin);
         gpio_set_mode(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, GPIO_OUTPUT_PP);
         gpio_write_bit(PIN_MAP[pin].gpio_device, PIN_MAP[pin].gpio_bit, 1);
+
     }
     if (_settle_time_ms != 0) {
         _read_start_time_ms = AP_HAL::millis();
@@ -165,7 +167,7 @@ void REVOMINIAnalogSource::setup_read() {
 
     } else if (_pin == ANALOG_INPUT_NONE) {
         // nothing to do
-    } else if(dev != NULL) {
+    } else if(dev != NULL && _pin < BOARD_NR_GPIO_PINS) {
 	adc_set_reg_seqlen(dev, 1);
 	uint8_t channel = 0;
 	channel = PIN_MAP[_pin].adc_channel;
@@ -178,7 +180,7 @@ void REVOMINIAnalogSource::stop_read() {
     if(_pin == ANALOG_INPUT_REVOMINI_VCC) {
 	ADC_TempSensorVrefintCmd(DISABLE);
     }
-    if (_stop_pin != ANALOG_INPUT_NONE) {
+    if (_stop_pin != ANALOG_INPUT_NONE && _stop_pin < BOARD_NR_GPIO_PINS) {
         const adc_dev *dev = _find_device();
 	adc_disable(dev);
         uint8_t pin = REVOMINIGPIO::analogPinToDigital(_stop_pin);
@@ -215,9 +217,9 @@ void REVOMINIAnalogSource::new_sample(uint16_t sample) {
 
 const adc_dev* REVOMINIAnalogSource::_find_device() {
 
-    if(_pin != ANALOG_INPUT_NONE) {
+//    if(_pin != ANALOG_INPUT_NONE) {
 	return _ADC1;
-    }
-    return NULL;
+//    }
+//    return NULL;
 }
 #endif 

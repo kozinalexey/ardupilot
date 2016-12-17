@@ -32,7 +32,7 @@ volatile uint8_t        SerialDriver::bufferOverflow;
 */
 
 #ifdef SS_DEBUG
-    static volatile uint8_t          SerialDriver::bufferOverflow;
+    volatile uint8_t          SerialDriver::bufferOverflow;
 #endif
 
 volatile int8_t         SerialDriver::rxBitCount;

@@ -239,6 +239,8 @@ private:
     static uint32_t yield_count;
 #endif
 
+    static inline bool in_interrupt(){ return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) || (__get_BASEPRI()); }
+
 };
 
 #endif // __AP_HAL_REVOMINI_SCHEDULER_H__

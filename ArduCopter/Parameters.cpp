@@ -944,6 +944,10 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(terrain_follow, "TERRAIN_FOLLOW", 0),
 
+    // @Group: HAL_
+    // @Path: ../libraries/AP_HAL_REVOMINI/HAL_REVOMINI_Class.cpp
+//    GOBJECT(chal, "HAL", AP_HAL::HAL),
+
     // @Group: 
     // @Path: Parameters.cpp
     GOBJECT(g2, "",  ParametersG2),

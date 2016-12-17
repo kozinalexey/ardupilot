@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <syscalls.h>
 
 /* _end is set in the linker command file */
 extern caddr_t _end;
@@ -77,7 +78,11 @@ caddr_t _sbrk(int nbytes) {
         heap_ptr = (caddr_t)&_end;
     }
 
-    if ((get_stack_top - (unsigned int)heap_ptr) >= 0) {
+    uint32_t top = (unsigned int)get_stack_top();
+
+    if ( top > (unsigned int)heap_ptr // there is place in stack
+        || top < 0x20000000 ) //       or stack not in RAM
+    {
         base = heap_ptr;
         heap_ptr += nbytes;
         return (base);
@@ -165,7 +170,7 @@ void cgets(char *s, int bufsize) {
 }
 
 int _write(int fd, const char *buf, size_t cnt) {
-    int i;
+    size_t i;
 
     for (i = 0; i < cnt; i++)
         putch(buf[i]);
@@ -180,3 +185,31 @@ char *fgets(char *s, int bufsize, void *f) {
 
 void clock_gettime(uint32_t a1, void *a2) { return; } 
 
+int val_read(void *dest, volatile const void *src, int bytes)
+{
+
+        int i;
+
+        for (i = 0; i < bytes / 4; i++) {
+                *(((volatile unsigned *)dest) + i) = *(((volatile unsigned *)src) + i);
+        }
+
+        return i * 4;
+}
+
+
+#define UDID_START              0x1FFF7A10
+int get_board_serial(uint8_t *serialid)
+{
+        const volatile uint32_t *udid_ptr = (const uint32_t *)UDID_START;
+        union udid id;
+        val_read((uint32_t *)&id, udid_ptr, sizeof(id));
+
+
+        /* Copy the serial from the chips non-write memory and swap endianess */
+        serialid[0] = id.data[3];   serialid[1] = id.data[2];  serialid[2] = id.data[1];  serialid[3] = id.data[0];
+        serialid[4] = id.data[7];   serialid[5] = id.data[6];  serialid[6] = id.data[5];  serialid[7] = id.data[4];
+        serialid[8] = id.data[11];   serialid[9] = id.data[10];  serialid[10] = id.data[9];  serialid[11] = id.data[8];
+
+        return 0;
+}

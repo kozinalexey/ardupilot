@@ -128,6 +128,7 @@
 #include <SITL/SITL.h>
 #endif
 
+extern const AP_HAL::HAL& hal;
 
 class Copter : public AP_HAL::HAL::Callbacks {
 public:
@@ -180,6 +181,8 @@ private:
     // Dataflash
     DataFlash_Class DataFlash;
 
+    const AP_HAL::HAL& chal = hal;
+    
     AP_GPS gps;
 
     // flight modes convenience array

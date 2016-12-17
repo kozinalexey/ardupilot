@@ -115,7 +115,7 @@ void REVOMINIScheduler::_delay(uint16_t ms)
 #endif
     
     while (ms > 0) {
-        if(!_in_timer_proc)  // not switch context in interrupts
+        if(!_in_timer_proc && !in_interrupt())  // not switch context in interrupts
             yield();
             
         while ((systick_micros() - start) >= 1000) {
@@ -140,32 +140,27 @@ void REVOMINIScheduler::_delay(uint16_t ms)
 }
 
 void REVOMINIScheduler::_delay_microseconds_boost(uint16_t us){
-    uint32_t t = systick_micros();
-    uint32_t dt= t + us;
-
-    while(systick_micros()<dt){
-        if(!_in_timer_proc)  // not switch context in interrupts
-            yield();
-    }    
-
-#ifdef SHED_PROF
-    us=systick_micros()-t; // real time
-    
-    if(_in_timer_proc)
-        delay_int_time +=us;
-    else
-        delay_time     +=us;
-#endif
-
-
+    _delay_microseconds(us);
 }
 
 void REVOMINIScheduler::_delay_microseconds(uint16_t us)
 {
 #ifdef SHED_PROF
-    uint32_t t = systick_micros();
+    uint32_t t = systick_micros(); 
 #endif
-    stopwatch_delay_us((uint32_t)us); // it not a stopwatch anymore - @NG
+
+    uint32_t rtime = stopwatch_getticks(); // start ticks
+    uint32_t dt    = us_ticks * us;  // delay time in ticks
+
+    uint32_t ny = 10 * us_ticks; // 10 uS in ticks
+    uint32_t tw;
+
+    while ((tw = stopwatch_getticks() - rtime) < dt) { // tw - time waiting, in ticks
+        if((dt - tw) > ny // No Yeld time - 10uS to end of wait 
+           && !_in_timer_proc && !in_interrupt()) {  // not switch context in interrupts
+            yield();
+        }
+    }    
 
 #ifdef SHED_PROF
     us=systick_micros()-t; // real time
@@ -180,6 +175,14 @@ void REVOMINIScheduler::_delay_microseconds(uint16_t us)
 
 void REVOMINIScheduler::register_delay_callback(AP_HAL::Proc proc, uint16_t min_time_ms)
 {
+    static bool init_done=false;
+    if(!init_done){     // small hack to load HAL parameters in needed time
+
+        ((HAL_REVOMINI&) hal).lateInit();
+        
+        init_done=true;
+    }
+
     _delay_cb        = proc;
     _min_delay_cb_ms = min_time_ms;
 }

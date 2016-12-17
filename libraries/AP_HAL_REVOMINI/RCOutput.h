@@ -26,6 +26,7 @@
 extern void setupTimers(void);
 
 class REVOMINI::REVOMINIRCOutput : public AP_HAL::RCOutput {
+public:
     void     init() override;
     void     set_freq(uint32_t chmask, uint16_t freq_hz) override;
     uint16_t get_freq(uint8_t ch) override;
@@ -38,6 +39,8 @@ class REVOMINI::REVOMINIRCOutput : public AP_HAL::RCOutput {
     
     void cork() override{ _corked = true; }
     void push() override;
+    
+    static void    lateInit(uint8_t map); // 2nd stage with loaded parameters
     
 /*
     void     set_safety_pwm(uint32_t chmask, uint16_t period_us) override;
@@ -58,15 +61,15 @@ class REVOMINI::REVOMINIRCOutput : public AP_HAL::RCOutput {
 */
 
 private:
-    void InitPWM(void);
+    static void InitPWM(void);
     void set_pwm(uint8_t ch, uint16_t pwm);
     uint32_t _timer_period(uint16_t speed_hz);
     uint16_t _period[REVOMINI_MAX_OUTPUT_CHANNELS];
     uint16_t _enabled_channels;
     enum output_mode _output_mode = MODE_PWM_NORMAL;
-    bool _sbus_enabled:1;
-    bool _corked:1;
-    bool _need_update:1;    
+    bool _sbus_enabled;
+    bool _corked;
+    bool _need_update;
     void _init_alt_channels() {}// we don't has channels more than 8
     uint8_t _used_channels;
 };
