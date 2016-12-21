@@ -155,7 +155,8 @@ void HAL_REVOMINI::run(int argc,char* const argv[], Callbacks* callbacks) const
     usb_init(); // moved from boards.cpp
 
     /* uartA is the USB serial port used for the console, so lets make sure it is initialized at boot */
-    uartA->begin(115200);
+//    uartA->begin(115200); 
+    uartA->begin(230400); 
 
     rcin->init();
 
@@ -178,6 +179,7 @@ void HAL_REVOMINI::run(int argc,char* const argv[], Callbacks* callbacks) const
     for (;;) {
         callbacks->loop();
         ((REVOMINI::REVOMINIScheduler *)scheduler)->loop(); // to execute stats in main loop
+//        ((REVOMINI::REVOMINIRCInput *)rcin)->loop(); // to execute debug in main loop
     }
 }
 
@@ -187,7 +189,7 @@ void HAL_REVOMINI::lateInit(){
     
     //((REVOMINI::REVOMINIRCOutput *)rcout)->lateInit(_motor_layout); // 2nd stage - now with loaded parameters
 //    REVOMINIRCOutput::lateInit(_motor_layout); // 2nd stage - now with loaded parameters
-    REVOMINIRCOutput::lateInit(0); // 2nd stage - now with loaded parameters
+    REVOMINIRCOutput::lateInit(1); // 2nd stage - now with loaded parameters
 }
 
 //const HAL_REVOMINI AP_HAL_REVOMINI;

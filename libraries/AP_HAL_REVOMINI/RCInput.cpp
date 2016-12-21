@@ -31,8 +31,8 @@ extern pulse_buffer pulses; // PPM data from interrupt
 #define MINONWIDTH 950
 #define MAXONWIDTH 2075
 // PATCH FOR FAILSAFE AND FRSKY
-#define MINOFFWIDTH 1000
-#define MAXOFFWIDTH 22000
+//#define MINOFFWIDTH 1000
+//#define MAXOFFWIDTH 22000
 
 #define MINCHECK 900
 #define MAXCHECK 2100
@@ -80,7 +80,9 @@ bool REVOMINIRCInput::_override_valid;
 
 unsigned int REVOMINIRCInput::ppm_sum_channel=0;
 
-bool REVOMINIRCInput::is_PPM = true;;
+bool REVOMINIRCInput::is_PPM = true;
+
+uint32_t REVOMINIRCInput::hist[257];
 
 
 /* constrain captured pulse to be between min and max pulsewidth. */
@@ -135,30 +137,62 @@ bool REVOMINIRCInput::_process_ppmsum_pulse(uint16_t value)
     }
 }
 
+void REVOMINIRCInput::addHist(uint32_t v){
+
+    
+    if(v>255) {
+        v=256;
+    }
+    hist[v]++;
+}
+
 
 void REVOMINIRCInput::parse_pulses(){
     while(!pb_is_empty(&pulses)){
         Pulse p = pb_remove(&pulses);
-        
+
+
+        addHist(p.low);
+        addHist(p.high);
+
+
         rxIntRC(p.low, p.high);
     }
 
 }
 
+/*
+void printBin(uint16_t v){
+    hal.console->printf(" v=");
 
+    for(uint16_t i=0;i<12;i++){
+        hal.console->printf("%d", v&1);
+        v>>=1;
+    }
+}
+*/
 
 /*
   process a SBUS input pulse of the given width
+  
+  pulses are captured on falling edge
+  
  */
+ 
+#if 1
 void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
 {
-    // convert to bit widths, allowing for up to 1usec error, assuming 100000 bps
-    uint16_t bits_s0 = (width_s0+1) / 10;
-    uint16_t bits_s1 = (width_s1+1) / 10;
+    // convert to bit widths, allowing for up to 1usec error, assuming 100000 bps - inverted
+    uint16_t bits_s0 = (width_s1+4) / 10;
+    uint16_t bits_s1 = (width_s0+4) / 10;
     uint16_t nlow;
 
     uint8_t byte_ofs = sbus_state.bit_ofs/12;
     uint8_t bit_ofs = sbus_state.bit_ofs%12;
+
+
+hal.console->printf("\np %d\\%d", bits_s0, bits_s1);
+
 
     if (bits_s0 == 0 || bits_s1 == 0) {
         // invalid data
@@ -169,6 +203,9 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
         // invalid data as last two bits must be stop bits
         goto reset;
     }
+
+
+hal.console->printf("\nb %d.%d",  byte_ofs,  bit_ofs);
 
     // pull in the high bits
     sbus_state.bytes[byte_ofs] |= ((1U<<bits_s0)-1) << bit_ofs;
@@ -183,10 +220,16 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
     bits_s1 -= nlow;
     sbus_state.bit_ofs += nlow;
 
+hal.console->printf(" v=%x",  sbus_state.bytes[byte_ofs]);
+
+
     if (sbus_state.bit_ofs == 25*12 && bits_s1 > 12) {
         // we have a full frame
         uint8_t bytes[25];
         uint8_t i;
+
+hal.console->printf("\ngot frame");
+
         for (i=0; i<25; i++) {
             // get inverted data
             uint16_t v = ~sbus_state.bytes[i];
@@ -196,6 +239,7 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
             }
             // check stop bits
             if ((v & 0xC00) != 0xC00) {
+hal.console->printf("\nbad stop at %d",  i);
                 goto reset;
             }
             // check parity
@@ -204,22 +248,27 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
                 parity ^= (v & (1U<<j))?1:0;
             }
             if (parity != (v&0x200)>>9) {
+hal.console->printf("\nbad CS at %d",  i);
                 goto reset;
             }
             bytes[i] = ((v>>1) & 0xFF);
         }
+
+hal.console->printf("\nframe OK");
+
         uint16_t values[REVOMINI_RC_INPUT_NUM_CHANNELS];
         uint16_t num_values=0;
         bool sbus_failsafe=false, sbus_frame_drop=false;
-        
+
+
         if (sbus_decode(bytes, values, &num_values,
                         &sbus_failsafe, &sbus_frame_drop,
                         REVOMINI_RC_INPUT_NUM_CHANNELS) &&
-                        num_values >= REVOMINI_RC_INPUT_MIN_CHANNELS) {
+            num_values >= REVOMINI_RC_INPUT_MIN_CHANNELS) 
+        {
             for (i=0; i<num_values; i++) {
                 _dsm_val[i] = values[i];
             }
-            
             _valid_channels = num_values;
             if (!sbus_failsafe) {
                 _got_dsm = true;
@@ -234,6 +283,138 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
 reset:
     memset(&sbus_state, 0, sizeof(sbus_state));
 }
+
+#else
+
+void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
+{
+    // convert to bit widths, assuming 100000 bps
+    uint16_t bits_s0 = (width_s0+4) / 10;
+    uint16_t bits_s1 = (width_s1+4) / 10;
+
+hal.console->printf("\np %d\\%d", bits_s0, bits_s1);
+
+    uint8_t byte_ofs = sbus_state.bit_ofs/12;
+    uint8_t bit_ofs = sbus_state.bit_ofs%12;
+
+    if (bits_s0 == 0 || bits_s1 == 0) {
+        // invalid data
+        goto reset;
+    }
+
+    if(bits_s1 > 10) { // can't be so long 1, max is start+8data+parity=10
+        goto reset;
+    }
+
+hal.console->printf("\nb %d.%d",  byte_ofs,  bit_ofs);
+
+
+    if(sbus_state.bit_ofs>0) {// don't capture anything before start bit of 1st byte
+
+        // SBUS is inverted serial so if we got falling edge it is CAN be start bit of 1st byte, when 0 state time is a garbage
+        if(bits_s0 + bit_ofs < 20) { // protocol is asyncronous so we CAN got here start bit of next byte
+//  0xff bytes are transmitted as s00000000pp s00000000pp where s is start bit=1 and p is stop bit=0,
+// so there is NO interrupts besides start bits - histogramm shows a lot of 10-bit intervals
+// so just assume that next byte is not so far
+
+            uint16_t ones = bits_s0;
+            if (ones+bit_ofs >= 12) {
+                uint16_t ones = 12 - bit_ofs; // remaining bytes
+hal.console->printf(" r ");
+            }
+        
+            // pull in the high bits
+            sbus_state.bytes[byte_ofs] |= ((1U<<ones)-1) << bit_ofs;
+            sbus_state.bit_ofs += ones;
+
+
+            if(bits_s0 >= ones){
+                bits_s0 -= ones; // remaining time of 0 state - gap between bytes
+if(bits_s0) hal.console->printf(" gap=%d ones=%d",  bits_s0, ones);
+            }
+    
+        }  else {
+            // huge gap is just frame gap
+hal.console->printf(" gap=%d",  bits_s0);
+            memset(&sbus_state, 0, sizeof(sbus_state)); // reset on inter-frame gap
+        }
+    }
+
+
+//printBin(sbus_state.bytes[byte_ofs]);
+hal.console->printf(" v=%x",  sbus_state.bytes[byte_ofs]);
+
+
+    // pull in the low bits (1 on wire)
+    sbus_state.bit_ofs += bits_s1;
+
+    if (sbus_state.bit_ofs > (25*12 + 11) ) { // overflow - one byte more
+hal.console->printf("\noverflow =%d",  sbus_state.bit_ofs);
+
+        goto reset;
+    
+            // we just got last byte, on protocol it is should be 0 so we got 9 bits
+    }else if ( sbus_state.bit_ofs >= (24*12 + 9) && sbus_state.bit_ofs <= (25*12 + 11)) {
+
+hal.console->printf("\ngot frame");
+
+        // we have a full frame
+        uint8_t bytes[25];
+        uint8_t i;
+        for (i=0; i<25; i++) {
+            // get data
+            uint16_t v = sbus_state.bytes[i];
+            // check start bit
+            if ((v & 1) != 0) {
+                goto reset;
+            }
+            // check stop bits
+            if ((v & 0xC00) != 0xC00) {
+hal.console->printf("\nbad stop at %d",  i);
+                goto reset;
+            }
+            // check parity
+            uint8_t parity = 0, j;
+            for (j=1; j<=8; j++) {
+                parity ^= (v & (1U<<j))?1:0;
+            }
+            if (parity != (v & 0x200)>>9) {
+hal.console->printf("\nbad CS at %d",  i);
+
+                goto reset;
+            }
+            bytes[i] = ((v>>1) & 0xFF);
+        }
+        uint16_t values[REVOMINI_RC_INPUT_NUM_CHANNELS];
+        uint16_t num_values=0;
+        bool sbus_failsafe=false, sbus_frame_drop=false;
+
+hal.console->printf("\nframe OK");
+        
+        if (sbus_decode(bytes, values, &num_values,
+                        &sbus_failsafe, &sbus_frame_drop,
+                        REVOMINI_RC_INPUT_NUM_CHANNELS) &&
+                        num_values >= REVOMINI_RC_INPUT_MIN_CHANNELS) {
+
+            for (i=0; i<num_values; i++) {
+                _dsm_val[i] = values[i];
+            }
+            
+            _valid_channels = num_values;
+            if (!sbus_failsafe) {
+                _got_dsm = true;
+            }
+        }
+        goto reset;
+    }
+    return;
+reset:
+hal.console->printf("\nreset");
+
+    memset(&sbus_state, 0, sizeof(sbus_state));
+}
+#endif
+
 
 void REVOMINIRCInput::_process_dsm_pulse(uint16_t width_s0, uint16_t width_s1)
 {

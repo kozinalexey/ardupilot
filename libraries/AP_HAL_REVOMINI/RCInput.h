@@ -99,11 +99,15 @@ private:
 
     // state of add_sbus_input
     static struct SBUS {
-        uint8_t frame[25];
+        uint8_t frame[26];
         uint8_t partial_frame_count;
         uint32_t last_input_ms;
     } sbus;
     
+    
+    static uint32_t hist[257];
+    
+    static void addHist(uint32_t v);
 };
 
 #endif // __AP_HAL_REVOMINI_RCINPUT_H__

@@ -90,7 +90,7 @@ static const uint8_t * const revo_motor_map[]={
     output_channels_servo,
 };
 
-static const uint8_t *output_channels = output_channels_arducopter;  // current pin assignment
+static const uint8_t *output_channels = output_channels_openpilot;  // current pin assignment
 
 
 
