@@ -44,10 +44,10 @@ private:
     uint16_t df_NumPages;
 
  // Select device 
-    void cs_assert(){    hal.gpio->write(DF_RESET,0); }
+    bool cs_assert();
 
     // Deselect device
-    void cs_release(){   hal.gpio->write(DF_RESET,1); }
+    void cs_release();
     
     uint8_t spi_read(void);
     void spi_write(uint8_t data);

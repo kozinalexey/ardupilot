@@ -31,7 +31,7 @@ public:
     bool rc_bind(int dsmMode) override;
     
 private:
-    static void rxIntRC(uint16_t value0, uint16_t value1);
+    static void rxIntRC(uint16_t value0, uint16_t value1, bool state);
     static bool _process_ppmsum_pulse(uint16_t value);
     static void _process_dsm_pulse(uint16_t width_s0, uint16_t width_s1);
     static void _process_sbus_pulse(uint16_t width_s0, uint16_t width_s1);

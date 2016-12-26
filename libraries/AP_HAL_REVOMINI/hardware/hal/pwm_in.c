@@ -297,14 +297,25 @@ struct PWM_State  {
 	        input->lower = time;
 	        input->state = 1;
 
+
+                Pulse p={
+                    .length  = time, 
+                    .state = 0//           was 0
+                };
+
+                if(!pb_is_full(&pulses)){
+                    pb_insert(&pulses, p);
+                }
+
+
 	        TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling; // reprogram timer to falling
 	    } else  {               // falling edge
 	        input->upper = time;
 	        input->state = 0;
 
                 Pulse p={
-                    .low  = input->lower>>1, // in ms
-                    .high = input->upper>>1
+                    .length  = time, 
+                    .state = 1 //       was 1
                 };
 
                 if(!pb_is_full(&pulses)){

@@ -45,8 +45,8 @@ typedef void (*rcc_clockcmd)(uint32_t, FunctionalState);
 #endif
 
 typedef struct PULSE {
-    uint16_t low;
-    uint16_t high;
+    uint16_t length;
+    bool state;
 } Pulse;
 
 
@@ -60,7 +60,7 @@ struct PWM_State  {
         uint32_t last_pulse;
 };
 
-struct TIM_Channel    {
+struct TIM_Channel {
         TIM_TypeDef * tim;
         uint32_t tim_clk;
         rcc_clockcmd tim_clkcmd;

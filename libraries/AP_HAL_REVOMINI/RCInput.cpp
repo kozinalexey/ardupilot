@@ -94,20 +94,6 @@ static inline uint16_t constrain_pulse(uint16_t p) {
 
 
 
-void REVOMINIRCInput::rxIntRC(uint16_t value0, uint16_t value1)
-{
-
-    if(!_process_ppmsum_pulse(value0 + value1) ) {
-
-        // try treat as SBUS
-        _process_sbus_pulse(value0, value1);
-
-        // try treat as DSM
-        _process_dsm_pulse(value0, value1);
-    }
-}
-
-
 bool REVOMINIRCInput::_process_ppmsum_pulse(uint16_t value)
 {
     static uint8_t channel_ctr;
@@ -147,16 +133,37 @@ void REVOMINIRCInput::addHist(uint32_t v){
 }
 
 
+void REVOMINIRCInput::rxIntRC(uint16_t value0, uint16_t value1, bool state)
+{
+
+    if(state) { // falling
+        if(!_process_ppmsum_pulse( (value0 + value1) >>1 ) ) {
+
+            // try treat as DSM
+            _process_dsm_pulse(value0>>1, value1>>1);
+        }
+    } else { // rising
+            // try treat as SBUS
+            _process_sbus_pulse(value1>>1, value0>>1); // was 0 so now is length of 0, last is a length of 1
+    }
+}
+
+
+
+
 void REVOMINIRCInput::parse_pulses(){
+    static Pulse last_p={0,0};
+    
     while(!pb_is_empty(&pulses)){
         Pulse p = pb_remove(&pulses);
 
-
+/*
         addHist(p.low);
         addHist(p.high);
+*/
 
-
-        rxIntRC(p.low, p.high);
+        rxIntRC(last_p.length, p.length, p.state);
+        last_p = p;
     }
 
 }
@@ -183,63 +190,67 @@ void printBin(uint16_t v){
 void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
 {
     // convert to bit widths, allowing for up to 1usec error, assuming 100000 bps - inverted
-    uint16_t bits_s0 = (width_s1+4) / 10;
-    uint16_t bits_s1 = (width_s0+4) / 10;
-    uint16_t nlow;
+    uint16_t bits_s0 = (width_s0+4) / 10;
+    uint16_t bits_s1 = (width_s1+4) / 10;
 
     uint8_t byte_ofs = sbus_state.bit_ofs/12;
     uint8_t bit_ofs = sbus_state.bit_ofs%12;
+    uint16_t nlow;
+
+hal.console->printf("\np %d\\%d", bits_s1, bits_s0);
 
 
-hal.console->printf("\np %d\\%d", bits_s0, bits_s1);
-
-
-    if (bits_s0 == 0 || bits_s1 == 0) {
+    if (bits_s1 == 0 || bits_s0 == 0) {
         // invalid data
+hal.console->printf("\nreset 0");
         goto reset;
     }
-
-    if (bits_s0+bit_ofs > 10) {
-        // invalid data as last two bits must be stop bits
-        goto reset;
-    }
-
 
 hal.console->printf("\nb %d.%d",  byte_ofs,  bit_ofs);
 
+    if (bits_s1+bit_ofs > 10) { // invalid data as last two bits must be stop bits
+hal.console->printf("\nreset 1");
+        goto reset;
+    }
+    
+    // pulses stored at falling edge so zero bits are first!
+    
+    
+
     // pull in the high bits
-    sbus_state.bytes[byte_ofs] |= ((1U<<bits_s0)-1) << bit_ofs;
-    sbus_state.bit_ofs += bits_s0;
-    bit_ofs += bits_s0;
+    sbus_state.bytes[byte_ofs] |= ((1U<<bits_s1)-1) << bit_ofs;
+    sbus_state.bit_ofs += bits_s1;
+    bit_ofs += bits_s1;
 
     // pull in the low bits
-    nlow = bits_s1;
+    nlow = bits_s0;
     if (nlow + bit_ofs > 12) {
         nlow = 12 - bit_ofs;
     }
-    bits_s1 -= nlow;
+    bits_s0 -= nlow;
     sbus_state.bit_ofs += nlow;
 
 hal.console->printf(" v=%x",  sbus_state.bytes[byte_ofs]);
 
-
-    if (sbus_state.bit_ofs == 25*12 && bits_s1 > 12) {
+    if (sbus_state.bit_ofs == 25*12 && bits_s0 > 12) { // all frame got and was gap
         // we have a full frame
         uint8_t bytes[25];
-        uint8_t i;
+        uint16_t i;
 
 hal.console->printf("\ngot frame");
 
         for (i=0; i<25; i++) {
             // get inverted data
             uint16_t v = ~sbus_state.bytes[i];
-            // check start bit
-            if ((v & 1) != 0) {
+    
+            if ((v & 1) != 0) {        // check start bit
+hal.console->printf("\nreset 3");
                 goto reset;
             }
-            // check stop bits
-            if ((v & 0xC00) != 0xC00) {
+            
+            if ((v & 0xC00) != 0xC00) {// check stop bits
 hal.console->printf("\nbad stop at %d",  i);
+hal.console->printf("\nreset 4");
                 goto reset;
             }
             // check parity
@@ -249,6 +260,7 @@ hal.console->printf("\nbad stop at %d",  i);
             }
             if (parity != (v&0x200)>>9) {
 hal.console->printf("\nbad CS at %d",  i);
+hal.console->printf("\nreset 5");
                 goto reset;
             }
             bytes[i] = ((v>>1) & 0xFF);
@@ -275,12 +287,15 @@ hal.console->printf("\nframe OK");
             }
         }
         goto reset;
-    } else if (bits_s1 > 12) {
+    } else if (bits_s0 > 12) {
         // break
+hal.console->printf("\nreset 6");
         goto reset;
     }
     return;
 reset:
+
+
     memset(&sbus_state, 0, sizeof(sbus_state));
 }
 
@@ -445,6 +460,7 @@ void REVOMINIRCInput::_process_dsm_pulse(uint16_t width_s0, uint16_t width_s1)
     dsm_state.bytes[byte_ofs] |= ((1U<<nbits)-1) << bit_ofs;
     dsm_state.bit_ofs += nbits;
     bit_ofs += nbits;
+
 
     if (bits_s0 - nbits > 10) {
         if (dsm_state.bit_ofs == 16*10) {

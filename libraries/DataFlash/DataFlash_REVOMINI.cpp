@@ -57,6 +57,19 @@ uint8_t DataFlash_REVOMINI::spi_read(void) { uint8_t b;  _spi->transfer(NULL,0, 
 void DataFlash_REVOMINI::spi_write(uint8_t b) {  _spi->transfer(&b,1, NULL, 0);  }
 
 
+bool DataFlash_REVOMINI::cs_assert(){    
+    if (!_sem_take(50))
+        return false;
+
+    hal.gpio->write(DF_RESET,0); 
+    return true; 
+}
+
+void DataFlash_REVOMINI::cs_release(){   
+    hal.gpio->write(DF_RESET,1); 
+
+    _spi_sem->give();
+}
 
 /*
   try to take a semaphore safely from both in a timer and outside
@@ -103,10 +116,8 @@ void DataFlash_REVOMINI::Init(void)
 // This function is mainly to test the device
 void DataFlash_REVOMINI::ReadManufacturerID()
 {
-    if (!_sem_take(5))
-        return;
     // activate dataflash command decoder
-    cs_assert();
+    if (!cs_assert()) return;
 
     // Read manufacturer and ID command...
     spi_write(JEDEC_DEVICE_ID); //
@@ -118,8 +129,6 @@ void DataFlash_REVOMINI::ReadManufacturerID()
 
     // release SPI bus for use by other sensors
     cs_release();
-
-    _spi_sem->give();
 }
 
 // This function return 1 if Card is inserted on SD slot
@@ -135,7 +144,7 @@ uint8_t DataFlash_REVOMINI::ReadStatusReg()
     uint8_t tmp;
 
     // activate dataflash command decoder
-    cs_assert();
+    if (!cs_assert()) return JEDEC_STATUS_BUSY;
 
     // Read status command
     spi_write(JEDEC_READ_STATUS);
@@ -179,7 +188,7 @@ void DataFlash_REVOMINI::WaitReady()
 void DataFlash_REVOMINI::Flash_Jedec_WriteEnable(void)
 {
     // activate dataflash command decoder
-    cs_assert();
+    if (!cs_assert()) return;
 
     spi_write(JEDEC_WRITE_ENABLE);
 
@@ -188,8 +197,6 @@ void DataFlash_REVOMINI::Flash_Jedec_WriteEnable(void)
 
 void DataFlash_REVOMINI::BufferToPage (uint32_t IntPageAdr)
 {
-    if (!_sem_take(1))
-        return;
     uint8_t *pData = BlockBuffer;
 
     uint8_t cmd[4];
@@ -200,16 +207,15 @@ void DataFlash_REVOMINI::BufferToPage (uint32_t IntPageAdr)
 
     Flash_Jedec_WriteEnable();
 
-    cs_assert();
-
+    if (!cs_assert()) return;
     _spi->transfer(cmd, sizeof(cmd),NULL, 0);
 
     _spi->transfer((uint8_t *)pData, sizeof(BlockBuffer), NULL, 0);
 
     // release SPI bus for use by other sensors
     cs_release();
+
     WaitReady();
-    _spi_sem->give();
 }
 
 // Write block of data to temporary buffer
@@ -227,11 +233,8 @@ void DataFlash_REVOMINI::BlockWrite (uint32_t BufferIdx, const void *pHeader, ui
 
 bool DataFlash_REVOMINI::BlockRead (uint32_t IntPageAdr, void *pBuffer, uint16_t size)
 {
-    if (!_sem_take(1))
-        return false;
-
     // activate dataflash command decoder
-    cs_assert();
+    if (!cs_assert()) return false;
 
     uint8_t cmd[4];
     cmd[0] = JEDEC_READ_DATA;
@@ -248,7 +251,6 @@ bool DataFlash_REVOMINI::BlockRead (uint32_t IntPageAdr, void *pBuffer, uint16_t
     // release SPI bus for use by other sensors
     cs_release();
 
-    _spi_sem->give();
     return true;
 }
 
@@ -260,6 +262,7 @@ bool DataFlash_REVOMINI::BlockRead (uint32_t IntPageAdr, void *pBuffer, uint16_t
 void DataFlash_REVOMINI::Flash_Jedec_EraseSector(uint32_t chip_offset)
 {
     uint8_t cmd[4];
+
     cmd[0] = sector_erase;
     cmd[1] = (chip_offset >> 16) & 0xff;
     cmd[2] = (chip_offset >>  8) & 0xff;
@@ -267,12 +270,11 @@ void DataFlash_REVOMINI::Flash_Jedec_EraseSector(uint32_t chip_offset)
 
     Flash_Jedec_WriteEnable();
 
-    cs_assert();
+    if (!cs_assert()) return;
 
     _spi->transfer(cmd, sizeof(cmd), NULL, 0);
 
     cs_release();
-
 }
 
 // *** END OF INTERNAL FUNCTIONS ***
