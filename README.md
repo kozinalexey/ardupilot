@@ -9,7 +9,7 @@
 * stack now in CCM memory
 * PPM and PWM inputs works via Timer's driver handlers
 * added DSM and SBUS parsing on PPM input
-* high-frequency (8kHz) advancel scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
+* high-frequency (8kHz) advanced scheduler, common for all needs, capable to use semaphores with (optional) performance statistics
 * all hardware description tables are now 'const' and locates in flash
 * more reliable reset for I2C bus on hangups
 * all drivers support set_retries()
@@ -26,6 +26,9 @@
 * removed unused files from "wirish" folder
 * ...
 * a lot of minor enhancements
+
+[![Russian thread](http://www.ykoctpa.ru/groups/eye-in-a-sky/forum/topic/ardupilot-na-platax-openpilot-revolution-revomini/)
+
 
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ArduPilot/ardupilot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

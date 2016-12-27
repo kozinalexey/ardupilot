@@ -197,19 +197,19 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
     uint8_t bit_ofs = sbus_state.bit_ofs%12;
     uint16_t nlow;
 
-hal.console->printf("\np %d\\%d", bits_s1, bits_s0);
+//hal.console->printf("\np %d\\%d", bits_s0, bits_s1);
 
 
     if (bits_s1 == 0 || bits_s0 == 0) {
         // invalid data
-hal.console->printf("\nreset 0");
+//hal.console->printf("\nreset 0");
         goto reset;
     }
 
-hal.console->printf("\nb %d.%d",  byte_ofs,  bit_ofs);
+//hal.console->printf("\nb %d.%d",  byte_ofs,  bit_ofs);
 
     if (bits_s1+bit_ofs > 10) { // invalid data as last two bits must be stop bits
-hal.console->printf("\nreset 1");
+//hal.console->printf("\nreset 1");
         goto reset;
     }
     
@@ -230,27 +230,26 @@ hal.console->printf("\nreset 1");
     bits_s0 -= nlow;
     sbus_state.bit_ofs += nlow;
 
-hal.console->printf(" v=%x",  sbus_state.bytes[byte_ofs]);
+//hal.console->printf(" v=%x",  sbus_state.bytes[byte_ofs]);
 
     if (sbus_state.bit_ofs == 25*12 && bits_s0 > 12) { // all frame got and was gap
         // we have a full frame
         uint8_t bytes[25];
         uint16_t i;
 
-hal.console->printf("\ngot frame");
+//hal.console->printf("\ngot frame");
 
         for (i=0; i<25; i++) {
             // get inverted data
             uint16_t v = ~sbus_state.bytes[i];
     
             if ((v & 1) != 0) {        // check start bit
-hal.console->printf("\nreset 3");
+//hal.console->printf("\nreset 3");
                 goto reset;
             }
             
             if ((v & 0xC00) != 0xC00) {// check stop bits
-hal.console->printf("\nbad stop at %d",  i);
-hal.console->printf("\nreset 4");
+//hal.console->printf("\nreset 4 %d", i);
                 goto reset;
             }
             // check parity
@@ -259,8 +258,7 @@ hal.console->printf("\nreset 4");
                 parity ^= (v & (1U<<j))?1:0;
             }
             if (parity != (v&0x200)>>9) {
-hal.console->printf("\nbad CS at %d",  i);
-hal.console->printf("\nreset 5");
+//hal.console->printf("\nreset 5  %d", i);
                 goto reset;
             }
             bytes[i] = ((v>>1) & 0xFF);
@@ -286,16 +284,17 @@ hal.console->printf("\nframe OK");
                 _got_dsm = true;
             }
         }
-        goto reset;
-    } else if (bits_s0 > 12) {
+        goto reset_ok;
+    } else if (bits_s0 > 12) { // Was gap but not full frame
         // break
-hal.console->printf("\nreset 6");
+//hal.console->printf("\nreset 6");
         goto reset;
     }
     return;
 reset:
+    hal.console->printf("\nreset");
 
-
+reset_ok:
     memset(&sbus_state, 0, sizeof(sbus_state));
 }
 

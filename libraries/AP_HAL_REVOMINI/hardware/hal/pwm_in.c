@@ -46,7 +46,7 @@ see https://github.com/mahowik/MahoRotorF4-Discovery/blob/master/src/drv/drv_pwm
 #define MINOFFWIDTH 1000 * 2
 #define MAXOFFWIDTH 22000 * 2
 
-#define PULSES_QUEUE_SIZE 40 // 2 full frames by 20 each
+#define PULSES_QUEUE_SIZE 25*12*2*2 // 2 full frames by 25 bytes each
 
 typedef void (*rcc_clockcmd)( uint32_t, FunctionalState);
 /**************** PWM INPUT **************************************/
