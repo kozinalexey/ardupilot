@@ -29,12 +29,16 @@
  *
  * FIXME this has no business being here
  */
-#define USER_ADDR_ROM 0x08005000
-#define USER_ADDR_RAM 0x20000C00
-#define STACK_TOP     0x20000800
+
+//#define USER_ADDR_ROM 0x08005000
+//#define USER_ADDR_RAM 0x20000C00
+//#define STACK_TOP     0x20000800
 
 extern void clock_gettime(uint32_t a1, void *a2);
 
+#ifndef IN_CCM
+#define IN_CCM  __attribute__((section("ccm")))
+#endif
 
 
 #ifdef ISR_PROF

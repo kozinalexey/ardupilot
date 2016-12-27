@@ -215,10 +215,10 @@ void REVOMINIScheduler::register_io_process(AP_HAL::MemberProc proc)
 {
     if(_num_io_proc>=REVOMINI_SCHEDULER_MAX_IO_PROCS) return;
 
-    _io_process[_num_io_proc]=proc;
 
     if(_num_io_proc==0) { // the 1st
         //        setup  loop
+        _io_process[_num_io_proc]=proc;
         start_task(NULL, do_io_process);
     } else {
         for (int i = 0; i < _num_io_proc; i++) {
@@ -226,8 +226,9 @@ void REVOMINIScheduler::register_io_process(AP_HAL::MemberProc proc)
                 return;
             }
         }
-    
+        _io_process[_num_io_proc]=proc;    
     }
+
     _num_io_proc++;
 }
 
@@ -497,7 +498,7 @@ void REVOMINIScheduler::_run_timers(){
 // ]
 
 
-//[ realization of cooperative multitasking
+//[ -------- realization of cooperative multitasking --------
 
 bool REVOMINIScheduler::adjust_stack(size_t stackSize)
 {  // Set main task stack size

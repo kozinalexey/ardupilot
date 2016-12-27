@@ -46,20 +46,19 @@ see https://github.com/mahowik/MahoRotorF4-Discovery/blob/master/src/drv/drv_pwm
 #define MINOFFWIDTH 1000 * 2
 #define MAXOFFWIDTH 22000 * 2
 
-#define PULSES_QUEUE_SIZE 25*12*2*2 // 2 full frames by 25 bytes each
+#define PULSES_QUEUE_SIZE (25*12*2*2) // 2 full frames by 25 bytes each
 
 typedef void (*rcc_clockcmd)( uint32_t, FunctionalState);
 /**************** PWM INPUT **************************************/
 
 // Forward declaration
 static inline void pwmIRQHandler(TIM_TypeDef *tim);
-static PWM_callback ppm_capture_callback = 0;
 
 static void pwmInitializeInput(uint8_t ppmsum);
 
 
 volatile pulse_buffer pulses;
-static Pulse pulse_mem[PULSES_QUEUE_SIZE];
+static Pulse IN_CCM pulse_mem[PULSES_QUEUE_SIZE];
 
 bool _is_ppmsum;
 
@@ -82,7 +81,7 @@ const struct TIM_Channel PWM_Channels[] =   {
 	uint8_t gpio_af_tim;
 */    
 
-    //CH1 also for PPMSUM
+    //CH1 also for PPMSUM / SBUS / DSM
 	    { // 0 RC_IN1
 		    TIM12,
 		    RCC_APB1Periph_TIM12,
@@ -186,34 +185,6 @@ const struct TIM_Channel PWM_Channels[] =   {
 struct PWM_State Inputs[PWM_CHANNELS];
 
 
-
-void attachPWMCaptureCallback( PWM_callback callback)
-{
-    ppm_capture_callback = callback;
-}
-
-/*
-static void pwm_tim8_handler(){
-    pwmIRQHandler(TIM8 );
-
-
-void TIM1_CC_IRQHandler(void) // ISR
-{
-    pwmIRQHandler(TIM1 );
-}
-
-
-void TIM8_CC_IRQHandler(void) // ISR
-{
-    if(timer8_capture_callback) timer8_capture_callback();
-}
-
-void TIM8_BRK_TIM12_IRQHandler(void) // ISR
-{
-    pwmIRQHandler(TIM12 );
-}
-*/
-
 static void pwmIRQHandler(TIM_TypeDef *tim){
 #ifdef ISR_PERF
     uint32_t t=systick_micros();
@@ -241,41 +212,12 @@ struct PWM_State  {
 
 	if (channel->tim == tim && (TIM_GetITStatus(tim, channel->tim_cc) == SET)) {
 	    TIM_ClearITPendingBit(channel->tim, channel->tim_cc);  // this is already done by timer's ISR handler
-	    val = TIM_GetCapture1(channel->tim);
+
+	    val = TIM_GetCapture1(channel->tim); // captured value
 
 	    input->last_pulse = systick_uptime();
         
             uint16_t time;
-
-#if 0 // something wrong 
-
-//            bool pv = (channel->gpio_port->IDR & channel->gpio_pin) !=0 ; // read pin state
-
-            if (val > input->last_val) {
-                time = val - input->last_val;
-            } else {
-                time = ((0xFFFF - input->last_val) + val)+1;
-            }
-	    input->last_val = val; // remember previous value
-            
-            if(input->state) { // was 1 so was falling edge - just remember        
-                input->upper = time;  // length of 1 state
-                input->state = 0;
-
-                channel->tim->CCMR1 = (channel->tim->CCMR1 & (uint16_t)~(TIM_CCER_CC1P | TIM_CCER_CC1NP) ) | TIM_CCER_CC1P; // positive
-
-                // on falling edge parse data
-	        if (ppm_capture_callback) {
-		    ppm_capture_callback(0, input->lower >> 1, input->upper >> 1);
-	        }
-            }else {  // was 0 so was raising edge
-	        input->lower = time;  // length of 0 state
-	        input->state = 1;
-
-                channel->tim->CCMR1 = (channel->tim->CCMR1 & (uint16_t)~(TIM_CCER_CC1P | TIM_CCER_CC1NP) ) | TIM_CCER_CC1NP; // Negative
-            }       
-#endif
-#if 1 // testing
 
             TIM_ICInitTypeDef TIM_ICInitStructure;
 
@@ -283,8 +225,6 @@ struct PWM_State  {
             TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
             TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
 	    TIM_ICInitStructure.TIM_ICFilter = 0x0;
-	    TIM_ICInit(channel->tim, &TIM_ICInitStructure);
-
 
             if (val > input->last_val)  {
                 time = val - input->last_val;
@@ -293,57 +233,30 @@ struct PWM_State  {
             }
             input->last_val = val;
 
+
+            Pulse p={
+                .length  = time, 
+                .state = input->state
+            };
+
+            if(!pb_is_full(&pulses)){ // save pulse length and state
+                pb_insert(&pulses, p);
+            }
+
+
 	    if (input->state == 0) { // rising edge
-	        input->lower = time;
 	        input->state = 1;
-
-
-                Pulse p={
-                    .length  = time, 
-                    .state = 0//           was 0
-                };
-
-                if(!pb_is_full(&pulses)){
-                    pb_insert(&pulses, p);
-                }
-
 
 	        TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling; // reprogram timer to falling
 	    } else  {               // falling edge
-	        input->upper = time;
 	        input->state = 0;
-
-                Pulse p={
-                    .length  = time, 
-                    .state = 1 //       was 1
-                };
-
-                if(!pb_is_full(&pulses)){
-                    pb_insert(&pulses, p);
-                }
 	
 	        TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; // reprogram timer to raising
 	    }
 	    TIM_ICInit(channel->tim, &TIM_ICInitStructure);
-
-#endif
-#if 0 // works fine
-                    
-            if (val > input->last_val)  {
-                time = val - input->last_val;
-            } else  {
-                time = ((0xFFFF - input->last_val) + val)+1;
-            }
-                
-            input->last_val = val;
-
-            if (ppm_capture_callback) {
-                ppm_capture_callback(input->state, 0, time >> 1);
-            }
-#endif
  
 	}
-    } else {
+    } else { // PWM
 
 
 	for (i = 0; i < PWM_CHANNELS; i++)  {
@@ -377,7 +290,6 @@ struct PWM_State  {
 	        TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	        TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
 	        TIM_ICInitStructure.TIM_ICFilter = 0x0;
-	        TIM_ICInit(channel->tim, &TIM_ICInitStructure);
 		
 		if (input->state == 0) { // rising edge
 		    input->lower = val;
@@ -488,7 +400,7 @@ static inline void pwmInitializeInput(uint8_t ppmsum){
 
 	const struct TIM_Channel *channel = &PWM_Channels[0];
 	
-	timer_attach_all_interrupts(TIMER12, pwmIRQHandler);
+	timer_attach_all_interrupts(TIMER12, pwmIRQHandler); // TIM8 and TIM12 share one IRQ so to use TIM12 without TIM8 we MUST use timer's triver
 	
 	// timer_reset ******************************************************************/
 	channel->tim_clkcmd(channel->tim_clk, ENABLE);

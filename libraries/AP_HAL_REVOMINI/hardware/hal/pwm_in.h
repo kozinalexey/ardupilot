@@ -37,7 +37,6 @@
 #include <stdbool.h>
 #include "timer.h"
 
-typedef void (*PWM_callback)(uint8_t state, uint16_t value0, uint16_t value1);
 typedef void (*rcc_clockcmd)(uint32_t, FunctionalState);
 
 #ifdef __cplusplus
@@ -94,8 +93,6 @@ extern struct PWM_State Inputs[];
 void pwmInit(bool ppmsum);
 
 
-void attachPWMCaptureCallback(PWM_callback callback);
-//void attachTimer8CaptureCallback(PWM_callback callback);
 extern bool _is_ppmsum;
 
 static inline uint16_t pwmRead(uint8_t channel, uint32_t *time){

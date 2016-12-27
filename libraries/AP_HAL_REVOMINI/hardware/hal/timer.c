@@ -148,8 +148,7 @@ const timer_dev timer8 = {
     .n_handlers   = NR_ADV_HANDLERS,
     .bus          = 1,
     .id           = 8,
-};
-/** Timer 8 device (advanced) */
+}; /** Timer 8 device (advanced) */
 
 TimerHandler tim12_handlers[NR_GEN_HANDLERS]={0};
 const timer_dev timer12 = {
@@ -161,10 +160,7 @@ const timer_dev timer12 = {
     .n_handlers   = NR_GEN_HANDLERS,
     .bus          = 0,
     .id           = 12,
-};
-/** Timer 12 device (general-purpose) */
-
-
+}; /** Timer 12 device (general-purpose) */
 
 const timer_dev * const TIMER1 = &timer1;
 const timer_dev * const TIMER2 = &timer2;
@@ -198,11 +194,6 @@ void timer_init(const timer_dev *dev) {
     else
 	RCC_APB1PeriphClockCmd(dev->clk, ENABLE);
 
-/*	if (dev->regs == TIM1 || dev->regs == TIM8 || dev->regs == TIM9 || dev->regs == TIM10 || dev->regs == TIM11)
-		RCC_APB2PeriphClockCmd(dev->clk, ENABLE);
-	else
-		RCC_APB1PeriphClockCmd(dev->clk, ENABLE);
-*/
 }
 
 /**
@@ -211,12 +202,7 @@ void timer_init(const timer_dev *dev) {
  */
 void timer_reset(const timer_dev *dev) {
     memset(dev->handlers, 0, dev->n_handlers * sizeof(TimerHandler));
-/*
-    if (dev->regs == TIM1 || dev->regs == TIM8 || dev->regs == TIM9 || dev->regs == TIM10 || dev->regs == TIM11)
-	RCC_APB2PeriphClockCmd(dev->clk, ENABLE);
-    else
-	RCC_APB1PeriphClockCmd(dev->clk, ENABLE);
-*/
+
     if(dev->bus)
     	RCC_APB2PeriphClockCmd(dev->clk, ENABLE);
     else
@@ -237,6 +223,7 @@ void timer_reset(const timer_dev *dev) {
 void timer_disable(const timer_dev *dev) {
     dev->regs->CR1 = 0;
     dev->regs->DIER = 0;
+
     switch (dev->type) {
     case TIMER_ADVANCED:        /* fall-through */
     case TIMER_GENERAL:
@@ -312,12 +299,11 @@ void timer_attach_interrupt(const timer_dev *dev, uint8_t interrupt, TimerHandle
     enable_irq(dev, interrupt, priority);
 }
 
+// attach all timer's interrupts to one handler - for PWM/PPM input
 void timer_attach_all_interrupts(const timer_dev *dev,  TimerHandler handler) {
     uint16_t i;
     for(i=0; i < dev->n_handlers; i++) {
         dev->handlers[i] = handler;
-//        timer_enable_irq(dev, interrupt); individually
-//        enable_irq(dev, interrupt);
     }
 }
 
@@ -396,7 +382,7 @@ void TIM3_IRQHandler(void) {
 void TIM4_IRQHandler(void) {
     dispatch_general(TIMER4);
 }
-//*
+//
 void TIM5_IRQHandler(void) {
     dispatch_general(TIMER5);
 }
@@ -404,11 +390,12 @@ void TIM5_IRQHandler(void) {
 void TIM6_DAC_IRQHandler(void) {
     dispatch_basic(TIMER6);
 }
-//*/
+//
 void TIM7_IRQHandler(void) {
     dispatch_basic(TIMER7);
 }
-///* used in PWM
+
+// used in PWM
 void TIM8_BRK_TIM12_IRQHandler(void) { // used in PWM tim12
     dispatch_adv_brk(TIMER8);
     dispatch_general_h(TIMER12);
@@ -417,7 +404,7 @@ void TIM8_BRK_TIM12_IRQHandler(void) { // used in PWM tim12
 void TIM8_CC_IRQHandler(void) { // used in PWM tim8
     dispatch_adv_cc(TIMER8);
 }
-//*/
+//
 
 void TIM8_UP_TIM13_IRQHandler(void) { // not conflicts with PWM
     dispatch_adv_up(TIMER8);
@@ -427,7 +414,6 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void) {
     dispatch_adv_trg_com(TIMER8);
 }
 
-          
   
 /* Note: the following dispatch routines make use of the fact that
  * DIER interrupt enable bits and SR interrupt flags have common bit
@@ -584,26 +570,7 @@ static void disable_channel(const timer_dev *dev, uint8_t channel) {
 static void pwm_mode(const timer_dev *dev, uint8_t channel) {
     timer_disable_irq(dev, channel);
     timer_oc_set_mode(dev, channel, TIMER_OC_MODE_PWM_1, TIMER_OC_PE);
-/*
-    switch (channel)  {
-    case 1:
-	TIM_SelectOCxM(dev->regs, TIM_Channel_1, TIM_OCMode_PWM1);
-	TIM_OC1PreloadConfig(dev->regs, TIM_OCPreload_Enable);		
-	break;
-    case 2:
-	TIM_SelectOCxM(dev->regs, TIM_Channel_2, TIM_OCMode_PWM1);
-	TIM_OC2PreloadConfig(dev->regs, TIM_OCPreload_Enable);					
-	break;
-    case 3:
-	TIM_SelectOCxM(dev->regs, TIM_Channel_3, TIM_OCMode_PWM1);
-	TIM_OC3PreloadConfig(dev->regs, TIM_OCPreload_Enable);					
-	break;
-    case 4:
-	TIM_SelectOCxM(dev->regs, TIM_Channel_4, TIM_OCMode_PWM1);
-	TIM_OC4PreloadConfig(dev->regs, TIM_OCPreload_Enable);					
-	break;
-    }
-*/    
+
     timer_cc_enable(dev, channel);
 }
 
@@ -651,18 +618,6 @@ static void enable_advanced_irq(const timer_dev *dev, timer_interrupt_id id, uin
 }
 
 static void enable_nonmuxed_irq(const timer_dev *dev, uint8_t priority) {
-/*	if (dev->regs == TIM2)      NVIC_EnableIRQ(TIM2_IRQn);
-	else if (dev->regs == TIM3) NVIC_EnableIRQ(TIM3_IRQn);
-	else if (dev->regs == TIM4) NVIC_EnableIRQ(TIM4_IRQn);
-	else if (dev->regs == TIM5) NVIC_EnableIRQ(TIM5_IRQn);
-	else if (dev->regs == TIM6) NVIC_EnableIRQ(TIM6_DAC_IRQn);
-	else if (dev->regs == TIM7) NVIC_EnableIRQ(TIM7_IRQn);
-	else
-	{
-        assert_param(0);
-    }
-*/
-
     IRQn_Type irq;
 
     switch(dev->id){
@@ -672,6 +627,7 @@ static void enable_nonmuxed_irq(const timer_dev *dev, uint8_t priority) {
     case 5: irq=TIM5_IRQn; break;
     case 6: irq=TIM6_DAC_IRQn;  break;
     case 7: irq=TIM7_IRQn; break;
+    default: return;
     }
 
     NVIC_EnableIRQ(irq);

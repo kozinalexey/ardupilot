@@ -6,7 +6,9 @@
 /* Your layer exports should depend on AP_HAL.h ONLY. */
 #include <AP_HAL/AP_HAL.h>
 
+#ifndef IN_CCM
 #define IN_CCM  __attribute__((section("ccm")))
+#endif
 
 //#define  USE_SOFTSERIAL
 

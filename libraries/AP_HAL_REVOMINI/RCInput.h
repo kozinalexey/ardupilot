@@ -9,8 +9,11 @@
 #define REVOMINI_RC_INPUT_MIN_CHANNELS 4
 #define REVOMINI_RC_INPUT_NUM_CHANNELS 20
 
-
-
+enum BOARD_RC_MODE {
+    BOARD_RC_NONE=0,
+    BOARD_RC_SBUS,
+    BOARD_RC_DSM,
+};
 
 class REVOMINI::REVOMINIRCInput : public AP_HAL::RCInput {
 public:
@@ -104,10 +107,10 @@ private:
         uint32_t last_input_ms;
     } sbus;
     
+    static enum BOARD_RC_MODE _rc_mode;
     
-    static uint32_t hist[257];
-    
-    static void addHist(uint32_t v);
+//    static uint32_t hist[257]; // debugging
+//    static void addHist(uint32_t v);
 };
 
 #endif // __AP_HAL_REVOMINI_RCINPUT_H__
