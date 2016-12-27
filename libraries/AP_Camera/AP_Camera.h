@@ -10,7 +10,7 @@
 #include <AP_GPS/AP_GPS.h>
 #include <AP_AHRS/AP_AHRS.h>
 #include <AP_Mission/AP_Mission.h>
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4   || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 #include <drivers/drv_hrt.h>
 #endif
 
@@ -85,7 +85,7 @@ private:
     void            relay_pic();        // basic relay activation
     void            feedback_pin_timer();
     void            setup_feedback_callback(void);
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4  || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
     static void     capture_callback(void *context, uint32_t chan_index,
                                      hrt_abstime edge_time, uint32_t edge_state, uint32_t overflow);
 #endif

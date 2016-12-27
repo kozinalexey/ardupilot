@@ -65,6 +65,12 @@ void F4BYGPIO::pinMode(uint8_t pin, uint8_t output)
 	case F4BY_GPIO_D3_PIN:
 		ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, GPIO_EXT_3);
 		break;
+	case F4BY_GPIO_D4_PIN:
+		ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, GPIO_EXT_4);
+		break;
+	case F4BY_GPIO_D5_PIN:
+		ioctl(_gpio_fmu_fd, output?GPIO_SET_OUTPUT:GPIO_SET_INPUT, GPIO_EXT_5);
+		break;
     }
 }
 
@@ -104,6 +110,22 @@ uint8_t F4BYGPIO::read(uint8_t pin) {
             uint32_t relays = 0;
             ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
             return (relays & GPIO_EXT_3)?HIGH:LOW;
+        }
+#endif
+
+#ifdef GPIO_EXT_4
+        case F4BY_GPIO_D4_PIN:{
+            uint32_t relays = 0;
+            ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
+            return (relays & GPIO_EXT_4)?HIGH:LOW;
+        }
+#endif
+
+#ifdef GPIO_EXT_5
+        case F4BY_GPIO_D5_PIN:{
+            uint32_t relays = 0;
+            ioctl(_gpio_fmu_fd, GPIO_GET, (unsigned long)&relays);
+            return (relays & GPIO_EXT_5)?HIGH:LOW;
         }
 #endif
 
@@ -200,6 +222,19 @@ void F4BYGPIO::write(uint8_t pin, uint8_t value)
             ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, GPIO_EXT_3);
             break;
 #endif
+
+#ifdef GPIO_EXT_4
+        case F4BY_GPIO_D4_PIN:
+            ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, GPIO_EXT_4);
+            break;
+#endif
+
+#ifdef GPIO_EXT_5
+        case F4BY_GPIO_D5_PIN:
+            ioctl(_gpio_fmu_fd, value==LOW?GPIO_CLEAR:GPIO_SET, GPIO_EXT_5);
+            break;
+#endif
+
 
 #ifdef F4BYIO_P_SETUP_RELAYS_POWER1
         case F4BY_GPIO_EXT_IO_RELAY1_PIN:
