@@ -5,7 +5,7 @@
 #include <AP_Math/AP_Math.h>
 #include <RC_Channel/RC_Channel.h>
 #include <AP_HAL/AP_HAL.h>
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4  || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 #include <drivers/drv_input_capture.h>
 #include <drivers/drv_pwm_output.h>
 #include <sys/types.h>
@@ -118,6 +118,7 @@ AP_Camera::servo_pic()
 void
 AP_Camera::relay_pic()
 {
+    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_WARNING, "Camera: relay command received\n");
     if (_relay_on) {
         _apm_relay->on(0);
     } else {
@@ -347,7 +348,7 @@ bool AP_Camera::check_trigger_pin(void)
     return false;
 }
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4  || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
 /*
   callback for timer capture on PX4
  */
@@ -393,6 +394,7 @@ void AP_Camera::setup_feedback_callback(void)
     }
 failed:
 #endif // CONFIG_HAL_BOARD
+
 
     if (!_timer_installed) {
         // install a 1kHz timer to check feedback pin

@@ -7,6 +7,8 @@
 #define F4BY_GPIO_D1_PIN				 70
 #define F4BY_GPIO_D2_PIN			     71
 #define F4BY_GPIO_D3_PIN				 72
+#define F4BY_GPIO_D4_PIN				 73
+#define F4BY_GPIO_D5_PIN				 74
 
 /*
   start servo channels used as GPIO at 50. Pin 50 is
