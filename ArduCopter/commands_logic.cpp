@@ -699,7 +699,7 @@ bool Copter::verify_payload_place()
 {
     const uint16_t hover_throttle_calibrate_time = 2000; // milliseconds
     const uint16_t descend_throttle_calibrate_time = 2000; // milliseconds
-    const float hover_throttle_placed_fraction = 0.8; // i.e. if throttle is less than 80% of hover we have placed
+    const float hover_throttle_placed_fraction = 0.7; // i.e. if throttle is less than 70% of hover we have placed
     const float descent_throttle_placed_fraction = 0.9; // i.e. if throttle is less than 90% of descent throttle we have placed
     const uint16_t placed_time = 500; // how long we have to be below a throttle threshold before considering placed
 
@@ -754,8 +754,8 @@ bool Copter::verify_payload_place()
         const float hover_throttle_delta = fabsf(nav_payload_place.hover_throttle_level - motors.get_throttle_hover());
         gcs_send_text_fmt(MAV_SEVERITY_INFO, "hover throttle delta: %f", static_cast<double>(hover_throttle_delta));
         nav_payload_place.state = PayloadPlaceStateType_Descending_Start;
-        // no break
         }
+        // no break
     case PayloadPlaceStateType_Descending_Start:
         nav_payload_place.descend_start_timestamp = now;
         nav_payload_place.descend_start_altitude = inertial_nav.get_altitude();
@@ -802,6 +802,8 @@ bool Copter::verify_payload_place()
             g2.gripper.release();
         } else {
             gcs_send_text_fmt(MAV_SEVERITY_INFO, "Gripper not valid");
+            nav_payload_place.state = PayloadPlaceStateType_Ascending_Start;
+            break;
         }
         nav_payload_place.state = PayloadPlaceStateType_Releasing;
         // no break
