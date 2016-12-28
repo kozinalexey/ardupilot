@@ -99,7 +99,7 @@ void REVOMINIAnalogSource::set_pin(uint8_t pin) {
             REVOMINIGPIO::_pinMode(pin, INPUT_ANALOG);
 	}
 	
-	if (pin != ANALOG_INPUT_NONE && pin < BOARD_NR_GPIO_PINS) {
+	if (pin == ANALOG_INPUT_REVOMINI_VCC || pin != ANALOG_INPUT_NONE &&  pin < BOARD_NR_GPIO_PINS) {
             const adc_dev *dev = _find_device();
 
             if(dev) {
