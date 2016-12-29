@@ -8,6 +8,24 @@
 #include "GPIO.h"
 #include <AP_Math/AP_Math.h>
 
+
+/*
+
+stats for Copter
+
+Scheduler stats:
+  % of full time: 24.56  Efficiency 0.957 
+delay times: in main 86.09 including in semaphore  0.00  in timer  4.89 in isr  0.00 
+Task times:
+task 0x808FFB1200074C4 tim      0.0 int 0.000% tot 0.0000% mean time   0.0
+task 0x8090BB1200074F0 tim    293.6 int 2.321% tot 0.5701% mean time   8.3
+task 0x808B07D200073E8 tim      1.8 int 0.014% tot 0.0035% mean time   0.9
+task 0x804206720009438 tim   1711.7 int 13.532% tot 3.3244% mean time 442.5
+task 0x804403720009900 tim   1845.0 int 14.586% tot 3.5834% mean time 632.1
+task 0x804AEDD200099F0 tim   8797.0 int 69.547% tot 17.0855% mean time 265.9
+
+*/
+
 using namespace REVOMINI;
 
 extern const AP_HAL::HAL& hal;
@@ -106,7 +124,8 @@ void REVOMINIScheduler::init()
     register_timer_task(10000000, FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::_set_10s_flag, bool), NULL);
 #endif
 
-    register_io_process(FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::stats_proc, void) );
+// for debug
+//    register_io_process(FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::stats_proc, void) );
 
 }
 
@@ -327,11 +346,11 @@ void REVOMINIScheduler::reboot(bool hold_in_bootloader) {
 
 void REVOMINIScheduler::loop(){    // executes in main thread
 
-    // _print_stats();
+     _print_stats();
 }
 
 void REVOMINIScheduler::stats_proc(void){
-    _print_stats();
+//    _print_stats(); only for debug
 
 }
 
@@ -581,6 +600,8 @@ bool REVOMINIScheduler::start_task(func_t taskSetup, func_t taskLoop, size_t sta
   return true;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-label"
 void REVOMINIScheduler::yield(uint16_t ttw) // time to work 
 {
     if(task_n==0) return;
@@ -602,7 +623,9 @@ void REVOMINIScheduler::yield(uint16_t ttw) // time to work
         return;
     }
     // begin of context switch
+#ifdef MTASK_PROF
     yield_time += stopwatch_getticks()-ticks; // time of setjmp
+#endif
 
 next:
     // Next task in run queue will continue
@@ -618,6 +641,8 @@ next:
     longjmp(s_running->context, true);
     // never comes here
 }
+#pragma GCC diagnostic pop
+
 
 size_t REVOMINIScheduler::task_stack(){
   unsigned char marker;

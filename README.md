@@ -44,6 +44,10 @@ Since this controller is intended primarily for very small aircraft, the followi
 
 If some of this is needed it can be enabled later
 
+Also, this HAL now is not compatible with LibMapple/ArduinoSTM32 ("wirish" folder) - all imported files are altered.
+
+Warning!!!
+EEPROM emulation in Flash cause periodic program hunging on time of sector erase! So never allow auto-save parameters like MOT_THST_HOVER - MOT_HOVER_LEARN should NOT be 2!
 
 If you like this project and want to support further development - you can do it! [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](htt
 ps://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SLUC8B3U7E7PS)USD

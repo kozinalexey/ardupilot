@@ -18,6 +18,24 @@
 #include "../STM32_USB_Driver/ring_buff.h"
 #include "../STM32_USB_Driver/min_max.h"
 
+
+
+
+#define USBD_MANUFACTURER_STRING        "RevoMini"
+#define USBD_PRODUCT_FS_STRING          "3DR Virtual COM"
+#define USBD_SERIALNUMBER_FS_STRING     "00000000050C"
+#define USBD_CONFIGURATION_FS_STRING    "VCP Config"
+#define USBD_INTERFACE_FS_STRING        "VCP Interface"
+  
+#define USBD_VID                        0x26ac
+#define USBD_PID                        0x0011
+#define USBD_LANGID_STRING              0x409
+    
+#define USB_RXFIFO_SIZE 256
+#define USB_TXFIFO_SIZE 256
+
+
+
 #define USB_IRQ		OTG_FS_IRQn
 #define USB_AF		GPIO_AF_OTG1_FS
 #define USB_CLOCK	RCC_AHB2Periph_OTG_FS
@@ -56,7 +74,7 @@ typedef struct {
 	char *interface;
 } usb_attr_t;
 
-#define I_USB_CLEAR			1
+#define I_USB_CLEAR		1
 #define I_USB_CONNECTED		2
 #define I_USB_GETATTR		3
 #define I_USB_SETATTR		4
@@ -126,6 +144,3 @@ void VCP_MarkWritten(unsigned sz);
 int usb_periphcfg(FunctionalState state);
 
 #endif
-/*----------------------------------------------------------------------------
- * end of file
- *---------------------------------------------------------------------------*/

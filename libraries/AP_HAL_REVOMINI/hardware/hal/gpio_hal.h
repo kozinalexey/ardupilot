@@ -1,8 +1,8 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
-//#include <exti.h>
 #include <stm32f4xx.h>
+#include <hal.h>
 
 
 /**
@@ -134,17 +134,17 @@ extern void gpio_set_mode(const gpio_dev* const dev, uint8_t pin, gpio_pin_mode 
  * Set or reset a GPIO pin. Pin must have previously been configured to output mode.
  * Enables the clock for and resets the given device.
  */
-extern void gpio_write_bit(const gpio_dev* const  dev, uint8_t pin, uint8_t val);
+// extern void gpio_write_bit(const gpio_dev* const  dev, uint8_t pin, uint8_t val);
 
 /**
  * Determine whether or not a GPIO pin is set. Pin must have previously been configured to input mode
  */
-extern uint8_t gpio_read_bit(const gpio_dev* const  dev, uint8_t pin);
+//extern uint8_t gpio_read_bit(const gpio_dev* const  dev, uint8_t pin);
 
 /**
  * Toggle a pin configured as output push-pull. 
  */
-extern void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin);
+//extern void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin);
 
 /**
  * Initialize the AFIO clock, and reset the AFIO registers. 
@@ -171,12 +171,12 @@ extern const gpio_dev * gpio_get_gpio_dev(uint8_t port);
 /**
  * Get a GPIO port’s corresponding afio_exti_port.
  */
-afio_exti_port gpio_exti_port(const gpio_dev* const dev);
+//afio_exti_port gpio_exti_port(const gpio_dev* const dev);
 
 /**
  * Select a source input for an external interrupt. 
  */
-void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port);
+//void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port);
 
 /**
  * Perform an alternate function remap. 
@@ -188,8 +188,74 @@ void afio_remap(const gpio_dev* const dev, uint8_t pin, afio_remap_peripheral re
  */
 void afio_cfg_debug_ports(afio_debug_cfg config);					
 
+inline void gpio_write_bit(const gpio_dev* const dev, uint8_t pin, uint8_t val)
+{
+	/* Check the parameters */
+    assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
+    assert_param(IS_GPIO_PIN_SOURCE(pin));
+    
+    if (val) {
+	dev->GPIOx->BSRRL = BIT(pin);
+    } else {
+	dev->GPIOx->BSRRH = BIT(pin);
+    }    
+}
+
+inline uint8_t gpio_read_bit(const gpio_dev* const dev, uint8_t pin)
+{
+    uint8_t bitstatus = 0x00;
+
+    /* Check the parameters */
+    assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
+    assert_param(IS_GPIO_PIN_SOURCE(pin));
+ 
+    if ((dev->GPIOx->IDR & BIT(pin)) != (uint32_t)Bit_RESET){
+	bitstatus = (uint8_t)Bit_SET;
+    } else {
+	bitstatus = (uint8_t)Bit_RESET;
+    }
+    return bitstatus;
+
+	
+}
+
+inline void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin)
+{
+	/* Check the parameters */
+    assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
+    assert_param(IS_GPIO_PIN_SOURCE(pin));
+    dev->GPIOx->ODR ^= BIT(pin);	
+}
+
+inline afio_exti_port gpio_exti_port(const gpio_dev* const dev)
+{
+	/* Check the parameters */
+    assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
+    return dev->exti_port;
+}
+
+
+inline void gpio_set_speed(const gpio_dev* const dev, uint8_t pin, GPIOSpeed_TypeDef gpio_speed){
+/* Speed mode configuration */
+    dev->GPIOx->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR0 << (pin * 2));
+    dev->GPIOx->OSPEEDR |=  ((uint32_t)(gpio_speed) << (pin * 2));
+}
+
+inline void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port)
+{
+	/* Check the parameters */
+	assert_param(IS_EXTI_PIN_SOURCE(exti));
+	assert_param(IS_EXTI_PORT_SOURCE(gpio_port));
+		
+	SYSCFG_EXTILineConfig(gpio_port, exti);
+}
+
+
+
+
 #ifdef __cplusplus
   }
 #endif
  
 #endif
+

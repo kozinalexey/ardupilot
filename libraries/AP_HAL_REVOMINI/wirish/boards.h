@@ -120,24 +120,6 @@ extern void pre_init(void);
 #endif
 
 
-/* Include the appropriate private header from boards/: */
-
-/* FIXME HACK put boards/ before these paths once IDE uses make. */
-/*
-#if defined(BOARD_laserlab_MP32V1F1)
-#include "laserlab_MP32V1F1.h"
-#elif defined(BOARD_laserlab_MP32V3F1)
-#include "laserlab_MP32V3F1.h"
-#elif defined(BOARD_laserlab_MP32V1F4)
-#include "laserlab_MP32V1F4.h"
-#elif defined(BOARD_revomini_MP32V1F4)
-#include "revomini_MP32V1F4.h"
-#else
-
-#error "Board type has not been selected correctly."
-#endif
-*/
-
 #ifndef BOARD_NR_GPIO_PINS
 #error "Board type has not been selected correctly."
 #endif

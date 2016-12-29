@@ -34,8 +34,8 @@ typedef enum {
 } SchedState;
 
 
-#define SHED_PROF // profiling
-#define MTASK_PROF
+// #define SHED_PROF // profiling
+// #define MTASK_PROF
 
 typedef struct RevoTimer {
     uint32_t period;
@@ -225,7 +225,7 @@ private:
     static void _run_timers(void);
 
     void _print_stats();
-    void REVOMINIScheduler::stats_proc(void);
+    void stats_proc(void);
     
 #ifdef SHED_PROF
     static uint64_t shed_time;

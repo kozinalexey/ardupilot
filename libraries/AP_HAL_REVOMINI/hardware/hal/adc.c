@@ -21,7 +21,7 @@ const adc_dev const _adc3 = {
 /** ADC3 device. */
 const adc_dev* const _ADC3 = &_adc3;
 
-__IO uint16_t 	ADC_ConvertedValue, T_StartupTimeDelay;
+__IO uint16_t 	ADC_ConvertedValue;
 __IO bool adc_data_ready;
 
 /**

@@ -12,20 +12,6 @@ typedef uint8_t U8;
 typedef uint32_t U32;
 typedef uint16_t U16;
 
-#define USBD_MANUFACTURER_STRING        "RevoMini"
-#define USBD_PRODUCT_FS_STRING          "3DR Virtual COM"
-#define USBD_SERIALNUMBER_FS_STRING     "00000000050C"
-#define USBD_CONFIGURATION_FS_STRING    "VCP Config"
-#define USBD_INTERFACE_FS_STRING        "VCP Interface"
-
-//#define USBD_VID                        0x0483
-//#define USBD_PID                        0x5740
-#define USBD_VID                        0x26ac
-#define USBD_PID                        0x0011
-#define USBD_LANGID_STRING              0x409
-
-#define USB_RXFIFO_SIZE 256
-#define USB_TXFIFO_SIZE 256
 
 extern USB_OTG_CORE_HANDLE           USB_OTG_dev;
 extern uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);

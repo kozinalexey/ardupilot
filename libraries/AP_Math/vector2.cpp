@@ -112,7 +112,7 @@ Vector2<T> Vector2<T>::operator -(void) const
 }
 
 template <typename T>
-bool Vector2<T>::operator ==(const Vector2<T> &v) const
+bool Vector2<T>::operator ==(Vector2<T> const &v) const
 {
     return (is_equal(x,v.x) && is_equal(y,v.y));
 }

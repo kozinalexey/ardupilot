@@ -100,46 +100,7 @@ typedef enum WiringPinMode {
                        consists of alternating cycles of LOW and
                        floating (disconnected). */
 } WiringPinMode;
-/**
- * Specifies a GPIO pin behavior.
- * @see pinMode()
- */
 
-/**
- * Specifies a GPIO pin behavior.
- * @see pinMode()
- */
-
-
-/**
- * Configure behavior of a GPIO pin.
- *
- * @param pin Number of pin to configure.
- * @param mode Mode corresponding to desired pin behavior.
- * @see WiringPinMode
- */
-//void pinMode(uint8_t pin, WiringPinMode mode);
-
-
-/**
- * Writes a (digital) value to a pin.  The pin must have its
- * mode set to OUTPUT or OUTPUT_OPEN_DRAIN.
- *
- * @param pin Pin to write to.
- * @param value Either LOW (write a 0) or HIGH (write a 1).
- * @see pinMode()
- */
-//void digitalWrite(uint8_t pin, int8_t value);
-
-/**
- * Read a digital value from a pin.  The pin must have its mode set to
- * one of INPUT, INPUT_PULLUP, and INPUT_PULLDOWN.
- *
- * @param pin Pin to read from.
- * @return LOW or HIGH.
- * @see pinMode()
- */
-//uint32_t digitalRead(uint8_t pin);
 
 /**
  * Read an analog value from pin.  This function blocks during ADC
@@ -165,22 +126,6 @@ uint16_t analogRead(uint8_t pin);
  */
 void togglePin(uint8_t pin);
 
-/**
- * Toggle the LED.
- *
- * If the LED is on, turn it off.  If it is off, turn it on.
- *
- * The LED must its mode set to OUTPUT. This can be accomplished
- * portably over all LeafLabs boards by calling pinMode(BOARD_LED_PIN,
- * OUTPUT) before calling this function.
- *
- * @see pinMode()
- */
-/*
-static inline void toggleLED() {
-    togglePin(BOARD_LED_PIN);
-}
-*/
 /**
  * Shift out a byte of data, one bit at a time.
  *

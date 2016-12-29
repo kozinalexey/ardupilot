@@ -84,7 +84,7 @@ bool REVOMINIRCInput::is_PPM = true;
 
 // uint32_t REVOMINIRCInput::hist[257];
 
-enum BOARD_RC_MODE REVOMINIRCInput::_rc_mode=0;
+enum BOARD_RC_MODE REVOMINIRCInput::_rc_mode=BOARD_RC_NONE;
 
 
 /* constrain captured pulse to be between min and max pulsewidth. */

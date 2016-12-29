@@ -101,7 +101,10 @@ void REVOMINIStorage::read_block(void* dst, uint16_t loc, size_t n) {
         n--;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
     uint16_t *ptr_w=(uint16_t *)ptr_b;
+#pragma GCC diagnostic pop
     
     while(n>=2){
         *ptr_w++ = eeprom.read(loc >> 1);
@@ -112,10 +115,7 @@ void REVOMINIStorage::read_block(void* dst, uint16_t loc, size_t n) {
     if(n){
         ptr_b=(uint8_t *)ptr_w;
         *ptr_b = read_byte(loc);
-    }
-    
-//    for (size_t i = 0; i < n; i++)
-//	((uint8_t*)dst)[i] = read_byte(loc+i);
+    }    
 }
 
 void REVOMINIStorage::write_byte(uint16_t loc, uint8_t value)
@@ -152,7 +152,10 @@ void REVOMINIStorage::write_block(uint16_t loc, const void* src, size_t n)
         n--;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
     uint16_t *ptr_w = (uint16_t *)ptr_b;     // Treat as a block of words
+#pragma GCC diagnostic pop
     while(n>=2){
         eeprom.write(loc >> 1, *ptr_w++);
         loc+=2;
@@ -163,9 +166,6 @@ void REVOMINIStorage::write_block(uint16_t loc, const void* src, size_t n)
         ptr_b=(uint8_t *)ptr_w;
         write_byte(loc, *ptr_b);      // odd byte
     }
-    
-//    for (size_t i = 0; i < n; i++)
-//	write_byte(loc+i, ((uint8_t*)src)[i]);
 }
 
 void REVOMINIStorage::format_eeprom(void)

@@ -66,3 +66,4 @@
 #define HAL_BARO_MS5611_I2C_BUS  0
 #endif
 
+#define TOSHIBA_LED_I2C_BUS  1
