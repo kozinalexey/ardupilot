@@ -263,7 +263,7 @@ void REVOMINIRCInput::_process_sbus_pulse(uint16_t width_s0, uint16_t width_s1)
             bytes[i] = ((v>>1) & 0xFF);
         }
 
-hal.console->printf("\nframe");
+//hal.console->printf("\nframe");
 
         uint16_t values[REVOMINI_RC_INPUT_NUM_CHANNELS];
         uint16_t num_values=0;
@@ -276,7 +276,7 @@ hal.console->printf("\nframe");
             num_values >= REVOMINI_RC_INPUT_MIN_CHANNELS) 
         {
 
-hal.console->printf(" OK");
+//hal.console->printf(" OK");
 
             for (i=0; i<num_values; i++) {
                 _dsm_val[i] = values[i];
@@ -297,7 +297,7 @@ hal.console->printf(" OK");
     }
     return;
 reset:
-    hal.console->printf("\nreset");
+//    hal.console->printf("\nreset");
 
 reset_ok:
     memset(&sbus_state, 0, sizeof(sbus_state));

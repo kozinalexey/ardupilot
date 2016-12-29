@@ -105,6 +105,9 @@ void REVOMINIScheduler::init()
 // set flag for stats output each 10 seconds
     register_timer_task(10000000, FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::_set_10s_flag, bool), NULL);
 #endif
+
+    register_io_process(FUNCTOR_BIND_MEMBER(&REVOMINIScheduler::stats_proc, void) );
+
 }
 
 void REVOMINIScheduler::_delay(uint16_t ms)
@@ -116,7 +119,7 @@ void REVOMINIScheduler::_delay(uint16_t ms)
     
     while (ms > 0) {
         if(!_in_timer_proc && !in_interrupt())  // not switch context in interrupts
-            yield();
+            yield(ms*1000); // time in micros
             
         while ((systick_micros() - start) >= 1000) {
             ms--;
@@ -158,7 +161,7 @@ void REVOMINIScheduler::_delay_microseconds(uint16_t us)
     while ((tw = stopwatch_getticks() - rtime) < dt) { // tw - time waiting, in ticks
         if((dt - tw) > ny // No Yeld time - 10uS to end of wait 
            && !_in_timer_proc && !in_interrupt()) {  // not switch context in interrupts
-            yield();
+            yield((dt - tw) / us_ticks); // in micros
         }
     }    
 
@@ -323,6 +326,16 @@ void REVOMINIScheduler::reboot(bool hold_in_bootloader) {
 }
 
 void REVOMINIScheduler::loop(){    // executes in main thread
+
+    // _print_stats();
+}
+
+void REVOMINIScheduler::stats_proc(void){
+    _print_stats();
+
+}
+
+void REVOMINIScheduler::_print_stats(){
 #ifdef SHED_PROF
     if(flag_10s) {
         flag_10s=false;
@@ -339,9 +352,12 @@ void REVOMINIScheduler::loop(){    // executes in main thread
         hal.console->printf("\nScheduler stats:\n  %% of full time: %5.2f  Efficiency %5.3f \n", (task_time/10.0)/t /* in percent*/ , shed_eff );
         hal.console->printf("delay times: in main %5.2f including in semaphore %5.2f  in timer %5.2f in isr %5.2f \nTask times:\n", (delay_time/10.0)/t, (Semaphore::sem_time/10.0)/t,  (delay_int_time/10.0)/t, (isr_time/10.0)/t );
 
+        yield();
+
         for(int i=0; i< _num_timers; i++) {
             if(_timers[i].proc){    // task not cancelled?
                 hal.console->printf("task 0x%llX tim %8.1f int %5.3f%% tot %6.4f%% mean time %5.1f\n", _timers[i].proc, _timers[i].fulltime/1000.0, _timers[i].fulltime*100.0 / task_time, (_timers[i].fulltime / 10.0) / t, (float)_timers[i].fulltime/_timers[i].count  );
+                yield();
             }
         }
 
@@ -351,8 +367,10 @@ void REVOMINIScheduler::loop(){    // executes in main thread
 
         hal.console->printf("task switch time %7.3f count %ld mean %6.3f \n", yield_time/(float)us_ticks, yield_count, yield_time /(float)us_ticks / (float)yield_count );
         
+        yield();
         do {
             hal.console->printf("task %d times: full %lld max %ld \n",  ptr->id, ptr->time, ptr->delay );
+            yield();
         
             ptr = ptr->next;
         } while(ptr != &s_main);
@@ -563,14 +581,14 @@ bool REVOMINIScheduler::start_task(func_t taskSetup, func_t taskLoop, size_t sta
   return true;
 }
 
-void REVOMINIScheduler::yield()
+void REVOMINIScheduler::yield(uint16_t ttw) // time to work 
 {
     if(task_n==0) return;
 
 #ifdef MTASK_PROF
     uint32_t t =  systick_micros();
     uint32_t dt =  t - s_running->start; // time in task
-    s_running->time+=dt;                    // calculate sum
+    s_running->time+=dt;                           // calculate sum
     if(dt>s_running->delay) s_running->delay = dt; // and remember maximum
     
     uint64_t ticks = stopwatch_getticks();
@@ -590,6 +608,8 @@ next:
     // Next task in run queue will continue
     s_running = s_running->next;
 //  if(!s_running->active) goto next; // a way to skip unneeded tasks
+// and here we can check task max execution time and reject task if more than we have (if ID not 0!)
+
 
 #ifdef MTASK_PROF
     s_running->start = systick_micros();

@@ -36,6 +36,13 @@
 # define HAL_GPIO_LED_ON           LOW
 # define HAL_GPIO_LED_OFF          HIGH
 
+ # define PUSHBUTTON_PIN   254
+ # define USB_MUX_PIN      -1
+ # define BATTERY_VOLT_PIN     8   // Battery voltage on A0 (PC2) D8
+ # define BATTERY_CURR_PIN     7   // Battery current on A1 (PC1) D7
+ # define CONFIG_SONAR_SOURCE_ANALOG_PIN 254
+ 
+
 
 #undef TOSHIBA_LED_I2C_BUS // someone placed this not in board config
 #define TOSHIBA_LED_I2C_ADDR 0x55    // default I2C bus address
@@ -47,3 +54,26 @@
 #define EXTERNAL_LED_MOTOR1       30    // Motor1 LED - AN8
 #define EXTERNAL_LED_MOTOR2       31    // Motor2 LED - AN12
 */
+
+ #define CONFIG_IMU_TYPE   CONFIG_IMU_MPU6000
+ #define CONFIG_SONAR_SOURCE SONAR_SOURCE_ANALOG_PIN
+ #define MAGNETOMETER ENABLED
+ #define CONFIG_BARO     HAL_BARO_MS5611
+
+ #define AC_TERRAIN             DISABLED // no SD card
+ #define OPTFLOW                DISABLED
+ #define ADSB_ENABLED           DISABLED
+ #define PRECISION_LANDING      DISABLED
+ #define CONFIG_PUSHBUTTON      DISABLED
+ #define CONFIG_RELAY           DISABLED
+ #define RANGEFINDER_ENABLED    DISABLED
+
+ #define SPRAYER                DISABLED
+ #define EPM_ENABLED            DISABLED
+ #define MOUNT                  DISABLED // don't fit to flash
+// #define AC_FENCE               DISABLED // causes compilation error
+ #define CLI_ENABLED            DISABLED
+
+ #define LOGGING_ENABLED ENABLED
+
+ 

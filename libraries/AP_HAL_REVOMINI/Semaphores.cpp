@@ -58,7 +58,7 @@ bool Semaphore::_take_from_mainloop(uint32_t timeout_ms) {
     uint32_t to = t + timeout_ms*1000; // timeout time
 
     do {
-        REVOMINIScheduler::yield(); // this is more useful  // REVOMINIScheduler::_delay_microseconds(10);
+        REVOMINIScheduler::yield(100); // 100uS max task time - this is more useful  // REVOMINIScheduler::_delay_microseconds(10);
         if (_take_nonblocking()) {
 #ifdef SEM_PROF 
             sem_time += systick_micros()-t; // calculate semaphore wait time

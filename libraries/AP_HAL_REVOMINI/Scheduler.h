@@ -132,7 +132,7 @@ public:
   /**               
    * Context switch to next task in run queue.
    */
-  static void yield();
+  static void yield(uint16_t ttw=0); // optional time to work
   
   /**
    * Return current task stack size.
@@ -145,6 +145,8 @@ public:
 //}
 
 //    bool                  _run_1khz_procs();
+    static inline bool in_interrupt(){ return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) || (__get_BASEPRI()); }
+
 
 protected:
 
@@ -222,6 +224,8 @@ private:
 
     static void _run_timers(void);
 
+    void _print_stats();
+    void REVOMINIScheduler::stats_proc(void);
     
 #ifdef SHED_PROF
     static uint64_t shed_time;
@@ -239,7 +243,6 @@ private:
     static uint32_t yield_count;
 #endif
 
-    static inline bool in_interrupt(){ return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) || (__get_BASEPRI()); }
 
 };
 
