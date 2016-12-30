@@ -61,6 +61,10 @@ union Revo_handler { // кровь кишки ассемблер :) преобр
 };
 
 
+#define NOINLINE __attribute__ ((noinline))
+#define INLINE __attribute__ ((always_inline)) inline
+#define WEAK __attribute__((weak))
+
 
 #endif
 

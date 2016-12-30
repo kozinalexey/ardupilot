@@ -24,6 +24,7 @@
 * optimized EEPROM usage by changing from 1-byte to 2-byte writes
 * all internal calls use static private methods                
 * removed unused files from "wirish" folder
+* added support for baro MS5611 on external I2C
 * ...
 * a lot of minor enhancements
 

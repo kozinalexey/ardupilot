@@ -56,7 +56,6 @@ private:
     static volatile uint64_t _ppm_last_signal;
     /* private variables to communicate with input capture isr */
     static volatile uint16_t _pulse_capt[REVOMINI_RC_INPUT_NUM_CHANNELS];
-//    static volatile uint32_t _last_pulse[REVOMINI_RC_INPUT_NUM_CHANNELS];
 
     static volatile uint8_t  _valid_channels;
     
@@ -107,10 +106,7 @@ private:
         uint32_t last_input_ms;
     } sbus;
     
-    static enum BOARD_RC_MODE _rc_mode;
-    
-//    static uint32_t hist[257]; // debugging
-//    static void addHist(uint32_t v);
+    static enum BOARD_RC_MODE _rc_mode;    
 };
 
 #endif // __AP_HAL_REVOMINI_RCINPUT_H__

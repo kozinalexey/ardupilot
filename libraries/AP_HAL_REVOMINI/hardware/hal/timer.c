@@ -438,7 +438,7 @@ static inline void dispatch_single_irq(const timer_dev *dev,
 }
 
 /* For dispatch routines which service multiple interrupts. */
-static inline void handle_irq(const timer_dev *dev, uint32_t dier_sr, uint32_t irq_mask, uint32_t iid, uint32_t handled_irq) {
+static INLINE uint32_t handle_irq(const timer_dev *dev, uint32_t dier_sr, uint32_t irq_mask, uint32_t iid, uint32_t handled_irq) {
     if ((dier_sr) & (irq_mask)) {                                 
         TimerHandler handler = (dev->handlers)[iid];                
         if (handler) {                                          
@@ -446,6 +446,8 @@ static inline void handle_irq(const timer_dev *dev, uint32_t dier_sr, uint32_t i
         }
         handled_irq |= (irq_mask);   // reset IRQ inspite of installed handler! @NG
     }
+    
+    return handled_irq;
 }
 
 static inline void dispatch_adv_brk(const timer_dev *dev) {
@@ -479,8 +481,8 @@ static inline void dispatch_adv_trg_com(const timer_dev *dev) {
                          * must clear overcapture flags, to avoid
                          * wasting time in output mode. */
 
-    handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT, handled);
-    handle_irq(dev, dsr, TIMER_SR_COMIF, TIMER_COM_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_COMIF, TIMER_COM_INTERRUPT, handled);
 
     dev->regs->SR &= ~handled;
 #ifdef ISR_PERF
@@ -496,10 +498,10 @@ static inline void dispatch_adv_cc(const timer_dev *dev) {
     uint32_t dsr = dev->regs->DIER & dev->regs->SR;
     uint32_t handled = 0;
 
-    handle_irq(dev, dsr, TIMER_SR_CC4IF, TIMER_CC4_INTERRUPT, handled);
-    handle_irq(dev, dsr, TIMER_SR_CC3IF, TIMER_CC3_INTERRUPT, handled);
-    handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT, handled);
-    handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC4IF, TIMER_CC4_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC3IF, TIMER_CC3_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT, handled);
 
     dev->regs->SR &= ~handled;
 
@@ -516,12 +518,12 @@ static inline void dispatch_general(const timer_dev *dev) {
     uint32_t dsr = dev->regs->DIER & dev->regs->SR;
     uint32_t handled = 0;
 
-    handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC4IF, TIMER_CC4_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC3IF, TIMER_CC3_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_UIF,   TIMER_UPDATE_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC4IF, TIMER_CC4_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC3IF, TIMER_CC3_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_UIF,   TIMER_UPDATE_INTERRUPT, handled);
 
     dev->regs->SR &= ~handled;
 
@@ -539,10 +541,10 @@ static inline void dispatch_general_h(const timer_dev *dev) {
     uint32_t dsr = dev->regs->DIER & dev->regs->SR;
     uint32_t handled = 0;
 
-    handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT,    handled);
-    handle_irq(dev, dsr, TIMER_SR_UIF,   TIMER_UPDATE_INTERRUPT, handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_TIF,   TIMER_TRG_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC2IF, TIMER_CC2_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_CC1IF, TIMER_CC1_INTERRUPT,    handled);
+    handled = handle_irq(dev, dsr, TIMER_SR_UIF,   TIMER_UPDATE_INTERRUPT, handled);
 
     dev->regs->SR &= ~handled;
 

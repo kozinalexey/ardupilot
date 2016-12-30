@@ -368,6 +368,12 @@ void AP_Baro::init(void)
 #elif HAL_BARO_DEFAULT == HAL_BARO_MS5611_I2C
     ADD_BACKEND(AP_Baro_MS56XX::probe(*this,
                                       std::move(hal.i2c_mgr->get_device(HAL_BARO_MS5611_I2C_BUS, HAL_BARO_MS5611_I2C_ADDR))));
+#ifdef HAL_BARO_MS5611_I2C_BUS_EXT // support for baro on external board - to use with racing boards
+
+    ADD_BACKEND(AP_Baro_MS56XX::probe(*this,
+                                      std::move(hal.i2c_mgr->get_device(HAL_BARO_MS5611_I2C_BUS_EXT, HAL_BARO_MS5611_I2C_ADDR))));
+#endif
+                                     
 #elif HAL_BARO_DEFAULT == HAL_BARO_MS5611_SPI
     ADD_BACKEND(AP_Baro_MS56XX::probe(*this,
                                       std::move(hal.spi->get_device(HAL_BARO_MS5611_NAME))));
