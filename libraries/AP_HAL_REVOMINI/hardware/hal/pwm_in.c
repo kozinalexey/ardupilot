@@ -211,7 +211,7 @@ struct PWM_State  {
 */
 
 	if (channel->tim == tim && (TIM_GetITStatus(tim, channel->tim_cc) == SET)) {
-	    TIM_ClearITPendingBit(channel->tim, channel->tim_cc);  // this is already done by timer's ISR handler
+//	    TIM_ClearITPendingBit(channel->tim, channel->tim_cc);  // this is already done by timer's ISR handler
 
 	    val = TIM_GetCapture1(channel->tim); // captured value
 
@@ -266,7 +266,7 @@ struct PWM_State  {
 	    if (channel->tim == tim && (TIM_GetITStatus(tim, channel->tim_cc) == SET)) {
 
 		input->last_pulse = systick_uptime();
-		TIM_ClearITPendingBit(channel->tim, channel->tim_cc); // this is already done by timer's ISR handler
+//		TIM_ClearITPendingBit(channel->tim, channel->tim_cc); // this is already done by timer's ISR handler
  
 		switch (channel->tim_channel)   {
 		case TIM_Channel_1:

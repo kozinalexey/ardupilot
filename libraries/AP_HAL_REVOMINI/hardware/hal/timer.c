@@ -424,7 +424,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void) {
 /* A special-case dispatch routine for single-interrupt NVIC lines.
  * This function assumes that the interrupt corresponding to `iid' has
  * in fact occurred (i.e., it doesn't check DIER & SR). */
-static inline void dispatch_single_irq(const timer_dev *dev,
+static INLINE  void dispatch_single_irq(const timer_dev *dev,
                                        timer_interrupt_id iid,
                                        uint32_t irq_mask) {
 

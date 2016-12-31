@@ -188,7 +188,7 @@ void afio_remap(const gpio_dev* const dev, uint8_t pin, afio_remap_peripheral re
  */
 void afio_cfg_debug_ports(afio_debug_cfg config);					
 
-inline void gpio_write_bit(const gpio_dev* const dev, uint8_t pin, uint8_t val)
+static inline void gpio_write_bit(const gpio_dev* const dev, uint8_t pin, uint8_t val)
 {
 	/* Check the parameters */
     assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
@@ -201,7 +201,7 @@ inline void gpio_write_bit(const gpio_dev* const dev, uint8_t pin, uint8_t val)
     }    
 }
 
-inline uint8_t gpio_read_bit(const gpio_dev* const dev, uint8_t pin)
+static inline uint8_t gpio_read_bit(const gpio_dev* const dev, uint8_t pin)
 {
     uint8_t bitstatus = 0x00;
 
@@ -219,7 +219,7 @@ inline uint8_t gpio_read_bit(const gpio_dev* const dev, uint8_t pin)
 	
 }
 
-inline void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin)
+static inline void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin)
 {
 	/* Check the parameters */
     assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
@@ -227,7 +227,7 @@ inline void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin)
     dev->GPIOx->ODR ^= BIT(pin);	
 }
 
-inline afio_exti_port gpio_exti_port(const gpio_dev* const dev)
+static inline afio_exti_port gpio_exti_port(const gpio_dev* const dev)
 {
 	/* Check the parameters */
     assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
@@ -235,13 +235,13 @@ inline afio_exti_port gpio_exti_port(const gpio_dev* const dev)
 }
 
 
-inline void gpio_set_speed(const gpio_dev* const dev, uint8_t pin, GPIOSpeed_TypeDef gpio_speed){
+static inline void gpio_set_speed(const gpio_dev* const dev, uint8_t pin, GPIOSpeed_TypeDef gpio_speed){
 /* Speed mode configuration */
     dev->GPIOx->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR0 << (pin * 2));
     dev->GPIOx->OSPEEDR |=  ((uint32_t)(gpio_speed) << (pin * 2));
 }
 
-inline void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port)
+static inline void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port)
 {
 	/* Check the parameters */
 	assert_param(IS_EXTI_PIN_SOURCE(exti));

@@ -34,7 +34,7 @@ typedef enum {
 } SchedState;
 
 
-// #define SHED_PROF // profiling
+ #define SHED_PROF // profiling
 // #define MTASK_PROF
 
 typedef struct RevoTimer {
