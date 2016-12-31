@@ -91,6 +91,20 @@ const AP_Param::GroupInfo AP_Camera::var_info[] = {
     // @Values: 0:TriggerLow,1:TriggerHigh
     // @User: Standard
     AP_GROUPINFO("FEEDBACK_POL",  9, AP_Camera, _feedback_polarity, 1),
+
+    // @Param: FB_MAX_CNT
+    // @DisplayName: Limit camera feedback pulses count after each shot command
+    // @Description: 0 - each feedback can be written to log, 1- only one pulse after each shot may to be written
+    // @Values: 0:always, 1..uint max
+    // @User: Standard
+    AP_GROUPINFO("FB_MAX_CNT",  10, AP_Camera, _fback_max_cnt , 1),
+
+    // @Param: FB_TST_PIN
+    // @DisplayName: Camera feedback test pin
+    // @Description: output change each time when feedback arived
+    // @Values: F4BY pin number 70-74
+    // @User: Standard
+    AP_GROUPINFO("FB_TST_PIN",  11, AP_Camera, _fback_tst_pin , -1),
     
     AP_GROUPEND
 };
@@ -101,6 +115,7 @@ extern const AP_HAL::HAL& hal;
   static trigger var for PX4 callback
  */
 volatile bool   AP_Camera::_camera_triggered;
+volatile uint8_t  AP_Camera::_fback_cnt;
 
 /// Servo operated camera
 void
@@ -116,7 +131,6 @@ AP_Camera::servo_pic()
 void
 AP_Camera::relay_pic()
 {
-    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_WARNING, "Camera: relay command received\n");
     if (_relay_on) {
         _apm_relay->on(0);
     } else {
@@ -144,7 +158,7 @@ AP_Camera::trigger_pic(bool send_mavlink_msg)
         relay_pic();                    // basic relay activation
         break;
     }
-
+    _fback_cnt =0;
     if (send_mavlink_msg) {
         // create command long mavlink message
         mavlink_command_long_t cmd_msg;
@@ -315,7 +329,11 @@ bool AP_Camera::update_location(const struct Location &loc, const AP_AHRS &ahrs)
  */
 void AP_Camera::feedback_pin_timer(void)
 {
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+    int8_t dpin = _feedback_pin;
+#else
     int8_t dpin = hal.gpio->analogPinToDigitalPin(_feedback_pin);
+#endif
     if (dpin == -1) {
         return;
     }
@@ -329,7 +347,18 @@ void AP_Camera::feedback_pin_timer(void)
     uint8_t trigger_polarity = _feedback_polarity==0?0:1;
     if (pin_state == trigger_polarity &&
         _last_pin_state != trigger_polarity) {
-        _camera_triggered = true;
+        if (_fback_cnt < _fback_max_cnt || _fback_max_cnt == 0) {
+            _camera_triggered = true;
+            _fback_cnt++;
+
+            if (_fback_tst_pin != -1) {
+                static int i = 0;
+                if (i > 1) { i = 0; }
+                hal.gpio->pinMode(_fback_tst_pin, HAL_GPIO_OUTPUT);
+                hal.gpio->write(_fback_tst_pin, i);
+                i++;
+            }
+        }
     }
     _last_pin_state = pin_state;
 }
@@ -346,7 +375,7 @@ bool AP_Camera::check_trigger_pin(void)
     return false;
 }
 
-#if CONFIG_HAL_BOARD == HAL_BOARD_PX4  || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
 /*
   callback for timer capture on PX4
  */

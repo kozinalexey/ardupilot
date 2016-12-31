@@ -100,9 +100,13 @@ private:
     // pin number for accurate camera feedback messages
     AP_Int8         _feedback_pin;
     AP_Int8         _feedback_polarity;
+    AP_Int8         _fback_max_cnt;
+    AP_Int8         _fback_tst_pin;
 
     // this is set to 1 when camera trigger pin has fired
     static volatile bool   _camera_triggered;
     bool            _timer_installed:1;
     uint8_t         _last_pin_state;
+    static volatile uint8_t     _fback_cnt; //count feedback pulses after shutter command. reset each shutter cycle
+
 };
