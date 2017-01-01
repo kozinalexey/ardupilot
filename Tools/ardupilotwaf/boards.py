@@ -469,11 +469,11 @@ class f4by(Board):
     toolchain = 'arm-none-eabi'
 
     def __init__(self):
-        self.version = None
+        self.px4_version = None
         self.use_px4io = True
 
     def configure(self, cfg):
-        if not self.version:
+        if not self.px4_version:
             cfg.fatal('configure: f4by: version required')
 
         super(f4by, self).configure(cfg)
@@ -505,7 +505,7 @@ class f4by(Board):
             'uavcan',
         ]
 
-        env.PX4_VERSION = self.version
+        env.PX4_VERSION = self.px4_version
         env.PX4_USE_PX4IO = True if self.use_px4io else False
 
         env.AP_PROGRAM_AS_STLIB = True
@@ -517,21 +517,21 @@ class f4by(Board):
         bld.load('px4')
 
 
-class f4by_v2(f4by):
-    name = 'f4by-v2'
+class f4by_v1(f4by):
+    name = 'f4by-v1'
     def __init__(self):
-        super(f4by_v2, self).__init__()
-        self.version = '2'
+        super(f4by_v1, self).__init__()
+        self.px4_version = '2'
 
 
-# class f4by_v2(px4):
-#     name = 'f4by-v2'
+# class f4by_v1(px4):
+#     name = 'f4by-v1'
 #     def __init__(self):
-#         super(f4by_v2, self).__init__()
+#         super(f4by_v1, self).__init__()
 #         self.version = '2'
 #
 #     def configure_env(self, cfg, env):
-#         super(f4by_v2, self).configure_env(cfg, env)
+#         super(f4by_v1, self).configure_env(cfg, env)
 #
 #         env.DEFINES.update(
 #             CONFIG_HAL_BOARD = 'HAL_BOARD_F4BY',
