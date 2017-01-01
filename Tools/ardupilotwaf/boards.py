@@ -463,3 +463,77 @@ class px4_v4(px4):
         super(px4_v4, self).__init__()
         self.version = '4'
         self.use_px4io = False
+
+class f4by(Board):
+    abstract = True
+    toolchain = 'arm-none-eabi'
+
+    def __init__(self):
+        self.version = None
+        self.use_px4io = True
+
+    def configure(self, cfg):
+        if not self.version:
+            cfg.fatal('configure: f4by: version required')
+
+        super(f4by, self).configure(cfg)
+        cfg.load('px4')
+
+    def configure_env(self, cfg, env):
+        super(f4by, self).configure_env(cfg, env)
+
+        env.DEFINES.update(
+            CONFIG_HAL_BOARD = 'HAL_BOARD_F4BY',
+            HAVE_STD_NULLPTR_T = 0,
+        )
+        env.CXXFLAGS += [
+            '-Wlogical-op',
+            '-Wframe-larger-than=1300',
+            '-fsingle-precision-constant',
+            '-Wno-error=double-promotion',
+            '-Wno-error=missing-declarations',
+            '-Wno-error=float-equal',
+            '-Wno-error=undef',
+            '-Wno-error=cpp',
+        ]
+        env.AP_LIBRARIES += [
+            'AP_HAL_F4BY',
+        ]
+        env.GIT_SUBMODULES += [
+            'PX4Firmware',
+            'PX4NuttX',
+            'uavcan',
+        ]
+
+        env.PX4_VERSION = self.version
+        env.PX4_USE_PX4IO = True if self.use_px4io else False
+
+        env.AP_PROGRAM_AS_STLIB = True
+
+    def build(self, bld):
+        super(f4by, self).build(bld)
+        bld.ap_version_append_str('NUTTX_GIT_VERSION', bld.git_submodule_head_hash('PX4NuttX', short=True))
+        bld.ap_version_append_str('PX4_GIT_VERSION', bld.git_submodule_head_hash('PX4Firmware', short=True))
+        bld.load('px4')
+
+
+class f4by_v2(f4by):
+    name = 'f4by-v2'
+    def __init__(self):
+        super(f4by_v2, self).__init__()
+        self.version = '2'
+
+
+# class f4by_v2(px4):
+#     name = 'f4by-v2'
+#     def __init__(self):
+#         super(f4by_v2, self).__init__()
+#         self.version = '2'
+#
+#     def configure_env(self, cfg, env):
+#         super(f4by_v2, self).configure_env(cfg, env)
+#
+#         env.DEFINES.update(
+#             CONFIG_HAL_BOARD = 'HAL_BOARD_F4BY',
+#             CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_NONE',
+#         )
