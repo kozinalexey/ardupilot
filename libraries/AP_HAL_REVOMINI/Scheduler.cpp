@@ -40,7 +40,7 @@ volatile bool REVOMINIScheduler::_in_timer_proc = false;
 revo_timer REVOMINIScheduler::_timers[REVOMINI_SCHEDULER_MAX_SHEDULED_PROCS] IN_CCM;
 uint8_t    REVOMINIScheduler::_num_timers = 0;
 
-AP_HAL::MemberProc REVOMINIScheduler::_io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS];
+AP_HAL::MemberProc REVOMINIScheduler::_io_process[REVOMINI_SCHEDULER_MAX_IO_PROCS] IN_CCM;
 uint8_t            REVOMINIScheduler::_num_io_proc=0;
 
 AP_HAL::Proc REVOMINIScheduler::_delay_cb=NULL;
@@ -440,6 +440,7 @@ AP_HAL::Device::PeriodicHandle REVOMINIScheduler::_register_timer_task(uint32_t 
 store:        
         _timers[i].period = period_us;
         _timers[i].time = period_us;
+        _timers[i].time_to_run = systick_micros() + period_us;
         _timers[i].sem = sem;
         _timers[i].mode = mode;
 #ifdef SHED_PROF
@@ -476,14 +477,20 @@ bool REVOMINIScheduler::unregister_timer_task(AP_HAL::Device::PeriodicHandle h)
 #define TIMER_PERIOD (1000000 / SHED_FREQ)  //250 // interrupts period in uS
 
 void REVOMINIScheduler::_run_timers(){
+    uint32_t now = systick_micros();
+    static uint32_t last_run = 0;
+
+
 #ifdef SHED_PROF
-    uint32_t full_t = systick_micros();
+    uint32_t full_t = now;
     uint32_t job_t = 0;
 #endif                
 
+    uint32_t dt = now - last_run; // time from last run
+
     for(int i = 0; i<_num_timers; i++){
         if(_timers[i].proc){    // task not cancelled?
-            if(_timers[i].time < TIMER_PERIOD) { // time to run?
+            if(_timers[i].time_to_run < now) { // time to run?
                 if(_timers[i].sem && !_timers[i].sem->take_nonblocking()) { // semaphore active? take!
                     // can't get semaphore, just do nothing - will try next time
                     continue;
@@ -502,8 +509,9 @@ void REVOMINIScheduler::_run_timers(){
                     ret=1;
                     break;
                 }
+                now = systick_micros();
 #ifdef SHED_PROF
-                t = systick_micros() - t;               // work time
+                t = now - t;               // work time
 #endif                
                 if(_timers[i].sem) _timers[i].sem->give(); //  semaphore active? give back ASAP!
 #ifdef SHED_PROF
@@ -514,13 +522,14 @@ void REVOMINIScheduler::_run_timers(){
                 job_t += t;                  // time of all jobs
 #endif                
                 if(ret)
-                    _timers[i].time = _timers[i].period;  // reshedule
+                    _timers[i].time_to_run += _timers[i].period;  // reschedule
                 else
                     _timers[i].proc = 0L;               // cancel task
-            } else
-                _timers[i].time -= TIMER_PERIOD; //     just count time
+            }
         }
     }
+
+    last_run = now;
 
 #ifdef SHED_PROF
     full_t = systick_micros() - full_t;         // full time of scheduler

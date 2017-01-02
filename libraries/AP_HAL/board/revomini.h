@@ -31,8 +31,6 @@
 
 # define HAL_GPIO_A_LED_PIN        36  // BLUE
 //# define HAL_GPIO_B_LED_PIN        37  // YELLOW OPTIONAL (not included)
-//# define HAL_GPIO_B_LED_PIN        26   //  EXTI_RFM22B /
-//# define HAL_GPIO_B_LED_PIN        103  //  RFM22 CS    /  already occupied by BOARD_SPEKTRUM_**_PIN
 # define HAL_GPIO_B_LED_PIN        9      //  frequency select - resistor to VCC or ground
 # define HAL_GPIO_C_LED_PIN        105 // RED
 
@@ -70,12 +68,21 @@
  #define CONFIG_PUSHBUTTON      DISABLED
  #define CONFIG_RELAY           DISABLED
  #define RANGEFINDER_ENABLED    DISABLED
-
  #define SPRAYER                DISABLED
  #define EPM_ENABLED            DISABLED
  #define MOUNT                  DISABLED // don't fit to flash
-// #define AC_FENCE               DISABLED // causes compilation error
  #define CLI_ENABLED            DISABLED
+ 
+ // for debugging
+ #define FRSKY_TELEM_ENABLED   DISABLED
+ #define NAV_GUIDED            DISABLED
+// #define AC_RALLY              DISABLED
+// #define PROXIMITY_ENABLED     DISABLED
+// #define CAMERA                DISABLED
+// #define AC_FENCE              DISABLED
+// #define AC_FENCE               DISABLED // causes compilation error
+ #define NAV_GUIDED            DISABLED
+ #define POSHOLD_ENABLED       DISABLED 
 
  #define LOGGING_ENABLED ENABLED
 

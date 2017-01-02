@@ -40,18 +40,8 @@ typedef enum SPIFrequency {
     SPI_281_250KHZ  = 6, /**< 281.250 KHz */
     SPI_140_625KHZ  = 7, /**< 140.625 KHz */
 } SPIFrequency;
-/*    
-static const spi_baud_rate baud_rates[8] __FLASH__ = {
-    SPI_BAUD_PCLK_DIV_2,
-    SPI_BAUD_PCLK_DIV_4,
-    SPI_BAUD_PCLK_DIV_8,
-    SPI_BAUD_PCLK_DIV_16,
-    SPI_BAUD_PCLK_DIV_32,
-    SPI_BAUD_PCLK_DIV_64,
-    SPI_BAUD_PCLK_DIV_128,
-    SPI_BAUD_PCLK_DIV_256,
-};
-*/     
+
+
 struct spi_pins {
     uint8_t nss;
     uint8_t sck;

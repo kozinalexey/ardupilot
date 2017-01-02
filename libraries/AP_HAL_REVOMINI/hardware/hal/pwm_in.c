@@ -58,7 +58,7 @@ static void pwmInitializeInput(uint8_t ppmsum);
 
 
 volatile pulse_buffer pulses;
-static Pulse IN_CCM pulse_mem[PULSES_QUEUE_SIZE];
+static Pulse IN_CCM pulse_mem[PULSES_QUEUE_SIZE] IN_CCM;
 
 bool _is_ppmsum;
 
@@ -182,7 +182,7 @@ const struct TIM_Channel PWM_Channels[] =   {
 
 #define PWM_CHANNELS (sizeof(PWM_Channels) / sizeof(struct TIM_Channel) )
 
-struct PWM_State Inputs[PWM_CHANNELS];
+struct PWM_State Inputs[PWM_CHANNELS] IN_CCM;
 
 
 static void pwmIRQHandler(TIM_TypeDef *tim){

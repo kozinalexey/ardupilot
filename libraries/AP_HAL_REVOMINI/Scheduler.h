@@ -40,6 +40,7 @@ typedef enum {
 typedef struct RevoTimer {
     uint32_t period;
     uint32_t time;
+    uint32_t time_to_run;
     uint64_t proc;          //AP_HAL::Device::PeriodicCb proc and AP_HAL::MemberProc mp together
     REVOMINI::Semaphore *sem;
     uint8_t mode;

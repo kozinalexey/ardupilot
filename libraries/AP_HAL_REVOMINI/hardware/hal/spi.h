@@ -22,7 +22,7 @@ extern const spi_dev * const _SPI2;
 extern const spi_dev * const _SPI3;
 
 typedef enum spi_firstbit {
-	LSBFIRST,
+	LSBFIRST=0,
 	MSBFIRST
 } spi_firstbit;
 
@@ -34,7 +34,7 @@ typedef enum spi_firstbit {
  * determines which clock edge triggers data capture.
  */
 typedef enum spi_mode {
-    SPI_MODE_0,  /**< Clock line idles low (0), data capture on first
+    SPI_MODE_0=0,  /**< Clock line idles low (0), data capture on first
                     clock transition. */
     SPI_MODE_1,  /**< Clock line idles low (0), data capture on second
                     clock transition */
@@ -151,7 +151,7 @@ void spi_peripheral_enable(const spi_dev *dev);
 void spi_peripheral_disable(const spi_dev *dev);
 uint32_t spi_tx(const spi_dev *dev, const void *buf, uint32_t len);
 int spimaster_transfer(const spi_dev *dev,
-                       uint8_t *txbuf,
+                       const uint8_t *txbuf,
                        uint32_t txcount,
                        uint8_t *rxbuf,
                        uint32_t rxcount);

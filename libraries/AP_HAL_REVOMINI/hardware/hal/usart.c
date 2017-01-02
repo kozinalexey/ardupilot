@@ -7,7 +7,7 @@
 
 static ring_buffer usart1_txrb;
 static ring_buffer usart1_rxrb;
-static usart_state u1state = { .tx_timeout = 10000, };
+static usart_state u1state IN_CCM;
 
 static const usart_dev usart1 =
     {
@@ -27,7 +27,7 @@ const usart_dev * const _USART1 = &usart1;
 
 static ring_buffer usart2_txrb;
 static ring_buffer usart2_rxrb;
-static usart_state u2state = { .tx_timeout = 10000, };
+static usart_state u2state IN_CCM;
 
 static const usart_dev usart2 =
     {
@@ -47,7 +47,7 @@ const usart_dev * const _USART2 = &usart2;
 
 static ring_buffer usart3_txrb;
 static ring_buffer usart3_rxrb;
-static usart_state u3state = { .tx_timeout = 10000, };
+static usart_state u3state IN_CCM;
 
 static const usart_dev usart3 =
     {
@@ -67,7 +67,7 @@ const usart_dev * const _USART3 = &usart3;
 
 static ring_buffer uart4_txrb;
 static ring_buffer uart4_rxrb;
-static usart_state u4state = { .tx_timeout = 10000, };
+static usart_state u4state IN_CCM;
 
 static const usart_dev uart4 = {
 	    .USARTx = UART4,
@@ -86,7 +86,7 @@ const usart_dev * const _UART4 = &uart4;
 
 static ring_buffer uart5_txrb;
 static ring_buffer uart5_rxrb;
-static usart_state u5state = { .tx_timeout = 10000, };
+static usart_state u5state IN_CCM;
 
 static const usart_dev uart5 = {
 	    .USARTx = UART5,
@@ -105,7 +105,7 @@ const usart_dev * const _UART5 = &uart5;
 
 static ring_buffer usart6_txrb;
 static ring_buffer usart6_rxrb;
-static usart_state u6state = { .tx_timeout = 10000, };
+static usart_state u6state IN_CCM;
 
 static const usart_dev usart6 =
     {

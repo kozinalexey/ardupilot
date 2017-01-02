@@ -34,26 +34,6 @@ static inline uint32_t stopwatch_getticks()
 	return CPU_CYCLES;
 }
 
-/*
-static inline uint32_t stopwatch_getus()
-{
-	return CPU_CYCLES / us_ticks;
-}
-
-static inline uint32_t stopwatch_getms()
-{
-	return CPU_CYCLES / us_ticks / 1000;
-}
-
-
-static inline void stopwatch_delay_ms(uint32_t ms)
-{
-	while (ms--) 
-	{
- 		stopwatch_delay_us(1000);
-	}
-}
-*/
 
 #ifdef __cplusplus
  }

@@ -5,7 +5,7 @@
  * SPI devices
  */
 
-const static spi_dev spi1 = {
+static const spi_dev spi1 = {
     .SPIx     = SPI1,
     .afio     = GPIO_AF_SPI1,
     .irq      = SPI1_IRQn,
@@ -14,7 +14,7 @@ const static spi_dev spi1 = {
 /** SPI device 1 */
 const spi_dev * const _SPI1 = &spi1;
 
-const static spi_dev spi2 = {
+static const spi_dev spi2 = {
     .SPIx     = SPI2,
     .afio     = GPIO_AF_SPI2,
     .irq      = SPI2_IRQn,
@@ -23,7 +23,7 @@ const static spi_dev spi2 = {
 /** SPI device 2 */
 const spi_dev * const _SPI2 = &spi2;
 
-const static spi_dev spi3 = {
+static const spi_dev spi3 = {
     .SPIx     = SPI3,
     .afio     = GPIO_AF_SPI3,
     .irq      = SPI3_IRQn,
@@ -85,10 +85,12 @@ void spi_gpio_cfg(const spi_dev *dev,
         /* Configure MISO pin */
         gpio_set_mode(comm_dev, miso_bit, GPIO_AF_OUTPUT_OD);
         gpio_set_af_mode(comm_dev, miso_bit, dev->afio);
+        gpio_set_speed(comm_dev, miso_bit, GPIO_Speed_100MHz);
         
         /* Configure MOSI pin */
         gpio_set_mode(comm_dev, mosi_bit, GPIO_AF_OUTPUT_PP);
 	gpio_set_af_mode(comm_dev, mosi_bit, dev->afio);        
+	gpio_set_speed(comm_dev, mosi_bit, GPIO_Speed_100MHz);
     } else {
 	/* Configure NSS pin */	
         gpio_set_mode(nss_dev, nss_bit, GPIO_INPUT_FLOATING);
@@ -144,6 +146,19 @@ static void spi_reconfigure(const spi_dev *dev, uint8_t ismaster, uint16_t baudP
 		break;
 	}
 
+/*
+ spiInit.SPI_Mode = SPI_Mode_Master;
+    spiInit.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    spiInit.SPI_DataSize = SPI_DataSize_8b;
+    spiInit.SPI_NSS = SPI_NSS_Soft;
+    spiInit.SPI_FirstBit = SPI_FirstBit_MSB;
+    spiInit.SPI_CRCPolynomial = 7;
+    spiInit.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+
+    spiInit.SPI_CPOL = SPI_CPOL_High;
+    spiInit.SPI_CPHA = SPI_CPHA_2Edge;
+*/
+
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
 	SPI_InitStructure.SPI_BaudRatePrescaler = baudPrescaler;
 	if (bitorder == LSBFIRST)
@@ -169,12 +184,13 @@ static void spi_reconfigure(const spi_dev *dev, uint8_t ismaster, uint16_t baudP
 	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
   
 	/* Configure the SPI interrupt priority */
+/*
 	NVIC_InitStructure.NVIC_IRQChannel = dev->irq;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-	    	
+*/	    	
     SPI_Cmd(dev->SPIx, ENABLE);
 }
 
@@ -208,7 +224,7 @@ inline void spi_slave_enable(const spi_dev *dev,
 
 // Transmit command and/or receive result in bidirectional master mode
 int spimaster_transfer(const spi_dev *dev,
-                       uint8_t *txbuf,
+                       const uint8_t *txbuf,
                        uint32_t txcount,
                        uint8_t *rxbuf,
                        uint32_t rxcount)
@@ -236,27 +252,29 @@ int spimaster_transfer(const spi_dev *dev,
 		return __LINE__ - 3;
 	}
 
+    uint16_t tmp;
 
 	// Transfer command data out
 	while (txcount--){
-		while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
-		dev->SPIx->DR = *txbuf++;
-		while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
-		(void) dev->SPIx->DR;
-	}	
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET);  //while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
+	    SPI_I2S_SendData(dev->SPIx, *txbuf++);//		dev->SPIx->DR = *txbuf++;
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET);//while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
+	    tmp=SPI_I2S_ReceiveData(dev->SPIx); // (void) dev->SPIx->DR;
+	}
 
 	// Transfer response data in
 	while (rxcount--){
-		while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
-		dev->SPIx->DR = 0;
-		while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
-		*rxbuf++ = dev->SPIx->DR;
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET);  //while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
+	    SPI_I2S_SendData(dev->SPIx, 0); // dev->SPIx->DR = 0;
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET); //while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
+	    *rxbuf++ = SPI_I2S_ReceiveData(dev->SPIx); // dev->SPIx->DR;
 	}
 
 	// Wait until the transfer is complete
-	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY);
+//	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY);
+        tmp = 0;
 
-	return 0;
+	return tmp;
 }
 
 
