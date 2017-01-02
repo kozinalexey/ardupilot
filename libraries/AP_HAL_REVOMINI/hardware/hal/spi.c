@@ -146,18 +146,6 @@ static void spi_reconfigure(const spi_dev *dev, uint8_t ismaster, uint16_t baudP
 		break;
 	}
 
-/*
- spiInit.SPI_Mode = SPI_Mode_Master;
-    spiInit.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-    spiInit.SPI_DataSize = SPI_DataSize_8b;
-    spiInit.SPI_NSS = SPI_NSS_Soft;
-    spiInit.SPI_FirstBit = SPI_FirstBit_MSB;
-    spiInit.SPI_CRCPolynomial = 7;
-    spiInit.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
-
-    spiInit.SPI_CPOL = SPI_CPOL_High;
-    spiInit.SPI_CPHA = SPI_CPHA_2Edge;
-*/
 
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
 	SPI_InitStructure.SPI_BaudRatePrescaler = baudPrescaler;
@@ -174,23 +162,6 @@ static void spi_reconfigure(const spi_dev *dev, uint8_t ismaster, uint16_t baudP
 	
 	SPI_Init(dev->SPIx, &SPI_InitStructure);
 
-	if (!ismaster) {
-		/* Enable the Rx buffer not empty interrupt */
-		spi_irq_enable(dev, SPI_I2S_IT_RXNE);
-	}
-	
-	NVIC_InitTypeDef NVIC_InitStructure;
-	/* Configure the Priority Group to 1 bit */                
-	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  
-	/* Configure the SPI interrupt priority */
-/*
-	NVIC_InitStructure.NVIC_IRQChannel = dev->irq;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-*/	    	
     SPI_Cmd(dev->SPIx, ENABLE);
 }
 
@@ -219,6 +190,26 @@ inline void spi_slave_enable(const spi_dev *dev,
                       uint16_t bitorder)
 {
     spi_reconfigure(dev, 0, 0, bitorder, mode);
+
+/*
+	if (!ismaster) {
+		// Enable the Rx buffer not empty interrupt 
+		spi_irq_enable(dev, SPI_I2S_IT_RXNE);
+	}
+*/	
+	NVIC_InitTypeDef NVIC_InitStructure;
+	/* Configure the Priority Group to 1 bit */                
+	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+  
+	/* Configure the SPI interrupt priority */
+/*
+	NVIC_InitStructure.NVIC_IRQChannel = dev->irq;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+*/	    	
+
 }
 
 
@@ -229,49 +220,60 @@ int spimaster_transfer(const spi_dev *dev,
                        uint8_t *rxbuf,
                        uint32_t rxcount)
 {
-	//errno_r = 0;
-
 	// Validate parameters
 	if ((txbuf == NULL) && (txcount != 0)){
-		//errno_r = EINVAL;
 		return __LINE__ - 3;
 	}
 
 	if ((txcount == 0) && (txbuf != NULL)){
-		//errno_r = EINVAL;
 		return __LINE__ - 3;
 	}
 
 	if ((rxbuf == NULL) && (rxcount != 0)){
-		//errno_r = EINVAL;
 		return __LINE__ - 3;
 	}
 
 	if ((rxcount == 0) && (rxbuf != NULL)){
-		//errno_r = EINVAL;
 		return __LINE__ - 3;
 	}
 
     uint16_t tmp;
 
 	// Transfer command data out
+#if 0
 	while (txcount--){
-	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET);  //while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
-	    SPI_I2S_SendData(dev->SPIx, *txbuf++);//		dev->SPIx->DR = *txbuf++;
-	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET);//while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
-	    tmp=SPI_I2S_ReceiveData(dev->SPIx); // (void) dev->SPIx->DR;
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET); 
+	    SPI_I2S_SendData(dev->SPIx, *txbuf++);
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET);
+	    tmp=SPI_I2S_ReceiveData(dev->SPIx); 
 	}
 
 	// Transfer response data in
 	while (rxcount--){
-	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET);  //while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
-	    SPI_I2S_SendData(dev->SPIx, 0); // dev->SPIx->DR = 0;
-	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET); //while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
-	    *rxbuf++ = SPI_I2S_ReceiveData(dev->SPIx); // dev->SPIx->DR;
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_TXE) == RESET);
+	    SPI_I2S_SendData(dev->SPIx, 0); 
+	    while (SPI_I2S_GetFlagStatus(dev->SPIx, SPI_I2S_FLAG_RXNE) == RESET);
+	    *rxbuf++ = SPI_I2S_ReceiveData(dev->SPIx); 
+	}
+#else
+	while (txcount--){
+	    while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
+	    dev->SPIx->DR = *txbuf++;
+	    while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
+	    tmp= dev->SPIx->DR;
 	}
 
+	// Transfer response data in
+	while (rxcount--){
+	    while (!(dev->SPIx->SR & SPI_I2S_FLAG_TXE));
+	    dev->SPIx->DR = 0;
+	    while (!(dev->SPIx->SR & SPI_I2S_FLAG_RXNE));
+	    *rxbuf++ = dev->SPIx->DR;
+	}
+#endif
+
 	// Wait until the transfer is complete
-//	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY);
+//	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY); datasheet prohibits this usage
         tmp = 0;
 
 	return tmp;

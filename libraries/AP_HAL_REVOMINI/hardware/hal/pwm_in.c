@@ -211,7 +211,6 @@ struct PWM_State  {
 */
 
 	if (channel->tim == tim && (TIM_GetITStatus(tim, channel->tim_cc) == SET)) {
-//	    TIM_ClearITPendingBit(channel->tim, channel->tim_cc);  // this is already done by timer's ISR handler
 
 	    val = TIM_GetCapture1(channel->tim); // captured value
 
@@ -264,9 +263,7 @@ struct PWM_State  {
 	    struct       PWM_State   *input   = &Inputs[i];
 
 	    if (channel->tim == tim && (TIM_GetITStatus(tim, channel->tim_cc) == SET)) {
-
 		input->last_pulse = systick_uptime();
-//		TIM_ClearITPendingBit(channel->tim, channel->tim_cc); // this is already done by timer's ISR handler
  
 		switch (channel->tim_channel)   {
 		case TIM_Channel_1:
@@ -315,7 +312,6 @@ struct PWM_State  {
 		    TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; // reprogram timer to raising
 		}
 		TIM_ICInit(channel->tim, &TIM_ICInitStructure);
-
 	    }
 	}
     }
@@ -400,7 +396,7 @@ static inline void pwmInitializeInput(uint8_t ppmsum){
 
 	const struct TIM_Channel *channel = &PWM_Channels[0];
 	
-	timer_attach_all_interrupts(TIMER12, pwmIRQHandler); // TIM8 and TIM12 share one IRQ so to use TIM12 without TIM8 we MUST use timer's triver
+	timer_attach_all_interrupts(TIMER12, pwmIRQHandler); // TIM8 and TIM12 share one IRQ so to use TIM12 without TIM8 we MUST use timer's driver
 	
 	// timer_reset ******************************************************************/
 	channel->tim_clkcmd(channel->tim_clk, ENABLE);

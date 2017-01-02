@@ -1,5 +1,8 @@
 /******************************************************************************
  * The MIT License
+
+ based on:
+
  *
  * Copyright (c) 2011 LeafLabs, LLC.
  *
@@ -428,12 +431,16 @@ static INLINE  void dispatch_single_irq(const timer_dev *dev,
                                        timer_interrupt_id iid,
                                        uint32_t irq_mask) {
 
-    if (dev->regs->DIER & dev->regs->SR & irq_mask) {
+    
+    uint32_t dsr = dev->regs->DIER & dev->regs->SR & irq_mask;
+    if (dsr) {
+        dev->regs->SR &= ~dsr;  // reset IRQ inspite of installed handler! @NG
+
         TimerHandler handler = (dev->handlers)[iid];
         if (handler) {
             handler(dev->regs);
         }
-        dev->regs->SR &= ~irq_mask;  // reset IRQ inspite of installed handler! @NG
+        
     }
 }
 

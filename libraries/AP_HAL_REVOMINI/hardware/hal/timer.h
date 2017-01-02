@@ -38,122 +38,6 @@
 #include "hal.h"
 #include "bitband.h"
 
-/*
- * Register maps and devices
- */
-
-/** Advanced control timer register map type */
-typedef struct timer_adv_reg_map {
-    __IO uint32_t CR1;            /**< Control register 1 */
-    __IO uint32_t CR2;            /**< Control register 2 */
-    __IO uint32_t SMCR;           /**< Slave mode control register */
-    __IO uint32_t DIER;           /**< DMA/Interrupt enable register */
-    __IO uint32_t SR;             /**< Status register */
-    __IO uint32_t EGR;            /**< Event generation register  */
-    __IO uint32_t CCMR1;          /**< Capture/compare mode register 1 */
-    __IO uint32_t CCMR2;          /**< Capture/compare mode register 2 */
-    __IO uint32_t CCER;           /**< Capture/compare enable register */
-    __IO uint32_t CNT;            /**< Counter */
-    __IO uint32_t PSC;            /**< Prescaler */
-    __IO uint32_t ARR;            /**< Auto-reload register */
-    __IO uint32_t RCR;            /**< Repetition counter register */
-    __IO uint32_t CCR1;           /**< Capture/compare register 1 */
-    __IO uint32_t CCR2;           /**< Capture/compare register 2 */
-    __IO uint32_t CCR3;           /**< Capture/compare register 3 */
-    __IO uint32_t CCR4;           /**< Capture/compare register 4 */
-    __IO uint32_t BDTR;           /**< Break and dead-time register */
-    __IO uint32_t DCR;            /**< DMA control register */
-    __IO uint32_t DMAR;           /**< DMA address for full transfer */
-} timer_adv_reg_map;
-
-/** General purpose timer register map type */
-typedef struct timer_gen_reg_map {
-    __IO uint32_t CR1;            /**< Control register 1 */
-    __IO uint32_t CR2;            /**< Control register 2 */
-    __IO uint32_t SMCR;           /**< Slave mode control register */
-    __IO uint32_t DIER;           /**< DMA/Interrupt enable register */
-    __IO uint32_t SR;             /**< Status register */
-    __IO uint32_t EGR;            /**< Event generation register  */
-    __IO uint32_t CCMR1;          /**< Capture/compare mode register 1 */
-    __IO uint32_t CCMR2;          /**< Capture/compare mode register 2 */
-    __IO uint32_t CCER;           /**< Capture/compare enable register */
-    __IO uint32_t CNT;            /**< Counter */
-    __IO uint32_t PSC;            /**< Prescaler */
-    __IO uint32_t ARR;            /**< Auto-reload register */
-    const uint32_t RESERVED1;     /**< Reserved */
-    __IO uint32_t CCR1;           /**< Capture/compare register 1 */
-    __IO uint32_t CCR2;           /**< Capture/compare register 2 */
-    __IO uint32_t CCR3;           /**< Capture/compare register 3 */
-    __IO uint32_t CCR4;           /**< Capture/compare register 4 */
-    const uint32_t RESERVED2;     /**< Reserved */
-    __IO uint32_t DCR;            /**< DMA control register */
-    __IO uint32_t DMAR;           /**< DMA address for full transfer */
-} timer_gen_reg_map;
-
-/** Basic timer register map type */
-typedef struct timer_bas_reg_map {
-    __IO uint32_t CR1;            /**< Control register 1 */
-    __IO uint32_t CR2;            /**< Control register 2 */
-    const uint32_t RESERVED1;     /**< Reserved */
-    __IO uint32_t DIER;           /**< DMA/Interrupt enable register */
-    __IO uint32_t SR;             /**< Status register */
-    __IO uint32_t EGR;            /**< Event generation register  */
-    const uint32_t RESERVED2;     /**< Reserved */
-    const uint32_t RESERVED3;     /**< Reserved */
-    const uint32_t RESERVED4;     /**< Reserved */
-    __IO uint32_t CNT;            /**< Counter */
-    __IO uint32_t PSC;            /**< Prescaler */
-    __IO uint32_t ARR;            /**< Auto-reload register */
-} timer_bas_reg_map;
-
-
-#ifdef STM32F2
-  /** Timer 1 register map base pointer */
-  #define TIMER1_BASE        ((struct timer_adv_reg_map*)0x40010000)
-#else
-  /** Timer 1 register map base pointer */
-  #define TIMER1_BASE        ((struct timer_adv_reg_map*)0x40012C00)
-#endif
-/** Timer 2 register map base pointer */
-#define TIMER2_BASE        ((struct timer_gen_reg_map*)0x40000000)
-/** Timer 3 register map base pointer */
-#define TIMER3_BASE        ((struct timer_gen_reg_map*)0x40000400)
-/** Timer 4 register map base pointer */
-#define TIMER4_BASE        ((struct timer_gen_reg_map*)0x40000800)
-
-#ifdef STM32_HIGH_DENSITY
-/** Timer 5 register map base pointer */
-#define TIMER5_BASE        ((struct timer_gen_reg_map*)0x40000C00)
-/** Timer 6 register map base pointer */
-#define TIMER6_BASE        ((struct timer_bas_reg_map*)0x40001000)
-/** Timer 7 register map base pointer */
-#define TIMER7_BASE        ((struct timer_bas_reg_map*)0x40001400)
-
-#ifdef STM32F2
-  /** Timer 8 register map base pointer */
-  #define TIMER8_BASE        ((struct timer_adv_reg_map*)0x40010400)
-#else
-  /** Timer 8 register map base pointer */
-  #define TIMER8_BASE        ((struct timer_adv_reg_map*)0x40013400)
-#endif
-#endif
-
-/*
- * Timer devices
- */
-
-/**
- * @brief Timer register map type.
- *
- * Just holds a pointer to the correct type of register map, based on
- * the timer's type.
- */
-typedef union timer_reg_map {
-    timer_adv_reg_map *adv;     /**< Advanced register map */
-    timer_gen_reg_map *gen;     /**< General purpose register map */
-    timer_bas_reg_map *bas;     /**< Basic register map */
-} timer_reg_map;
-
 /**
  * @brief Timer type
  *
@@ -704,7 +588,7 @@ static inline void timer_disable_all(void) {
  * @param dev Device whose counter to pause.
  */
 static inline void timer_pause(const timer_dev *dev) {
-    *bb_perip(&(dev->regs)->CR1, TIMER_CR1_CEN_BIT) = 0;
+    *bb_perip(&(dev->regs->CR1), TIMER_CR1_CEN_BIT) = 0;
 }
 
 /**
@@ -715,7 +599,7 @@ static inline void timer_pause(const timer_dev *dev) {
  * @param dev Device whose counter to resume
  */
 static inline void timer_resume(const timer_dev *dev) {
-    *bb_perip(&(dev->regs)->CR1, TIMER_CR1_CEN_BIT) = 1;
+    *bb_perip(&(dev->regs->CR1), TIMER_CR1_CEN_BIT) = 1;
 }
 
 /**
@@ -727,7 +611,7 @@ static inline void timer_resume(const timer_dev *dev) {
  * @param dev Timer whose counter to return
  */
 static inline uint16_t timer_get_count(const timer_dev *dev) {
-    return (uint16_t)(dev->regs)->CNT;
+    return (uint16_t)(dev->regs->CNT);
 }
 
 /**
@@ -736,7 +620,7 @@ static inline uint16_t timer_get_count(const timer_dev *dev) {
  * @param value New counter value
  */
 static inline void timer_set_count(const timer_dev *dev, uint16_t value) {
-    (dev->regs)->CNT = value;
+    dev->regs->CNT = value;
 }
 
 /**
@@ -752,7 +636,7 @@ static inline void timer_set_count(const timer_dev *dev, uint16_t value) {
  * @see timer_generate_update()
  */
 static inline uint16_t timer_get_prescaler(const timer_dev *dev) {
-    return (uint16_t)(dev->regs)->PSC;
+    return (uint16_t)(dev->regs->PSC);
 }
 
 /**
@@ -766,7 +650,7 @@ static inline uint16_t timer_get_prescaler(const timer_dev *dev) {
  * @see timer_generate_update()
  */
 static inline void timer_set_prescaler(const timer_dev *dev, uint16_t psc) {
-    (dev->regs)->PSC = psc;
+    dev->regs->PSC = psc;
 }
 
 /**
@@ -774,7 +658,7 @@ static inline void timer_set_prescaler(const timer_dev *dev, uint16_t psc) {
  * @param dev Timer whose reload value to return
  */
 static inline uint16_t timer_get_reload(const timer_dev *dev) {
-    return (uint16_t)(dev->regs)->ARR;
+    return (uint16_t)(dev->regs->ARR);
 }
 
 /**
@@ -784,7 +668,7 @@ static inline uint16_t timer_get_reload(const timer_dev *dev) {
  * @see timer_generate_update()
  */
 static inline void timer_set_reload(const timer_dev *dev, uint16_t arr) {
-    (dev->regs)->ARR = arr;
+    dev->regs->ARR = arr;
 }
 
 /**
@@ -793,7 +677,7 @@ static inline void timer_set_reload(const timer_dev *dev, uint16_t arr) {
  * @param channel Channel whose compare value to get.
  */
 static inline uint16_t timer_get_compare(const timer_dev *dev, uint8_t channel) {
-    __IO uint32_t *ccr = &(dev->regs)->CCR1 + (channel - 1);
+    __IO uint32_t *ccr = &(dev->regs->CCR1) + (channel - 1);
     return *ccr;
 }
 
@@ -806,13 +690,13 @@ static inline uint16_t timer_get_compare(const timer_dev *dev, uint8_t channel) 
 static inline void timer_set_compare(const timer_dev *dev,
                                      uint8_t channel,
                                      uint16_t value) {
-    __IO uint32_t *ccr = &(dev->regs)->CCR1 + (channel - 1);
+    __IO uint32_t *ccr = &(dev->regs->CCR1) + (channel - 1);
     *ccr = value;
 }
 
 
 static inline uint16_t timer_get_capture(const timer_dev *dev, uint8_t channel) {
-    __IO uint32_t *ccr = &(dev->regs)->CCR1 + (channel - 1);
+    __IO uint32_t *ccr = &(dev->regs->CCR1) + (channel - 1);
     return *ccr;
 }
 
@@ -828,7 +712,7 @@ static inline uint16_t timer_get_capture(const timer_dev *dev, uint8_t channel) 
  * @param dev Timer device to generate an update for.
  */
 static inline void timer_generate_update(const timer_dev *dev) {
-    *bb_perip(&(dev->regs)->EGR, TIMER_EGR_UG_BIT) = 1;
+    *bb_perip(&(dev->regs->EGR), TIMER_EGR_UG_BIT) = 1;
 }
 
 /**
@@ -836,7 +720,7 @@ static inline void timer_generate_update(const timer_dev *dev) {
  * @param dev Timer device, must have type TIMER_ADVANCED or TIMER_GENERAL
  */
 static inline void timer_dma_enable_trg_req(const timer_dev *dev) {
-    *bb_perip(&(dev->regs)->DIER, TIMER_DIER_TDE_BIT) = 1;
+    *bb_perip(&(dev->regs->DIER), TIMER_DIER_TDE_BIT) = 1;
 }
 
 /**
@@ -844,7 +728,7 @@ static inline void timer_dma_enable_trg_req(const timer_dev *dev) {
  * @param dev Timer device, must have type TIMER_ADVANCED or TIMER_GENERAL
  */
 static inline void timer_dma_disable_trg_req(const timer_dev *dev) {
-    *bb_perip(&(dev->regs)->DIER, TIMER_DIER_TDE_BIT) = 0;
+    *bb_perip(&(dev->regs->DIER), TIMER_DIER_TDE_BIT) = 0;
 }
 
 /**
@@ -853,7 +737,7 @@ static inline void timer_dma_disable_trg_req(const timer_dev *dev) {
  * @param channel Channel whose DMA request to enable.
  */
 static inline void timer_dma_enable_req(const timer_dev *dev, uint8_t channel) {
-    *bb_perip(&(dev->regs)->DIER, channel + 8) = 1;
+    *bb_perip(&(dev->regs->DIER), channel + 8) = 1;
 }
 
 /**
@@ -862,7 +746,7 @@ static inline void timer_dma_enable_req(const timer_dev *dev, uint8_t channel) {
  * @param channel Channel whose DMA request to disable.
  */
 static inline void timer_dma_disable_req(const timer_dev *dev, uint8_t channel) {
-    *bb_perip(&(dev->regs)->DIER, channel + 8) = 0;
+    *bb_perip(&(dev->regs->DIER), channel + 8) = 0;
 }
 
 /**
@@ -874,9 +758,10 @@ static inline void timer_dma_disable_req(const timer_dev *dev, uint8_t channel) 
  * @see timer_channel
  */
 static inline void timer_enable_irq(const timer_dev *dev, uint8_t interrupt) {
-//    *bb_perip(&(dev->regs)->DIER, interrupt) = 1;
-	switch(interrupt)
-	{
+#if 0
+    *bb_perip(&(dev->regs->DIER), interrupt) = 1;
+#else
+	switch(interrupt) {
 	case TIMER_UPDATE_INTERRUPT:
 	    TIM_ITConfig(dev->regs, TIM_IT_Update, ENABLE);
 	    break;		
@@ -902,7 +787,7 @@ static inline void timer_enable_irq(const timer_dev *dev, uint8_t interrupt) {
 	    TIM_ITConfig(dev->regs, TIM_IT_Break, ENABLE);
 	    break;
 	}
-	
+#endif
 	
 }
 
@@ -915,7 +800,9 @@ static inline void timer_enable_irq(const timer_dev *dev, uint8_t interrupt) {
  * @see timer_channel
  */
 static inline void timer_disable_irq(const timer_dev *dev, uint8_t interrupt) {
- //   *bb_perip(&(dev->regs)->DIER, interrupt) = 0;
+#if 0
+    *bb_perip(&(dev->regs->DIER), interrupt) = 0;
+#else
 	switch(interrupt) {
 	case TIMER_UPDATE_INTERRUPT:
 		TIM_ITConfig(dev->regs, TIM_IT_Update, DISABLE);
@@ -942,6 +829,7 @@ static inline void timer_disable_irq(const timer_dev *dev, uint8_t interrupt) {
 		TIM_ITConfig(dev->regs, TIM_IT_Break, DISABLE);
 		break;
 	} 
+#endif
 }
 
 /**
@@ -956,7 +844,9 @@ static inline void timer_disable_irq(const timer_dev *dev, uint8_t interrupt) {
  * @param channel Channel to enable, from 1 to 4.
  */
 static inline void timer_cc_enable(const timer_dev *dev, uint8_t channel) {
-    //*bb_perip(&(dev->regs)->CCER, 4 * (channel - 1)) = 1;
+#if 0
+    *bb_perip(&(dev->regs->CCER), 4 * (channel - 1)) = 1;
+#else
     switch(channel) {
     case 1:
 	dev->regs->CCER |= (uint16_t)TIM_CCER_CC1E;		
@@ -972,7 +862,8 @@ static inline void timer_cc_enable(const timer_dev *dev, uint8_t channel) {
 	break;
     default:
 	break;
-    }    
+    }
+#endif    
 }
 
 /**
@@ -982,7 +873,9 @@ static inline void timer_cc_enable(const timer_dev *dev, uint8_t channel) {
  * @see timer_cc_enable()
  */
 static inline void timer_cc_disable(const timer_dev *dev, uint8_t channel) {
-    //*bb_perip(&(dev->regs)->CCER, 4 * (channel - 1)) = 0;
+#if 0
+    *bb_perip(&(dev->regs->CCER), 4 * (channel - 1)) = 0;
+#else    
     switch(channel){
     case 1:
 	dev->regs->CCER &= (uint16_t)~TIM_CCER_CC1E;		
@@ -999,6 +892,7 @@ static inline void timer_cc_disable(const timer_dev *dev, uint8_t channel) {
     default:
 	break;
     }
+#endif
 }
 
 /**
@@ -1009,7 +903,7 @@ static inline void timer_cc_disable(const timer_dev *dev, uint8_t channel) {
  * @see timer_cc_set_polarity()
  */
 static inline uint8_t timer_cc_get_pol(const timer_dev *dev, uint8_t channel) {
-    return *bb_perip(&(dev->regs)->CCER, 4 * (channel - 1) + 1);
+    return *bb_perip(&(dev->regs->CCER), 4 * (channel - 1) + 1);
 }
 
 /**
@@ -1030,7 +924,7 @@ static inline uint8_t timer_cc_get_pol(const timer_dev *dev, uint8_t channel) {
  * @param pol New polarity, 0 or 1.
  */
 static inline void timer_cc_set_pol(const timer_dev *dev, uint8_t channel, uint8_t pol) {
-    *bb_perip(&(dev->regs)->CCER, 4 * (channel - 1) + 1) = pol;
+    *bb_perip(&(dev->regs->CCER), 4 * (channel - 1) + 1) = pol;
 }
 
 /**
@@ -1039,7 +933,7 @@ static inline void timer_cc_set_pol(const timer_dev *dev, uint8_t channel, uint8
  * @return Number of bytes to be transferred per DMA request, from 1 to 18.
  */
 static inline uint8_t timer_dma_get_burst_len(const timer_dev *dev) {
-    uint32_t dbl = ((dev->regs)->DCR & TIMER_DCR_DBL) >> 8;
+    uint32_t dbl = ((dev->regs->DCR) & TIMER_DCR_DBL) >> 8;
     return dbl + 1;             /* 0 means 1 byte, etc. */
 }
 
@@ -1050,10 +944,10 @@ static inline uint8_t timer_dma_get_burst_len(const timer_dev *dev) {
  *               per DMA request, from 1 to 18.
  */
 static inline void timer_dma_set_burst_len(const timer_dev *dev, uint8_t length) {
-    uint32_t tmp = (dev->regs)->DCR;
+    uint32_t tmp = dev->regs->DCR;
     tmp &= ~TIMER_DCR_DBL;
     tmp |= (length - 1) << 8;
-    (dev->regs)->DCR = tmp;
+    dev->regs->DCR = tmp;
 }
 
 /**
@@ -1108,7 +1002,7 @@ typedef enum timer_dma_base_addr {
  * @return DMA base address
  */
 static inline timer_dma_base_addr timer_dma_get_base_addr(const timer_dev *dev) {
-    uint32_t dcr = (dev->regs)->DCR;
+    uint32_t dcr = dev->regs->DCR;
     return (timer_dma_base_addr)(dcr & TIMER_DCR_DBA);
 }
 
@@ -1122,10 +1016,10 @@ static inline timer_dma_base_addr timer_dma_get_base_addr(const timer_dev *dev) 
  */
 static inline void timer_dma_set_base_addr(const timer_dev *dev,
                                            timer_dma_base_addr dma_base) {
-    uint32_t tmp = (dev->regs)->DCR;
+    uint32_t tmp = dev->regs->DCR;
     tmp &= ~TIMER_DCR_DBA;
     tmp |= dma_base;
-    (dev->regs)->DCR = tmp;
+    dev->regs->DCR = tmp;
 }
 
 
