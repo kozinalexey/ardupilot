@@ -148,7 +148,7 @@ protected:
     bool _initialized;
     void init(void);
 
-    void _cs_assert(){    _cs->write(0); } // Select device 
+    void _cs_assert(){    _cs->write(0); REVOMINIScheduler::_delay_microseconds(1); } // Select device and wait a little
     void _cs_release(){   _cs->write(1); } // Deselect device
 
     const spi_pins* dev_to_spi_pins(const spi_dev *dev);

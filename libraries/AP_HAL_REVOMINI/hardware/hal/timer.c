@@ -308,6 +308,7 @@ void timer_attach_all_interrupts(const timer_dev *dev,  TimerHandler handler) {
     for(i=0; i < dev->n_handlers; i++) {
         dev->handlers[i] = handler;
     }
+    // enabling by caller
 }
 
 

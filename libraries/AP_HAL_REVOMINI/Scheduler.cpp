@@ -102,17 +102,16 @@ void REVOMINIScheduler::init()
     uint32_t period = (2000000UL / SHED_FREQ) - 1; 
     uint32_t prescaler =  (uint16_t) ((SystemCoreClock /2) / 2000000UL) - 1; //2MHz 0.5us ticks
 
+    memset(_timers,     0, sizeof(_timers) );
+    memset(_io_process,     0, sizeof(_io_process));
+    
     timer_pause(TIMER7);
     timer_set_prescaler(TIMER7,prescaler);
     timer_set_count(TIMER7,0);
     timer_set_reload(TIMER7,period);
     
-//    memset(_timer_proc, 0, sizeof(_timer_proc) );
-    memset(_timers,     0, sizeof(_timers) );
-    memset(_io_process,     0, sizeof(_io_process));
-    
     timer_attach_interrupt(TIMER7, TIMER_UPDATE_INTERRUPT, _timer_isr_event, 7); // low priority
-//    NVIC_SetPriority(TIM7_IRQn,5); priority in the above call
+
     timer_resume(TIMER7);
 
     // run standard Ardupilot tasks on 1kHz 
@@ -195,6 +194,16 @@ void REVOMINIScheduler::_delay_microseconds(uint16_t us)
 
 }
 
+
+// register standard Ardupilot's task on 1KHz
+void REVOMINIScheduler::register_timer_process(AP_HAL::MemberProc proc)
+{
+    Revo_cb r = { .mp=proc };
+
+    _register_timer_task(1000, r.h, NULL, 1);
+}
+
+
 void REVOMINIScheduler::register_delay_callback(AP_HAL::Proc proc, uint16_t min_time_ms)
 {
     static bool init_done=false;
@@ -209,14 +218,6 @@ void REVOMINIScheduler::register_delay_callback(AP_HAL::Proc proc, uint16_t min_
     _min_delay_cb_ms = min_time_ms;
 }
 
-void REVOMINIScheduler::register_timer_process(AP_HAL::MemberProc proc)
-{
-
-    Revo_cb r = { .mp=proc };
-
-//    r.mp=proc;
-    _register_timer_task(1000, r.h, NULL, 1);
-}
 
 void do_io_process();
 
@@ -225,7 +226,7 @@ void REVOMINIScheduler::_do_io_process(){
         if (_io_process[i]) {
             _io_process[i]();
         }
-        yield(); // one in a time
+        yield(); // one at a time
     }
 }
 
@@ -439,7 +440,6 @@ AP_HAL::Device::PeriodicHandle REVOMINIScheduler::_register_timer_task(uint32_t 
         _num_timers++; // now nulled proc guards us
 store:        
         _timers[i].period = period_us;
-        _timers[i].time = period_us;
         _timers[i].time_to_run = systick_micros() + period_us;
         _timers[i].sem = sem;
         _timers[i].mode = mode;
@@ -480,13 +480,13 @@ void REVOMINIScheduler::_run_timers(){
     uint32_t now = systick_micros();
     static uint32_t last_run = 0;
 
-
 #ifdef SHED_PROF
     uint32_t full_t = now;
     uint32_t job_t = 0;
 #endif                
 
-    uint32_t dt = now - last_run; // time from last run
+    volatile uint32_t dt = now - last_run; // time from last run - just for debug
+    last_run = now;
 
     for(int i = 0; i<_num_timers; i++){
         if(_timers[i].proc){    // task not cancelled?
@@ -509,27 +509,27 @@ void REVOMINIScheduler::_run_timers(){
                     ret=1;
                     break;
                 }
+                if(_timers[i].sem) _timers[i].sem->give(); //  semaphore active? give back ASAP!
+
                 now = systick_micros();
 #ifdef SHED_PROF
                 t = now - t;               // work time
-#endif                
-                if(_timers[i].sem) _timers[i].sem->give(); //  semaphore active? give back ASAP!
-#ifdef SHED_PROF
+
                 if(_timers[i].micros < t)
                     _timers[i].micros    =  t;      // max time
                 _timers[i].count     += 1;          // number of calls
                 _timers[i].fulltime  += t;          // full time, mean time = full / count
                 job_t += t;                  // time of all jobs
 #endif                
-                if(ret)
+                if(ret) {
                     _timers[i].time_to_run += _timers[i].period;  // reschedule
-                else
+                } else {
                     _timers[i].proc = 0L;               // cancel task
+                }
             }
         }
     }
 
-    last_run = now;
 
 #ifdef SHED_PROF
     full_t = systick_micros() - full_t;         // full time of scheduler

@@ -38,9 +38,8 @@ typedef enum {
 // #define MTASK_PROF
 
 typedef struct RevoTimer {
-    uint32_t period;
-    uint32_t time;
-    uint32_t time_to_run;
+    uint32_t period;            // interval in uS
+    uint32_t time_to_run;       // next run time
     uint64_t proc;          //AP_HAL::Device::PeriodicCb proc and AP_HAL::MemberProc mp together
     REVOMINI::Semaphore *sem;
     uint8_t mode;
@@ -68,8 +67,8 @@ public:
     void     delay_microseconds(uint16_t us) { _delay_microseconds(us); }
     void     delay_microseconds_boost(uint16_t us) override { _delay_microseconds_boost(us); }
     
-    inline uint32_t millis() {    return systick_uptime(); }
-    inline uint32_t micros() {    return systick_micros(); }
+    inline   uint32_t millis() {    return systick_uptime(); }
+    inline   uint32_t micros() {    return systick_micros(); }
     
     void     register_delay_callback(AP_HAL::Proc, uint16_t min_time_ms);
     void     register_timer_process(AP_HAL::MemberProc);

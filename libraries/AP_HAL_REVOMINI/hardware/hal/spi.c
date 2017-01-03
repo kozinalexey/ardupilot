@@ -191,25 +191,20 @@ inline void spi_slave_enable(const spi_dev *dev,
 {
     spi_reconfigure(dev, 0, 0, bitorder, mode);
 
-/*
-	if (!ismaster) {
-		// Enable the Rx buffer not empty interrupt 
-		spi_irq_enable(dev, SPI_I2S_IT_RXNE);
-	}
-*/	
+
+	// Enable the Rx buffer not empty interrupt 
+	spi_irq_enable(dev, SPI_I2S_IT_RXNE);
+	
 	NVIC_InitTypeDef NVIC_InitStructure;
 	/* Configure the Priority Group to 1 bit */                
 	//NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
   
 	/* Configure the SPI interrupt priority */
-/*
 	NVIC_InitStructure.NVIC_IRQChannel = dev->irq;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-*/	    	
-
 }
 
 
