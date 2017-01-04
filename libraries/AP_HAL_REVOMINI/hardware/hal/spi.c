@@ -69,17 +69,12 @@ void spi_peripheral_disable(const spi_dev *dev) {
 
 void spi_gpio_cfg(const spi_dev *dev,
 		  uint8_t as_master,
-                  const gpio_dev *nss_dev,
-                  uint8_t nss_bit,
                   const gpio_dev *comm_dev,
                   uint8_t sck_bit,
                   uint8_t miso_bit,
                   uint8_t mosi_bit) {
 
     if (as_master) {
-	/* Configure NSS pin */	
-        gpio_set_mode(nss_dev, nss_bit, GPIO_OUTPUT_PP);
-	gpio_write_bit(nss_dev, nss_bit, 1);
 	
 	/* Configure SCK pin */
         gpio_set_mode(comm_dev, sck_bit, GPIO_AF_OUTPUT_PP);
@@ -96,8 +91,6 @@ void spi_gpio_cfg(const spi_dev *dev,
 	gpio_set_af_mode(comm_dev, mosi_bit, dev->afio);        
 	gpio_set_speed(comm_dev, mosi_bit, GPIO_Speed_100MHz);
     } else {
-	/* Configure NSS pin */	
-        gpio_set_mode(nss_dev, nss_bit, GPIO_INPUT_FLOATING);
         /* Configure SCK pin */
         gpio_set_mode(comm_dev, sck_bit, GPIO_INPUT_FLOATING);
         /* Configure MISO pin */

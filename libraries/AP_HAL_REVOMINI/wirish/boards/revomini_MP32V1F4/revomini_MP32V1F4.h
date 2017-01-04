@@ -50,21 +50,17 @@
 
    
 #define BOARD_NR_SPI            3
-//#define BOARD_SPI1_NSS_PIN      D51
-#define BOARD_SPI1_SCK_PIN      D52
-#define BOARD_SPI1_MISO_PIN     D53
-#define BOARD_SPI1_MOSI_PIN     D54
-#define BOARD_SPI1_CS_BR_PIN    51
-//#define BOARD_SPI2_NSS_PIN      255
+#define BOARD_SPI1_SCK_PIN      52
+#define BOARD_SPI1_MISO_PIN     53
+#define BOARD_SPI1_MOSI_PIN     54
 #define BOARD_SPI2_SCK_PIN      255
 #define BOARD_SPI2_MISO_PIN     255
 #define BOARD_SPI2_MOSI_PIN     255
-//#define BOARD_SPI3_NSS_PIN      104
 #define BOARD_SPI3_MOSI_PIN     18
 #define BOARD_SPI3_MISO_PIN     17
-#define BOARD_SPI3_CS_DF_PIN    104
 #define BOARD_SPI3_SCK_PIN      16
 
+#define BOARD_DATAFLASH_CS_PIN   104
 
 #define BOARD_HMC5883_DRDY_PIN  38  // PB7 - but it not used by driver
 
@@ -74,9 +70,10 @@
 
 #define BOARD_SBUS_INVERTER     6
 
+#define BOARD_USB_SENSE 11      // PC5
+
 
 #define BOARD_NR_GPIO_PINS      108
 
-#define BOARD_USB_SENSE 11
 
 #endif

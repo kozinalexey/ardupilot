@@ -101,7 +101,6 @@ void spi_init(const spi_dev *dev);
  * @param mosi_bit MOSI pin's GPIO bit on comm_dev
  */
 void spi_gpio_cfg(const spi_dev *dev,	  uint8_t as_master,
-                  const gpio_dev *nss_dev,  uint8_t nss_bit,
                   const gpio_dev *comm_dev, uint8_t sck_bit,
                   uint8_t miso_bit,
                   uint8_t mosi_bit);

@@ -25,7 +25,7 @@ REVOMINI::Semaphore SPIDevice::_semaphores[3]; // per bus
 SPIDesc SPIDeviceManager::_device[] = {    // different SPI tables per board subtype
     //          name                device   bus mode       cs_pin                             speed_low      speed_high
     SPIDesc(HAL_INS_MPU60x0_NAME,   _SPI1,   1,  SPI_MODE_3, MPU6000_CS_PIN       /* pa4 */, SPI_562_500KHZ,  SPI_4_5MHZ /*SPI_1_125MHZ*/), // 400ns SCK time
-    SPIDesc(HAL_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, BOARD_SPI3_CS_DF_PIN /* pb3 */, SPI_1_125MHZ,    SPI_18MHZ),
+    SPIDesc(HAL_DATAFLASH_NAME,     _SPI3,   3,  SPI_MODE_3, BOARD_DATAFLASH_CS_PIN /* pb3 */, SPI_1_125MHZ,    SPI_18MHZ),
 };
 
 
@@ -77,26 +77,20 @@ void SPIDevice::init(){
 //    configure_gpios(_desc.dev, true);
     const spi_pins *pins = dev_to_spi_pins(_desc.dev);
 
-    if (!pins || pins->nss > BOARD_NR_GPIO_PINS || pins->sck > BOARD_NR_GPIO_PINS || pins->mosi > BOARD_NR_GPIO_PINS || pins->miso > BOARD_NR_GPIO_PINS) {
+    if (!pins || pins->sck > BOARD_NR_GPIO_PINS || pins->mosi > BOARD_NR_GPIO_PINS || pins->miso > BOARD_NR_GPIO_PINS) {
         return;
     }
 
     //init the device
     spi_init(_desc.dev);
 
-    const stm32_pin_info *nssi  = &PIN_MAP[pins->nss];
     const stm32_pin_info *scki  = &PIN_MAP[pins->sck];
     const stm32_pin_info *misoi = &PIN_MAP[pins->miso];
     const stm32_pin_info *mosii = &PIN_MAP[pins->mosi];
 
-    spi_gpio_cfg(_desc.dev,
-		true,
-                nssi->gpio_device,
-                nssi->gpio_bit,
-                scki->gpio_device,
-                scki->gpio_bit,
-                misoi->gpio_bit,
-                mosii->gpio_bit);
+    spi_gpio_cfg(_desc.dev, true,
+                scki->gpio_device, scki->gpio_bit,
+                misoi->gpio_bit,   mosii->gpio_bit);
 
 
     spi_master_enable(_desc.dev, baud, _desc.mode, MSBFIRST);

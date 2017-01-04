@@ -43,7 +43,6 @@ typedef enum SPIFrequency {
 
 
 struct spi_pins {
-    uint8_t nss;
     uint8_t sck;
     uint8_t miso;
     uint8_t mosi;
@@ -51,19 +50,16 @@ struct spi_pins {
 
 static const spi_pins board_spi_pins[] __FLASH__ = {
     { // 0
-        BOARD_SPI1_NSS_PIN,
         BOARD_SPI1_SCK_PIN,
         BOARD_SPI1_MISO_PIN,
         BOARD_SPI1_MOSI_PIN
     },
     { // 1
-        BOARD_SPI2_NSS_PIN,
         BOARD_SPI2_SCK_PIN,
         BOARD_SPI2_MISO_PIN,
         BOARD_SPI2_MOSI_PIN
     },
     { //2
-        BOARD_SPI3_NSS_PIN,
         BOARD_SPI3_SCK_PIN,
         BOARD_SPI3_MISO_PIN,
         BOARD_SPI3_MOSI_PIN

@@ -15,7 +15,7 @@
 // flash size
 #define DF_LAST_PAGE 0x1f00
 
-#define DF_RESET BOARD_SPI3_CS_DF_PIN // RESET (PB3)
+#define DF_RESET BOARD_DATAFLASH_CS_PIN // RESET (PB3)
 
 extern const AP_HAL::HAL& hal;
 
