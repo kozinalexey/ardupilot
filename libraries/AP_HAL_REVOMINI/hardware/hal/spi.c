@@ -67,14 +67,12 @@ void spi_peripheral_disable(const spi_dev *dev) {
 	SPI_Cmd(dev->SPIx, DISABLE);
 }
 
-void spi_gpio_cfg(const spi_dev *dev,
-		  uint8_t as_master,
+void spi_gpio_master_cfg(const spi_dev *dev,
                   const gpio_dev *comm_dev,
                   uint8_t sck_bit,
                   uint8_t miso_bit,
                   uint8_t mosi_bit) {
 
-    if (as_master) {
 	
 	/* Configure SCK pin */
         gpio_set_mode(comm_dev, sck_bit, GPIO_AF_OUTPUT_PP);
@@ -90,14 +88,20 @@ void spi_gpio_cfg(const spi_dev *dev,
         gpio_set_mode(comm_dev, mosi_bit, GPIO_AF_OUTPUT_PP);
 	gpio_set_af_mode(comm_dev, mosi_bit, dev->afio);        
 	gpio_set_speed(comm_dev, mosi_bit, GPIO_Speed_100MHz);
-    } else {
+}
+
+void spi_gpio_slave_cfg(const spi_dev *dev,
+                  const gpio_dev *comm_dev,
+                  uint8_t sck_bit,
+                  uint8_t miso_bit,
+                  uint8_t mosi_bit) {
+
         /* Configure SCK pin */
         gpio_set_mode(comm_dev, sck_bit, GPIO_INPUT_FLOATING);
         /* Configure MISO pin */
         gpio_set_mode(comm_dev, miso_bit, GPIO_AF_OUTPUT_PP);
         /* Configure MOSI pin */
         gpio_set_mode(comm_dev, mosi_bit, GPIO_INPUT_FLOATING);
-    }
 }
 
 /*

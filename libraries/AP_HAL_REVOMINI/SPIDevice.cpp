@@ -88,7 +88,7 @@ void SPIDevice::init(){
     const stm32_pin_info *misoi = &PIN_MAP[pins->miso];
     const stm32_pin_info *mosii = &PIN_MAP[pins->mosi];
 
-    spi_gpio_cfg(_desc.dev, true,
+    spi_gpio_master_cfg(_desc.dev,
                 scki->gpio_device, scki->gpio_bit,
                 misoi->gpio_bit,   mosii->gpio_bit);
 
