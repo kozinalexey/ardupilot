@@ -502,7 +502,6 @@ typedef enum timer_oc_mode_flags {
 } timer_oc_mode_flags;
 
 
-struct Timer_dev;
 
 typedef void (* TimerHandler)(TIM_TypeDef *tim);
 

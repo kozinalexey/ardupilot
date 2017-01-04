@@ -1,12 +1,19 @@
 
+
 #include "Scheduler.h"
 #include "Semaphores.h"
-#include <delay.h>
 #include <timer.h>
-#include <systick.h>
+
 #include <AP_Notify/AP_Notify.h>
-#include "GPIO.h"
 #include <AP_Math/AP_Math.h>
+
+#include <systick.h>
+
+#include "GPIO.h"
+
+
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 
 /*
@@ -84,6 +91,7 @@ uint64_t REVOMINIScheduler::delay_int_time = 0;
  uint64_t REVOMINIScheduler::yield_time=0;
  uint32_t REVOMINIScheduler::yield_count=0;
 #endif
+
 
 REVOMINIScheduler::REVOMINIScheduler()
 {

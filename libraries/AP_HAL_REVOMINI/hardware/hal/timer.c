@@ -186,6 +186,10 @@ static void output_compare_mode(const timer_dev *dev, uint8_t channel);
 
 static inline void enable_irq(const timer_dev *dev, uint8_t interrupt, uint8_t priority);
 
+
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 /**
  * Initialize a timer (enable timer clock)
  * @param dev Timer to initialize

@@ -68,7 +68,8 @@ static const gpio_dev* _gpios[] =  { &gpioa, &gpiob, &gpioc, &gpiod, &gpioe, &gp
 
 
 
-
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 void gpio_init(const gpio_dev* const dev) 
 {
@@ -224,16 +225,14 @@ void afio_remap(const gpio_dev* const dev, uint8_t pin, afio_remap_peripheral re
     assert_param(IS_GPIO_PIN_SOURCE(pin));
     assert_param(IS_GPIO_AF(remapping));
     	
-	/* Enable the GPIO Clock  */
-	RCC_AHB1PeriphClockCmd(dev->clk, ENABLE);    	
-	GPIO_PinAFConfig(dev->GPIOx, BIT(pin), remapping);
+    /* Enable the GPIO Clock  */
+    RCC_AHB1PeriphClockCmd(dev->clk, ENABLE);    	
+    GPIO_PinAFConfig(dev->GPIOx, BIT(pin), remapping);
 }
 
 void afio_cfg_debug_ports(afio_debug_cfg config)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-
-
 
 	switch(config) {
 	case AFIO_DEBUG_NONE:

@@ -257,7 +257,6 @@ struct PWM_State  {
 	}
     } else { // PWM
 
-
 	for (i = 0; i < PWM_CHANNELS; i++)  {
 	    const struct TIM_Channel *channel = &PWM_Channels[i];
 	    struct       PWM_State   *input   = &Inputs[i];
@@ -438,8 +437,6 @@ static inline void pwmInitializeInput(uint8_t ppmsum){
 
 	// PWM input capture ************************************************************/
 	TIM_ICInitStructure.TIM_Channel = channel->tim_channel;
-	//TIM_ICInitStructure.TIM_ICPolarity  = TIM_ICPolarity_Rising;
-	//TIM_ICInitStructure.TIM_ICPolarity  = TIM_ICPolarity_BothEdge;
 	TIM_ICInitStructure.TIM_ICPolarity  = TIM_ICPolarity_Falling;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;

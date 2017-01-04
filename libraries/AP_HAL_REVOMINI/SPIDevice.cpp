@@ -1,10 +1,17 @@
 /// -*- tab-width: 4; Mode: C++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 #include <AP_HAL/AP_HAL.h>
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
+
 
 #include <AP_HAL/AP_HAL.h>
+
 #include "SPIDevice.h"
 #include "GPIO.h"
+
+
 #include "Semaphores.h"
 #include <spi.h>
 #include <io.h>
@@ -42,7 +49,6 @@ SPIDeviceManager::get_device(const char *name)
     if (!desc) {
         AP_HAL::panic("SPI: invalid device name");
     }
-
 
 
     return AP_HAL::OwnPtr<AP_HAL::SPIDevice>(new SPIDevice(*desc));

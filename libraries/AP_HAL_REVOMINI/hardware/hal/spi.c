@@ -33,6 +33,10 @@ static const spi_dev spi3 = {
 const spi_dev * const _SPI3 = &spi3;
 
 
+
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 void spi_init(const spi_dev *dev) {
 	SPI_I2S_DeInit(dev->SPIx);
 }
@@ -267,8 +271,8 @@ int spimaster_transfer(const spi_dev *dev,
 	}
 #endif
 
-	// Wait until the transfer is complete
-//	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY); datasheet prohibits this usage
+	// Wait until the transfer is complete - to not disable CS too early 
+	while (dev->SPIx->SR & SPI_I2S_FLAG_BSY); // but datasheet prohibits this usage
         tmp = 0;
 
 	return tmp;

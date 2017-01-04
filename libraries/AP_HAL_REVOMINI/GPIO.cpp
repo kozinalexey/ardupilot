@@ -1,11 +1,17 @@
 
-#include "GPIO.h"
-#include <gpio_hal.h>
+#include "io.h" // in wirish folder
+#include "gpio_hal.h"
+#include <boards.h>
+
+
+
 #include <ext_interrupts.h>
 #include <exti.h>
-#include "io.h"
 
-static inline exti_trigger_mode exti_out_mode(ExtIntTriggerMode mode);
+#include "GPIO.h"
+
+
+
 
 using namespace REVOMINI;
 
@@ -19,6 +25,10 @@ void REVOMINIGPIO::init()
 
     afio_init(); // empty
 }
+
+
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 
 void REVOMINIGPIO::_pinMode(uint8_t pin, uint8_t output)
 {
@@ -83,6 +93,7 @@ uint8_t REVOMINIGPIO::read(uint8_t pin) {
 
     return _read(pin);
 }
+
 
 void REVOMINIGPIO::write(uint8_t pin, uint8_t value) {
     if ((pin >= BOARD_NR_GPIO_PINS))   return;
@@ -158,16 +169,4 @@ void REVOMINIDigitalSource::mode(uint8_t output)
     gpio_set_mode(_device, _bit, outputMode);
 }
 
-
-static inline exti_trigger_mode exti_out_mode(ExtIntTriggerMode mode) {
-    switch (mode) {
-    case FALLING:
-        return EXTI_FALLING;
-    case CHANGE:
-        return EXTI_RISING_FALLING;
-    case RISING:
-    default:
-        return EXTI_RISING;
-    }
-}
 

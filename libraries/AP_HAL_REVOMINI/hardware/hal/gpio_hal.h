@@ -91,8 +91,8 @@ typedef enum afio_exti_num {
 
 /** GPIO device type */
 typedef struct gpio_dev {
-    GPIO_TypeDef *GPIOx; 		    /**< Register map */
-    uint32_t clk; 			        /**< RCC clock information */
+    GPIO_TypeDef *GPIOx;      /**< Register map */
+    uint32_t clk; 	      /**< RCC clock information */
     afio_exti_port exti_port; /**< AFIO external interrupt port value */
 } gpio_dev;
 
@@ -131,22 +131,6 @@ extern void gpio_init_all(void);
 extern void gpio_set_mode(const gpio_dev* const dev, uint8_t pin, gpio_pin_mode mode);
 
 /**
- * Set or reset a GPIO pin. Pin must have previously been configured to output mode.
- * Enables the clock for and resets the given device.
- */
-// extern void gpio_write_bit(const gpio_dev* const  dev, uint8_t pin, uint8_t val);
-
-/**
- * Determine whether or not a GPIO pin is set. Pin must have previously been configured to input mode
- */
-//extern uint8_t gpio_read_bit(const gpio_dev* const  dev, uint8_t pin);
-
-/**
- * Toggle a pin configured as output push-pull. 
- */
-//extern void gpio_toggle_bit(const gpio_dev* const dev, uint8_t pin);
-
-/**
  * Initialize the AFIO clock, and reset the AFIO registers. 
  */
 static inline void afio_init(void) 
@@ -169,16 +153,6 @@ void gpio_set_af_mode(const gpio_dev* const dev, uint8_t pin, int mode);
 extern const gpio_dev * gpio_get_gpio_dev(uint8_t port);
 
 /**
- * Get a GPIO port’s corresponding afio_exti_port.
- */
-//afio_exti_port gpio_exti_port(const gpio_dev* const dev);
-
-/**
- * Select a source input for an external interrupt. 
- */
-//void afio_exti_select(afio_exti_num exti, afio_exti_port gpio_port);
-
-/**
  * Perform an alternate function remap. 
  */
 void afio_remap(const gpio_dev* const dev, uint8_t pin, afio_remap_peripheral remapping);
@@ -193,11 +167,13 @@ static inline void gpio_write_bit(const gpio_dev* const dev, uint8_t pin, uint8_
 	/* Check the parameters */
     assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
     assert_param(IS_GPIO_PIN_SOURCE(pin));
+
+    uint16_t bv = BIT(pin);
     
     if (val) {
-	dev->GPIOx->BSRRL = BIT(pin);
+	dev->GPIOx->BSRRL = bv;
     } else {
-	dev->GPIOx->BSRRH = BIT(pin);
+	dev->GPIOx->BSRRH = bv;
     }    
 }
 
@@ -209,7 +185,7 @@ static inline uint8_t gpio_read_bit(const gpio_dev* const dev, uint8_t pin)
     assert_param(IS_GPIO_ALL_PERIPH(dev->GPIOx));
     assert_param(IS_GPIO_PIN_SOURCE(pin));
  
-    if ((dev->GPIOx->IDR & BIT(pin)) != (uint32_t)Bit_RESET){
+    if ((dev->GPIOx->IDR & BIT(pin)) != Bit_RESET){
 	bitstatus = (uint8_t)Bit_SET;
     } else {
 	bitstatus = (uint8_t)Bit_RESET;
