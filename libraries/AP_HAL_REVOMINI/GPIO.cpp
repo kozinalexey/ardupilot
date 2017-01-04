@@ -122,7 +122,7 @@ bool REVOMINIGPIO::attach_interrupt(uint8_t interrupt_num, AP_HAL::Proc p, uint8
 
 bool REVOMINIGPIO::usb_connected(void)
 {
-    return gpio_read_bit(_GPIOC,5);
+    return gpio_read_bit(PIN_MAP[BOARD_USB_SENSE].gpio_device,PIN_MAP[BOARD_USB_SENSE].gpio_bit);
 }
 
 void REVOMINIDigitalSource::mode(uint8_t output)

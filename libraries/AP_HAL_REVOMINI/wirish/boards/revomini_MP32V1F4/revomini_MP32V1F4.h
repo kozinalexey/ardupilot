@@ -77,4 +77,6 @@
 
 #define BOARD_NR_GPIO_PINS      108
 
+#define BOARD_USB_SENSE 11
+
 #endif
