@@ -23,6 +23,9 @@ revomini: HAL_BOARD = HAL_BOARD_REVOMINI
 revomini: TOOLCHAIN = ARM
 revomini: all
 
+
+
+
 linux: HAL_BOARD = HAL_BOARD_LINUX
 linux: TOOLCHAIN = NATIVE
 linux: BUILDSYS_DEPRECATED = 1

@@ -1,7 +1,7 @@
 #ifndef BOARD_STM32V1F4
 #define BOARD_STM32V1F4
 
-#include "revomini_MP32V1F4.h"
+#include "f4byv21x_MP32V1F4.h"
 #include "hal_types.h"
 #include "wirish_types.h"
 #include "gpio_hal.h"
@@ -21,57 +21,60 @@ extern const stm32_pin_info PIN_MAP[BOARD_NR_GPIO_PINS] = {
     uint8_t timer_channel;        < Timer channel, or 0 if none. 
     uint8_t adc_channel;          < Pin ADC channel, or ADCx if none. 
 */
+															//	PINS OF STM32F407VGTX 100-PIN CHIP
+    {&gpiob,   NULL,  	NULL, 10, 0, ADCx}, 	// D0/PB10  0   47	PB10	I/O				TIM2_CH3		I2C2_SCL	I2S2_CK/SPI2_SCK		USART3_TX			USB_OTG_HS_ULPI_D3	ETH_RX_ER
+    {&gpiob,   NULL,    NULL,  2, 0, ADCx}, 	// D1/PB2   1  	37	PB2	    				EXTI2
+    {&gpiob,   NULL,    NULL, 12, 0, ADCx},    	// D2/PB12  2 	51	PB12	I/O				TIM1_BKIN		I2C2_SMBA	I2S2_WS/SPI2_NSS		USART3_CK		CAN2_RX	USB_OTG_HS_ULPI_D5	ETH_TXD0	USB_OTG_HS_ID
+    {&gpiob,   NULL,    NULL, 13, 0, ADCx},    	// D3/PB13  3 	52	PB13	I/O				TIM1_CH1N		I2S2_CK/SPI2_SCK		USART3_CTS		CAN2_TX	USB_OTG_HS_ULPI_D6	ETH_TXD1
+    {&gpiob,   &timer12,NULL, 14, 1, ADCx}, 	// D4/PB14  4 	53	PB14	I/O				TIM1_CH2N		TIM8_CH2N		SPI2_MISO	I2S2_ext_SD	USART3_RTS		TIM12_CH1			USB_OTG_HS_DM
+    {&gpiob,   &timer12,NULL, 15, 2, ADCx},     // D5/pb15 	5	54	PB15	I/O			RTC_REFIN	TIM1_CH3N		TIM8_CH3N		I2S2_SD/SPI2_MOSI				TIM12_CH2			USB_OTG_HS_DP
+    {&gpioc,   NULL,  &_adc1, 0,  0,   10}, 	// D6/PC0  	6 	15	PC0		I/O
+    {&gpioc,   NULL,  &_adc1, 1,  0,   11},     // D7/PC1   7 	16	PC1		I/O
+    {&gpioc,   NULL,  &_adc1, 2,  0,   12}, 	// D8/PC2   8 	17	PC2		I/O
+    {&gpioc,   NULL,  &_adc1, 3,  0,   13},   	// D9/PC3   9   18	PC3		I/O
+    {&gpioc,   NULL,  &_adc1, 4,  0,   14},     // D10/PC4  10 	33	PC4		I/O
+    {&gpioc,   NULL,  &_adc1, 5,  0,   15},     // D11/PC5  1 	34	PC5		I/O
+    {&gpioc,   &timer8,NULL,  6,  1, ADCx}, 	// D12/PC6  2 	63	PC6		I/O					TIM3_CH1	TIM8_CH1		I2S2_MCK			USART6_TX				SDIO_D6	DCMI_D0
+    {&gpioc,   &timer8,NULL,  7,  2, ADCx}, 	// D13/PC7  3   64	PC7		I/O					TIM3_CH2	TIM8_CH2			I2S3_MCK		USART6_RX				SDIO_D7	DCMI_D1
+    {&gpioc,   &timer8,NULL,  8,  3, ADCx}, 	// D14/PC8  4	65	PC8		I/O					TIM3_CH3	TIM8_CH3					USART6_CK				SDIO_D0	DCMI_D2
+    {&gpioc,   &timer8,NULL,  9,  4, ADCx}, 	// D15/PC9  5 	66	PC9		I/O			RCC_MCO_2		TIM3_CH4	TIM8_CH4	I2C3_SDA	I2S_CKIN							SDIO_D1	DCMI_D3
+    {&gpioc,   NULL,   NULL, 10,  0, ADCx}, 	// D16/PC10 6   78	PC10	I/O									I2S3_CK/SPI3_SCK	USART3_TX	UART4_TX				SDIO_D2	DCMI_D8
+    {&gpioc,   NULL,   NULL, 11,  0, ADCx},     // D17/PC11 7 	79	PC11	I/O								I2S3_ext_SD	SPI3_MISO	USART3_RX	UART4_RX				SDIO_D3	DCMI_D4
+    {&gpioc,   NULL,   NULL, 12,  0, ADCx},     // D18/PC12 8   80	PC12	I/O									I2S3_SD/SPI3_MOSI	USART3_CK	UART5_TX				SDIO_CK	DCMI_D9
+    {&gpioc,   NULL,   NULL, 13,  0, ADCx},     // D19/PC13 9    7	PC13-ANTI_TAMP	I/O			RTC_AF1
+    {&gpioc,   NULL,   NULL, 14,  0, ADCx},     // D20/PC14 20 	 8	PC14-OSC32_IN	I/O			RCC_OSC32_IN
+    {&gpioc,   NULL,   NULL, 15,  0, ADCx},     // D21/PC15 1    9	PC15-OSC32_OUT	I/O			RCC_OSC32_OUT
 
-    {&gpiob,   NULL, NULL, 10, 0, ADCx}, /* D0/PB10  0 USART3_TX/I2C2-SCL */
-    {&gpiob,   NULL, NULL,  2, 0, ADCx}, /* D1/PB2   1*/
-    {&gpiob,   NULL, NULL, 12, 0, ADCx}, /* D2/PB12  2 in0 on REVO */
-    {&gpiob,   NULL, NULL, 13, 0, ADCx}, /* D3/PB13  3 in1 on REVO */
-    {&gpiob,&timer12,NULL, 14, 1, ADCx}, /* D4/PB14  4 CH1_IN - PPMSUM */
-    {&gpiob,&timer12,NULL, 15, 2, ADCx}, /* D5/PB15  5 CH2_IN / buzzer */
-    {&gpioc,   NULL,&_adc1, 0, 0,   10}, /* D6/PC0   6 SBUS invertor output */
-    {&gpioc,   NULL,&_adc1, 1, 0,   11}, /* D7/PC1   7 VOLT */
-    {&gpioc,   NULL,&_adc1, 2, 0,   12}, /* D8/PC2   8 AMP/SONAR */
-    {&gpioc,   NULL,&_adc1, 3, 0,   13}, /* D9/PC3   9 freq sense - resistor to VCC */
-    {&gpioc,   NULL,&_adc1, 4, 0,   14}, /* D10/PC4  10 EXTI_MPU6000 */
-    {&gpioc,   NULL,&_adc1, 5, 0,   15}, /* D11/PC5  1 USB_SENSE */
-    {&gpioc, &timer8,NULL,  6, 1, ADCx}, /* D12/PC6  2 CH3_IN / UART6_TX */
-    {&gpioc, &timer8,NULL,  7, 2, ADCx}, /* D13/PC7  3 CH4_IN / UART6_RX */
-    {&gpioc, &timer8,NULL,  8, 3, ADCx}, /* D14/PC8  4 CH5_IN / S_scl */
-    {&gpioc, &timer8,NULL,  9, 4, ADCx}, /* D15/PC9  5 CH6_IN / S_sda  */
-    {&gpioc,   NULL, NULL, 10, 0, ADCx}, /* D16/PC10 6 SPI3_SCLK */
-    {&gpioc,   NULL, NULL, 11, 0, ADCx}, /* D17/PC11 7 SPI3_MISO */
-    {&gpioc,   NULL, NULL, 12, 0, ADCx}, /* D18/PC12 8 SPI3_MOSI */
-    {&gpioc,   NULL, NULL, 13, 0, ADCx}, /* D19/PC13 9  NOT CONNECTED */
-    {&gpioc,   NULL, NULL, 14, 0, ADCx}, /* D20/PC14 20 NOT CONNECTED */
-    {&gpioc,   NULL, NULL, 15, 0, ADCx}, /* D21/PC15 1  NOT CONNECTED */
-    {&gpioa, &timer1,NULL,  8, 1, ADCx}, /* D22/PA8  2 */
-    {&gpioa, &timer1,NULL,  9, 2, ADCx}, /* D23/PA9  3 USART1_TX */
-    {&gpioa, &timer1,NULL, 10, 3, ADCx}, /* D24/PA10 4 USART1_RX */
-    {&gpiob,   NULL, NULL,  9, 4, ADCx}, /* D25/PB9  5 I2C1_SDA */
-    {&gpiod,   NULL, NULL,  2, 0, ADCx}, /* D26/PD2  6 EXTI_RFM22B / UART5_RX */
-    {&gpiod,   NULL, NULL,  3, 0, ADCx}, /* D27/PD3  7*/
-    {&gpiod,   NULL, NULL,  6, 0, ADCx}, /* D28/PD6  8*/
-    {&gpiog,   NULL, NULL, 11, 0, ADCx}, /* D29/PG11 9*/
-    {&gpiog,   NULL, NULL, 12, 0, ADCx}, /* D30/PG12 30*/
-    {&gpiog,   NULL, NULL, 13, 0, ADCx}, /* D31/PG13 1*/
-    {&gpiog,   NULL, NULL, 14, 0, ADCx}, /* D32/PG14 2*/
-    {&gpiog,   NULL, NULL,  8, 0, ADCx}, /* D33/PG8  3*/
-    {&gpiog,   NULL, NULL,  7, 0, ADCx}, /* D34/PG7  4*/
-    {&gpiog,   NULL, NULL,  6, 0, ADCx}, /* D35/PG6  5*/
-    {&gpiob, &timer3,NULL,  5, 2, ADCx}, /* D36/PB5  6 LED_BLUE */
-    {&gpiob, &timer4,NULL,  6, 1, ADCx}, /* D37/PB6  7 LED_YELLOW - OPTIONAL*/
-    {&gpiob, &timer4,NULL,  7, 2, ADCx}, /* D38/PB7  8 DRDY_HMC5883 */
-    {&gpiof,   NULL,&_adc3, 6, 0,    4}, /* D39/PF6  9*/
-    {&gpiof,   NULL,&_adc3, 7, 0,    5}, /* D40/PF7  40*/
-    {&gpiof,   NULL,&_adc3, 8, 0,    6}, /* D41/PF8  1*/
-    {&gpiof,   NULL,&_adc3, 9, 0,    7}, /* D42/PF9  2*/
-    {&gpiof,   NULL,&_adc3,10, 0,    8}, /* D43/PF10 3*/
-    {&gpiof,   NULL, NULL, 11, 0, ADCx}, /* D44/PF11 4*/
-    {&gpiob, &timer3,&_adc1,1, 4,    9}, /* D45/PB1  5  SERVO2 */
-    {&gpiob, &timer3,&_adc1,0, 3,    8}, /* D46/PB0  6  SERVO1 */
-    {&gpioa, &timer2,&_adc1,0, 1,    0}, /* D47/PA0  7  SERVO6 / UART4_TX */
+    {&gpioa,   NULL,   NULL,  8,  0, ADCx},  //TIMER1CH1 USED PE9  D22/PA8  2   67	PA8		I/O			RCC_MCO_1	TIM1_CH1			I2C3_SCL			USART1_CK			USB_OTG_FS_SOF
+    {&gpioa,   NULL,   NULL,  9,  0, ADCx},  //TIMER1CH2 USED pe11 D23/PA9  3   68	PA9		I/O				TIM1_CH2			I2C3_SMBA			USART1_TX						DCMI_D0
+    {&gpioa,   NULL, NULL,   10,  0, ADCx},  //TIMER1CH3 D24/PA10 4             69	PA10	I/O				TIM1_CH3						USART1_RX			USB_OTG_FS_ID			DCMI_D1
+
+    {&gpiob,   NULL, NULL,    9,  4, ADCx},     // D25/PB9  5 	96	PB9		I/O					TIM4_CH4	TIM11_CH1	I2C1_SDA	I2S2_WS/SPI2_NSS				CAN1_TX			SDIO_D5	DCMI_D7
+    {&gpiod,   NULL, NULL,    2,  0, ADCx}, 	// D26/PD2  6 	83	PD2		I/O					TIM3_ETR						UART5_RX				SDIO_CMD	DCMI_D11
+    {&gpiod,   NULL, NULL,    3,  0, ADCx}, 	// D27/PD3  7 	84	PD3		I/O										USART2_CTS					FSMC_CLK
+    {&gpiod,   NULL, NULL,    6,  0, ADCx},    	// D28/PD6  8	87	PD6		I/O										USART2_RX					FSMC_NWAIT
+    {&gpiog,   NULL, NULL,   11,  0, ADCx}, 	// D29/PG11 9   not found at 100 pins chips
+    {&gpiog,   NULL, NULL,   12,  0, ADCx}, 	// D30/PG12 30  not found at 100 pins chips
+    {&gpiog,   NULL, NULL,   13,  0, ADCx}, 	// D31/PG13 1	not found at 100 pins chips
+    {&gpiog,   NULL, NULL,   14,  0, ADCx},		// D32/PG14 2   not found at 100 pins chips
+    {&gpiog,   NULL, NULL,    8,  0, ADCx}, 	// D33/PG8  3   not found at 100 pins chips
+    {&gpiog,   NULL, NULL,    7,  0, ADCx}, 	// D34/PG7  4   not found at 100 pins chips
+    {&gpiog,   NULL, NULL,    6,  0, ADCx}, 	// D35/PG6  5   not found at 100 pins chips
+    {&gpiob, &timer3,NULL,    5,  2, ADCx}, //TIMER! D36/PB5  6 91	PB5	I/O					TIM3_CH2		I2C1_SMBA	SPI1_MOSI	I2S3_SD/SPI3_MOSI			CAN2_RX	USB_OTG_HS_ULPI_D7	ETH_PPS_OUT		DCMI_D10
+    {&gpiob, &timer4,NULL,    6,  1, ADCx}, //timer! D37/PB6  7 92	PB6	I/O					TIM4_CH1		I2C1_SCL			USART1_TX		CAN2_TX				DCMI_D5
+    {&gpiob, &timer4,NULL,    7,  2, ADCx}, //timer! D38/PB7  8 93	PB7	I/O					TIM4_CH2		I2C1_SDA			USART1_RX					FSMC_NL	DCMI_VSYNC
+    {&gpiof,   NULL,&_adc3,   6,  0,    4}, 	// D39/PF6    9 not found at 100 pins chips
+    {&gpiof,   NULL,&_adc3,   7,  0,    5}, 	// D40/PF7  40 		not found at 100 pins chips
+    {&gpiof,   NULL,&_adc3,   8,  0,    6}, 	// D41/PF8 	1 	not found at 100 pins chips
+    {&gpiof,   NULL,&_adc3,   9,  0,    7}, 	// D42/PF9 	2   not found at 100 pins chips
+    {&gpiof,   NULL,&_adc3,  10,  0,    8}, 	// D43/PF10	3 	not found at 100 pins chips
+    {&gpiof,   NULL, NULL,   11,  0, ADCx}, 	// D44/PF11	4 	not found at 100 pins chips
+    {&gpiob, &timer3,&_adc1, 1,   4, 	9},     // D45/PB1 	5  36	PB1	I/O				TIM1_CH3N	TIM3_CH4	TIM8_CH3N							USB_OTG_HS_ULPI_D2	ETH_RXD3
+    {&gpiob, &timer3,&_adc1,  0,  3,  	8}, 	// D46/PB0  6  35	PB0	I/O				TIM1_CH2N	TIM3_CH3	TIM8_CH2N							USB_OTG_HS_ULPI_D1	ETH_RXD2
+
+    {&gpioa, &timer2,&_adc1,0, 	  1,    0}, /* D47/PA0  7  SERVO6 / UART4_TX */
     {&gpioa, &timer2,&_adc1,1, 2,    1}, /* D48/PA1  8  SERVO5 / UART4_RX */
-    {&gpioa, &timer2,&_adc1,2, 3,    2}, /* D49/PA2  9  SERVO4 */
+    {&gpioa, &timer2,&_adc1,2, 3,    2}, /* D49/PA2  9  SERVO4 TIMER*/
     {&gpioa, &timer2,&_adc1,3, 4,    3}, /* D50/PA3  50 SERVO3 */
     {&gpioa,   NULL, &_adc1,4, 0,    4}, /* D51/PA4  1 CS_MPU6000 */
     {&gpioa,   NULL, &_adc1,5, 0,    5}, /* D52/PA5  2 SPI1_CLK */

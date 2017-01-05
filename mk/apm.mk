@@ -50,6 +50,7 @@ ifeq ($(HAL_BOARD),HAL_BOARD_REVOMINI)
 include $(MK_DIR)/board_REVOMINI.mk
 endif
 
+
 endif
 
 endif

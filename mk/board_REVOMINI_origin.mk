@@ -28,7 +28,7 @@ PATH:=$(PATH):/usr/local/bin
 
 # these default to a Maple Flash build.
 ## BOARDS:  f4byv21x_MP32V1F4  revomini_MP32V1F4
-BOARD            ?= f4byv21x_MP32V1F4
+BOARD            ?= revomini_MP32V1F4
 MEMORY_TARGET    ?= flash
 
 ##
@@ -145,7 +145,7 @@ GLOBAL_FLAGS    := -D$(VECT_BASE_ADDR)
 GLOBAL_FLAGS    += -DBOARD_$(BOARD)
 GLOBAL_FLAGS    += -DMCU_$(MCU)
 GLOBAL_FLAGS    += -DCONFIG_HAL_BOARD=$(HAL_BOARD)
-GLOBAL_FLAGS    += -DSTM32F4XX -DMCU_STM32F407VG
+GLOBAL_FLAGS    += -DSTM32F4XX -DMCU_STM32F405RG
 GLOBAL_FLAGS    += -DUSE_STDPERIPH_DRIVER
 GLOBAL_FLAGS    += -DHSE_VALUE=8000000
 GLOBAL_FLAGS    += -DARM_MATH_CM4
@@ -224,7 +224,7 @@ TGT_BIN :=
 
 COREINCLUDES = -I$(HARDWARE_PATH) -I$(HAL_PATH) -I$(STM32_PATH) -I$(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/inc \
  -I$(STM32_PATH)/Libraries/CMSIS/Include  -I$(STM32_PATH)/Libraries/CMSIS/Device/ST/STM32F4xx/Include  \
- -I$(STM32USB_PATH) -I$(WIRISH_PATH) -I$(WIRISH_PATH)/boards/$(BOARD)  -I$(WIRISH_PATH)/cxx \
+ -I$(STM32USB_PATH) -I$(WIRISH_PATH) -I$(WIRISH_PATH)/boards/revomini_MP32V1F4  -I$(WIRISH_PATH)/cxx \
  -I$(STM32USB_PATH)/STM32_USB_Device_Library/Class/cdc/inc -I$(STM32USB_PATH)/STM32_USB_Device_Library/Core/inc
 
 
@@ -346,13 +346,13 @@ revomini-program:
 
 revomini-clean: clean
 	$(v) /bin/rm -rf $(WIRISH_PATH)/*.d $(HARDWARE_PATH)/*.d $(HAL_PATH)/*.d $(STM32_PATH)/*.d $(STM32USB_PATH)/*.d \
-	$(WIRISH_PATH)/boards/$(BOARD)/*.d $(STM32USB_PATH)/MDK-ARM-GCC/build/*.d $(STM32_PATH)/src/*.d $(WIRISH_PATH)/comm/*.d $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.d
+	$(WIRISH_PATH)/boards/revomini_MP32V1F4/*.d $(STM32USB_PATH)/MDK-ARM-GCC/build/*.d $(STM32_PATH)/src/*.d $(WIRISH_PATH)/comm/*.d $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.d
 	$(v) /bin/rm -rf $(WIRISH_PATH)/*.o $(HARDWARE_PATH)/*.o $(HAL_PATH)/*.o $(STM32_PATH)/*.o $(STM32USB_PATH)/*.o \
-	$(WIRISH_PATH)/boards/$(BOARD)/*.o $(STM32USB_PATH)/MDK-ARM-GCC/build/*.o $(STM32_PATH)/src/*.o $(WIRISH_PATH)/comm/*.o $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.o
+	$(WIRISH_PATH)/boards/revomini_MP32V1F4/*.o $(STM32USB_PATH)/MDK-ARM-GCC/build/*.o $(STM32_PATH)/src/*.o $(WIRISH_PATH)/comm/*.o $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.o
 	$(v) /bin/rm -rf $(WIRISH_PATH)/*.i $(HARDWARE_PATH)/*.i $(HAL_PATH)/*.i $(STM32_PATH)/*.i $(STM32USB_PATH)/*.i \
-	$(WIRISH_PATH)/boards/$(BOARD)/*.i $(STM32USB_PATH)/MDK-ARM-GCC/build/*.i $(STM32_PATH)/src/*.i $(WIRISH_PATH)/comm/*.i $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.i
+	$(WIRISH_PATH)/boards/revomini_MP32V1F4/*.i $(STM32USB_PATH)/MDK-ARM-GCC/build/*.i $(STM32_PATH)/src/*.i $(WIRISH_PATH)/comm/*.i $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.i
 	$(v) /bin/rm -rf $(WIRISH_PATH)/*.ii $(HARDWARE_PATH)/*.ii $(HAL_PATH)/*.ii $(STM32_PATH)/*.ii $(STM32USB_PATH)/*.ii \
-	$(WIRISH_PATH)/boards/$(BOARD)/*.ii $(STM32USB_PATH)/MDK-ARM-GCC/build/*.ii $(STM32_PATH)/src/*.ii $(WIRISH_PATH)/comm/*.ii $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.ii
+	$(WIRISH_PATH)/boards/revomini_MP32V1F4/*.ii $(STM32USB_PATH)/MDK-ARM-GCC/build/*.ii $(STM32_PATH)/src/*.ii $(WIRISH_PATH)/comm/*.ii $(STM32_PATH)/Libraries/STM32F4xx_StdPeriph_Driver/src/*.ii
 
 
 # Link the final object

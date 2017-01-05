@@ -3,7 +3,11 @@
 
 #include <stm32f4xx.h>
 #include <hal_types.h>
+#ifdef BOARD_PINOUT_F4BY
+#include <f4byv21x_MP32V1F4.h>
+#else
 #include <revomini_MP32V1F4.h>
+#endif
 #include "ring_buffer.h"
 
 /*
