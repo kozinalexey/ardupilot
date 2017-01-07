@@ -7,3 +7,4 @@ include $(SKETCHBOOK)/mk/F4BY/f4by_common.mk
 #MODULES     += modules/uavcan
 MODULES     += lib/mathlib
 MODULES		+= drivers/boards/f4by
+MODULES		+= drivers/px4flow
