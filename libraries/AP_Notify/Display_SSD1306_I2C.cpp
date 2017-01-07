@@ -71,27 +71,13 @@ bool Display_SSD1306_I2C::hw_init()
     // give back i2c semaphore
     _dev->get_semaphore()->give();
 
-    _need_hw_update = true;
-
-    _dev->register_periodic_callback(20000, FUNCTOR_BIND_MEMBER(&Display_SSD1306_I2C::_update_timer, bool));
 
     return true;
 }
 
 bool Display_SSD1306_I2C::hw_update()
 {
-    _need_hw_update = true;
-    return true;
-}
-
-bool Display_SSD1306_I2C::_update_timer()
-{
-    if (!_need_hw_update) {
-        return true;
-    }
-    _need_hw_update = false;
-
-    struct PACKED {
+  struct PACKED {
         uint8_t reg;
         uint8_t cmd[6];
     } command = { 0x0, {0x21, 0, 127, 0x22, 0, 7} };

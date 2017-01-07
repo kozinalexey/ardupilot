@@ -62,26 +62,12 @@ bool Display_SH1106_I2C::hw_init()
     // give back i2c semaphore
     _dev->get_semaphore()->give();
 
-    _need_hw_update = true;
-
-    _dev->register_periodic_callback(20000, FUNCTOR_BIND_MEMBER(&Display_SH1106_I2C::_update_timer, bool));
 
     return true;
 }
 
 bool Display_SH1106_I2C::hw_update()
 {
-    _need_hw_update = true;
-    return true;
-}
-
-bool Display_SH1106_I2C::_update_timer()
-{
-    if (!_need_hw_update) {
-        return true;
-    }
-    _need_hw_update = false;
-
     struct PACKED {
         uint8_t reg;
         uint8_t cmd[3];
@@ -92,6 +78,9 @@ bool Display_SH1106_I2C::_update_timer()
         uint8_t db[SH1106_COLUMNS/2];
     } display_buffer = { 0x40, {} };
 
+    if (!_dev || !_dev->get_semaphore()->take(5)) {
+        return false;
+    }
     // write buffer to display
     for (uint8_t i = 0; i < (SH1106_ROWS / SH1106_ROWS_PER_PAGE); i++) {
         command.cmd[2] = 0xB0 | (i & 0x0F);
@@ -103,6 +92,8 @@ bool Display_SH1106_I2C::_update_timer()
         memcpy(&display_buffer.db[0], &_displaybuffer[i * SH1106_COLUMNS + SH1106_COLUMNS/2 ], SH1106_COLUMNS/2);
         _dev->transfer((uint8_t *)&display_buffer, SH1106_COLUMNS/2 + 1, nullptr, 0);
     }
+    // give back i2c semaphore
+    _dev->get_semaphore()->give();
 
     return true;
 }
