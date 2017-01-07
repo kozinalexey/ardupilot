@@ -30,7 +30,6 @@
 #include "ToshibaLED_PX4.h"
 #include "VRBoard_LED.h"
 #include "DiscreteRGBLed.h"
-#include "DiscoLED.h"
 #include <stdio.h>  // for strncpy
 
 // table of user settable parameters
