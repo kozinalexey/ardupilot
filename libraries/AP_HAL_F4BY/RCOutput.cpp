@@ -576,6 +576,8 @@ bool F4BYRCOutput::enable_sbus_out(uint16_t rate_hz)
  */
 void F4BYRCOutput::set_output_mode(enum output_mode mode)
 {
+unsigned int         pwm_clock = 1U;
+
     if (_output_mode == mode) {
         // no change
         return;
@@ -620,13 +622,15 @@ void F4BYRCOutput::set_output_mode(enum output_mode mode)
 
        case MODE_PWM_BRUSHED16KHZ:
        case MODE_PWM_ONESHOT125:
-           // setup an 8MHz clock. This has the effect of scaling all outputs by 8x
-           ioctl(_pwm_fd, PWM_SERVO_SET_UPDATE_CLOCK, 8);
-           if (_alt_fd != -1) {
-               ioctl(_alt_fd, PWM_SERVO_SET_UPDATE_CLOCK, 8);
-           }
-           break;
+    	   	   pwm_clock = 8U;
+        	break;
        }
+       // setup an 8MHz clock. This has the effect of scaling all outputs by 8x
+       ioctl(_pwm_fd, PWM_SERVO_SET_UPDATE_CLOCK, pwm_clock);
+       if (_alt_fd != -1) {
+           ioctl(_alt_fd, PWM_SERVO_SET_UPDATE_CLOCK, pwm_clock);
+       }
+
 
 }
 
