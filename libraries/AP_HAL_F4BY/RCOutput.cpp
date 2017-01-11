@@ -602,6 +602,32 @@ void F4BYRCOutput::set_output_mode(enum output_mode mode)
             ioctl(_alt_fd, PWM_SERVO_SET_ONESHOT, 0);
         }
     }
+
+    _output_mode = mode;
+       switch (_output_mode) {
+       case MODE_PWM_ONESHOT:
+           ioctl(_pwm_fd, PWM_SERVO_SET_ONESHOT, 1);
+           if (_alt_fd != -1) {
+               ioctl(_alt_fd, PWM_SERVO_SET_ONESHOT, 1);
+           }
+           break;
+       case MODE_PWM_NORMAL:
+           ioctl(_pwm_fd, PWM_SERVO_SET_ONESHOT, 0);
+           if (_alt_fd != -1) {
+               ioctl(_alt_fd, PWM_SERVO_SET_ONESHOT, 0);
+           }
+           break;
+
+       case MODE_PWM_BRUSHED16KHZ:
+       case MODE_PWM_ONESHOT125:
+           // setup an 8MHz clock. This has the effect of scaling all outputs by 8x
+           ioctl(_pwm_fd, PWM_SERVO_SET_UPDATE_CLOCK, 8);
+           if (_alt_fd != -1) {
+               ioctl(_alt_fd, PWM_SERVO_SET_UPDATE_CLOCK, 8);
+           }
+           break;
+       }
+
 }
 
 

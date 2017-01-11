@@ -118,7 +118,9 @@ public:
      */
     enum output_mode {
         MODE_PWM_NORMAL,
-        MODE_PWM_ONESHOT
+        MODE_PWM_ONESHOT,
+        MODE_PWM_ONESHOT125,
+        MODE_PWM_BRUSHED16KHZ
     };
     virtual void    set_output_mode(enum output_mode mode) {}
 };

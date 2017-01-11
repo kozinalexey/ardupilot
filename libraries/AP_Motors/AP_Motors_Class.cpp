@@ -85,20 +85,22 @@ void AP_Motors::rc_write(uint8_t chan, uint16_t pwm)
         // we have a mapped motor number for this channel
         chan = _motor_map[chan];
     }
-    if (_pwm_type == PWM_TYPE_ONESHOT125 && (_motor_fast_mask & (1U<<chan))) {
+    //setup 8MHz clock  for pwm timers for oneshot125
+    //no need decrease pwm steps count to 125
+    //if (_pwm_type == PWM_TYPE_ONESHOT125 && (_motor_fast_mask & (1U<<chan))) {
         // OneShot125 uses a PWM range from 125 to 250 usec
-        pwm /= 8;
+        ///pwm /= 8;
         /*
           OneShot125 ESCs can be confused by pulses below 125 or above
           250, making them fail the pulse type auto-detection. This
           happens at least with BLHeli
         */
-        if (pwm < 125) {
-            pwm = 125;
-        } else if (pwm > 250) {
-            pwm = 250;
-        }
-    }
+        //if (pwm < 125) {
+        //    pwm = 125;
+        //} else if (pwm > 250) {
+        //    pwm = 250;
+        //}
+    //}
     hal.rcout->write(chan, pwm);
 }
 
@@ -112,13 +114,19 @@ void AP_Motors::rc_set_freq(uint32_t mask, uint16_t freq_hz)
         _motor_fast_mask |= mask;
     }
     hal.rcout->set_freq(mask, freq_hz);
-    if ((_pwm_type == PWM_TYPE_ONESHOT ||
-         _pwm_type == PWM_TYPE_ONESHOT125) &&
+    if (_pwm_type == PWM_TYPE_ONESHOT  &&
         freq_hz > 50 &&
         mask != 0) {
         // tell HAL to do immediate output
         hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_ONESHOT);
     }
+    if (_pwm_type == PWM_TYPE_ONESHOT125 &&
+        freq_hz > 50 &&
+        mask != 0) {
+        // tell HAL to do immediate output
+        hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_ONESHOT125);
+    }
+
 }
 
 void AP_Motors::rc_enable_ch(uint8_t chan)
