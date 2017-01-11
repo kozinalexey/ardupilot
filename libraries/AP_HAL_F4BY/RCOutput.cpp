@@ -102,7 +102,7 @@ void F4BYRCOutput::set_freq_fd(int fd, uint32_t chmask, uint16_t freq_hz)
     // we can't set this per channel
     if (freq_hz > 50 || freq_hz == 1) {
         // we're being asked to set the alt rate
-        if (_output_mode == MODE_PWM_ONESHOT) {
+        if (_output_mode == MODE_PWM_ONESHOT || _output_mode == MODE_PWM_ONESHOT125) {
             /*
               set a 1Hz update for oneshot. This periodic output will
               never actually trigger, instead we will directly trigger
@@ -321,7 +321,8 @@ void F4BYRCOutput::write(uint8_t ch, uint16_t period_us)
       output
      */
     if (period_us != _period[ch] ||
-        _output_mode == MODE_PWM_ONESHOT) {
+        _output_mode == MODE_PWM_ONESHOT||
+        _output_mode == MODE_PWM_ONESHOT125) {
         _period[ch] = period_us;
         _need_update = true;
     }
@@ -530,7 +531,7 @@ void F4BYRCOutput::push()
     hal.gpio->write(55, 0);
 #endif
     _corking = false;
-    if (_output_mode == MODE_PWM_ONESHOT) {
+    if (_output_mode == MODE_PWM_ONESHOT || _output_mode == MODE_PWM_ONESHOT125) {
         // run timer immediately in oneshot mode
         _send_outputs();
     }
@@ -538,7 +539,7 @@ void F4BYRCOutput::push()
 
 void F4BYRCOutput::_timer_tick(void)
 {
-    if (_output_mode != MODE_PWM_ONESHOT) {
+    if (_output_mode != MODE_PWM_ONESHOT && _output_mode != MODE_PWM_ONESHOT125) {
         /* in oneshot mode the timer does nothing as the outputs are
          * sent from push() */
         _send_outputs();
@@ -582,7 +583,7 @@ unsigned int         pwm_clock = 1U;
         // no change
         return;
     }
-    if (mode == MODE_PWM_ONESHOT) {
+    if (mode == MODE_PWM_ONESHOT || mode == MODE_PWM_ONESHOT125) {
         // when using oneshot we don't want the regular pulses. The
         // best we can do with the current PX4Firmware code is ask for
         // 1Hz. This does still produce pulses, but the trigger calls
@@ -592,7 +593,7 @@ unsigned int         pwm_clock = 1U;
         set_freq(_rate_mask, 1);
     }
     _output_mode = mode;
-    if (_output_mode == MODE_PWM_ONESHOT) {
+    if (_output_mode == MODE_PWM_ONESHOT  || mode == MODE_PWM_ONESHOT125) {
         //::printf("enable oneshot\n");
         ioctl(_pwm_fd, PWM_SERVO_SET_ONESHOT, 1);
         if (_alt_fd != -1) {
@@ -605,25 +606,14 @@ unsigned int         pwm_clock = 1U;
         }
     }
 
-    _output_mode = mode;
        switch (_output_mode) {
-       case MODE_PWM_ONESHOT:
-           ioctl(_pwm_fd, PWM_SERVO_SET_ONESHOT, 1);
-           if (_alt_fd != -1) {
-               ioctl(_alt_fd, PWM_SERVO_SET_ONESHOT, 1);
-           }
-           break;
-       case MODE_PWM_NORMAL:
-           ioctl(_pwm_fd, PWM_SERVO_SET_ONESHOT, 0);
-           if (_alt_fd != -1) {
-               ioctl(_alt_fd, PWM_SERVO_SET_ONESHOT, 0);
-           }
-           break;
 
        case MODE_PWM_BRUSHED16KHZ:
        case MODE_PWM_ONESHOT125:
     	   	   pwm_clock = 8U;
         	break;
+       default:
+    	   break;
        }
        // setup an 8MHz clock. This has the effect of scaling all outputs by 8x
        ioctl(_pwm_fd, PWM_SERVO_SET_UPDATE_CLOCK, pwm_clock);
