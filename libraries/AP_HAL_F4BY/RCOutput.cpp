@@ -165,7 +165,8 @@ void F4BYRCOutput::set_freq_fd(int fd, uint32_t chmask, uint16_t freq_hz)
  */
 void F4BYRCOutput::set_freq(uint32_t chmask, uint16_t freq_hz)
 {
-    if (freq_hz > 50 && _output_mode == MODE_PWM_ONESHOT) {
+    if (freq_hz != 50 && (_output_mode == MODE_PWM_ONESHOT || _output_mode == MODE_PWM_ONESHOT125 )
+    		    ) {
         // rate is irrelevent in oneshot
         return;
     }
@@ -610,6 +611,7 @@ unsigned int         pwm_clock = 1U;
 
        case MODE_PWM_BRUSHED16KHZ:
        case MODE_PWM_ONESHOT125:
+       case MODE_PWM_PWMFASTX8:
     	   	   pwm_clock = 8U;
         	break;
        default:

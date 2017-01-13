@@ -115,17 +115,30 @@ void AP_Motors::rc_set_freq(uint32_t mask, uint16_t freq_hz)
     }
     hal.rcout->set_freq(mask, freq_hz);
     if (_pwm_type == PWM_TYPE_ONESHOT  &&
-        freq_hz > 50 &&
+        freq_hz != 50 &&
         mask != 0) {
         // tell HAL to do immediate output
         hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_ONESHOT);
     }
     if (_pwm_type == PWM_TYPE_ONESHOT125 &&
-        freq_hz > 50 &&
+        freq_hz != 50 &&
         mask != 0) {
         // tell HAL to do immediate output
         hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_ONESHOT125);
     }
+    if (_pwm_type ==  PWM_TYPE_PWMFASTX8 &&
+        freq_hz != 50 &&
+        mask != 0) {
+        // tell HAL to do immediate output
+        hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_PWMFASTX8);
+    }
+    if (_pwm_type ==  PWM_TYPE_BRUSHED16KHZ &&
+        freq_hz != 50 &&
+        mask != 0) {
+        // tell HAL to do immediate output
+        hal.rcout->set_output_mode(AP_HAL::RCOutput::MODE_PWM_BRUSHED16KHZ);
+    }
+
 
 }
 
