@@ -69,7 +69,7 @@ extern const AP_HAL::HAL& hal;
 // MediaTek-based GPS.
 //
 #define MTK_INIT_MSG \
-    "$PMTK314,0,5,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*2D\r\n" /* RMC GGA & VTG once every fix */ \
+    "$PMTK314,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0*29\r\n" /*  RMC GGA & VTG once every fix */  \
     "$PMTK330,0*2E\r\n"                                 /* datum = WGS84 */ \
 	"$PMTK397,0*23\r\n"									/* Set Nav Threshold (the minimum speed the GPS must be moving to update the position) to 0 m/s*/ \
     "$PMTK313,0*2F\r\n"                                 /* SBAS off */ \
