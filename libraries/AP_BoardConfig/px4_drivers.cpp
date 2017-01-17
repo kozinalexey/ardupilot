@@ -83,7 +83,8 @@ void AP_BoardConfig::px4_setup_pwm()
         { 6, PWM_SERVO_MODE_6PWM, 0 },
         { 7, PWM_SERVO_MODE_3PWM1CAP, 2 },
 #if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || CONFIG_HAL_BOARD == HAL_BOARD_F4BY
-        { 8, PWM_SERVO_MODE_12PWM, 0 },
+        { 8, PWM_SERVO_MODE_8PWM, 0 },
+        { 12, PWM_SERVO_MODE_12PWM, 0 }
 #endif
     };
     uint8_t mode_parm = (uint8_t)px4.pwm_count.get();
@@ -96,14 +97,31 @@ void AP_BoardConfig::px4_setup_pwm()
     if (i == ARRAY_SIZE(mode_table)) {
         hal.console->printf("RCOutput: invalid BRD_PWM_COUNT %u\n", mode_parm); 
     } else {
+#if  CONFIG_HAL_BOARD == HAL_BOARD_F4BY
+ //       int fd = open(PWM_OUTPUT0_DEVICE_PATH, O_RDWR);
+ //       if (fd == -1) {
+//            AP_HAL::panic("Unable to open fmu device");
+//        }
+ //       if (ioctl(fd, PWM_SERVO_SET_COUNT, mode_table[i].mode_value) != 0) {
+ //           hal.console->printf("RCOutput: unable to setup  PWM with BRD_PWM_COUNT %u\n", mode_parm);
+ //       }
+ //       else {
+ //           hal.console->printf("RCOutput: setup BRD_PWM_COUNT to %u\n", mode_parm);
+ //       }
+ //       close(fd);
+#else
         int fd = open("/dev/px4fmu", 0);
         if (fd == -1) {
             AP_HAL::panic("Unable to open /dev/px4fmu");
         }
         if (ioctl(fd, PWM_SERVO_SET_MODE, mode_table[i].mode_value) != 0) {
             hal.console->printf("RCOutput: unable to setup AUX PWM with BRD_PWM_COUNT %u\n", mode_parm);
-        }   
+        }
+        else {
+            hal.console->printf("RCOutput: setup BRD_PWM_COUNT to %u\n", mode_parm);
+        }
         close(fd);
+#endif
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
         if (mode_table[i].num_gpios < 2) {
             // reduce change of config mistake where relay and PWM interfere

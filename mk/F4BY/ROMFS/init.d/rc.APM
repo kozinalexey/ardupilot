@@ -68,13 +68,23 @@ else
     sh /etc/init.d/rc.error
 fi
 
-if [ -f /fs/microsd/APM/OUT8]
+echo "Starting F4BY_INPUT driver"
+if f4by_input start
+then
+	echo "started F4BY_INPUT driver"
+else
+    echo "failed to start F4BY_INPUT driver"
+    echo "failed to start F4BY_INPUT driver" >> $logfile
+    sh /etc/init.d/rc.error
+fi
+
+if [ -f /fs/microsd/APM/OUT8 ]
 then
 	echo "Setting FMU mode 8 outputs"
 	fmu mode_pwm_gpio
 else
-	echo "Setting FMU mode 12 outputs"
-	fmu mode_pwm
+ 	echo "Setting FMU mode 12 outputs"
+ 	fmu mode_pwm
 fi
 
 echo "Starting APM sensors"
@@ -161,15 +171,7 @@ else
     sh /etc/init.d/rc.error
 fi
 
-echo "Starting F4BY_INPUT driver"
-if f4by_input start
-then
-	echo "started F4BY_INPUT driver"
-else
-    echo "failed to start F4BY_INPUT driver"
-    echo "failed to start F4BY_INPUT driver" >> $logfile
-    sh /etc/init.d/rc.error
-fi
+
 
 echo Starting ArduPilot $deviceA $deviceC $deviceD $deviceE
 if ArduPilot -d $deviceA -d2 $deviceC -d3 $deviceD -d4 $deviceE start
