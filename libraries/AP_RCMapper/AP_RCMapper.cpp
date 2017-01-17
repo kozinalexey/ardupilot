@@ -38,6 +38,15 @@ const AP_Param::GroupInfo RCMapper::var_info[] = {
     // @RebootRequired: True
     AP_GROUPINFO("YAW",         3, RCMapper, _ch_yaw, 4),
 
+    // @Param: mode
+    // @DisplayName: mode channel
+    // @Description: mode channel number. This is useful when you have a RC transmitter that can't change the channel order easily. mode is normally on channel 5, but you can move it to any channel with this parameter.  Reboot is required for changes to take effect.
+    // @Range: 5 8
+    // @Increment: 1
+    // @User: Advanced
+    // @RebootRequired: True
+    AP_GROUPINFO("MODE",         4, RCMapper, _ch_mode, 5),
+
     AP_GROUPEND
 };
 

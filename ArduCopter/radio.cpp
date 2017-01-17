@@ -25,6 +25,7 @@ void Copter::init_rc_in()
     channel_pitch    = RC_Channel::rc_channel(rcmap.pitch()-1);
     channel_throttle = RC_Channel::rc_channel(rcmap.throttle()-1);
     channel_yaw      = RC_Channel::rc_channel(rcmap.yaw()-1);
+    channel_mode     = RC_Channel::rc_channel(rcmap.mode()-1);
 
     // set rc channel ranges
     channel_roll->set_angle(ROLL_PITCH_YAW_INPUT_MAX);

@@ -19,11 +19,11 @@ void Copter::read_control_switch()
 
     // calculate position of flight mode switch
     int8_t switch_position;
-    if      (g.rc_5.get_radio_in() < 1231) switch_position = 0;
-    else if (g.rc_5.get_radio_in() < 1361) switch_position = 1;
-    else if (g.rc_5.get_radio_in() < 1491) switch_position = 2;
-    else if (g.rc_5.get_radio_in() < 1621) switch_position = 3;
-    else if (g.rc_5.get_radio_in() < 1750) switch_position = 4;
+    if      (channel_mode->get_radio_in() < 1231) switch_position = 0;
+    else if (channel_mode->get_radio_in() < 1361) switch_position = 1;
+    else if (channel_mode->get_radio_in() < 1491) switch_position = 2;
+    else if (channel_mode->get_radio_in() < 1621) switch_position = 3;
+    else if (channel_mode->get_radio_in() < 1750) switch_position = 4;
     else switch_position = 5;
 
     // store time that switch last moved
