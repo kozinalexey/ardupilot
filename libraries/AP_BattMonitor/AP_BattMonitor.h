@@ -128,6 +128,7 @@ protected:
     AP_Float    _curr_amp_offset[AP_BATT_MONITOR_MAX_INSTANCES];    /// offset voltage that is subtracted from current pin before conversion to amps
     AP_Int32    _pack_capacity[AP_BATT_MONITOR_MAX_INSTANCES];      /// battery pack capacity less reserve in mAh
     AP_Int16    _watt_max[AP_BATT_MONITOR_MAX_INSTANCES];           /// max battery power allowed. Reduce max throttle to reduce current to satisfy this limit
+    AP_Int8     _alegro_off_comp [AP_BATT_MONITOR_MAX_INSTANCES];  /// do compensation offset  of aliegro curent sensor by board_voltage
 
     AP_Int8     _alegro_off_comp [AP_BATT_MONITOR_MAX_INSTANCES];  /// do compensation offset  of aliegro curent sensor by board_voltage
 

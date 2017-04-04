@@ -21,11 +21,19 @@ AP_BattMonitor_Analog::AP_BattMonitor_Analog(AP_BattMonitor &mon, uint8_t instan
 void
 AP_BattMonitor_Analog::read()
 {
+#if CONFIG_HAL_BOARD == HAL_BOARD_F4BY //f4by board have inboard 1/2 resistor divider
+float voltpinmult = 2.0f;
+float curpinmult  = 2.0f;
+#else
+float voltpinmult = 1.0f;
+float curpinmult  = 1.0f;
+#endif
+
     // this copes with changing the pin at runtime
     _volt_pin_analog_source->set_pin(_mon._volt_pin[_state.instance]);
 
     // get voltage
-    _state.voltage = _volt_pin_analog_source->voltage_average() * _mon._volt_multiplier[_state.instance];
+    _state.voltage = _volt_pin_analog_source->voltage_average() * voltpinmult *  _mon._volt_multiplier[_state.instance];
 
     // read current
     if (_mon.has_current(_state.instance)) {
@@ -36,6 +44,7 @@ AP_BattMonitor_Analog::read()
         // this copes with changing the pin at runtime
         _curr_pin_analog_source->set_pin(_mon._curr_pin[_state.instance]);
         float allegroOfsetComp = 1.0f;
+<<<<<<< HEAD
 if  (_mon._alegro_off_comp[_state.instance] == 1){
         float alegroVCC = hal.analogin->board_voltage();
         allegroOfsetComp =  alegroVCC /5.0f ; //5v default
@@ -44,6 +53,14 @@ if  (_mon._alegro_off_comp[_state.instance] == 1){
 
         // read current
         _state.current_amps = (_curr_pin_analog_source->voltage_average()  -_mon._curr_amp_offset[_state.instance] * allegroOfsetComp)*_mon._curr_amp_per_volt[_state.instance];
+=======
+        if  (_mon._alegro_off_comp[_state.instance] == 1){
+              float alegroVCC = hal.analogin->board_voltage();
+              allegroOfsetComp =  alegroVCC /5.0f ; //5v default
+        		}
+        // read current
+         _state.current_amps = (_curr_pin_analog_source->voltage_average() * curpinmult   -_mon._curr_amp_offset[_state.instance] * allegroOfsetComp)*_mon._curr_amp_per_volt[_state.instance];
+>>>>>>> b940e91... bat monitor fix
 
         // update total current drawn since startup
         if (_state.last_time_micros != 0 && dt < 2000000.0f) {
