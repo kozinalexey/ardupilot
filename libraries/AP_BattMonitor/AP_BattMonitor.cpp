@@ -69,8 +69,6 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] = {
     AP_GROUPINFO("_WATT_MAX", 9, AP_BattMonitor, _watt_max[0], AP_BATT_MAX_WATT_DEFAULT),
 #endif
 
-    // 10 is left for future expansion
-
 #if AP_BATT_MONITOR_MAX_INSTANCES > 1
     // @Param: 2_MONITOR
     // @DisplayName: Battery monitoring
@@ -133,6 +131,13 @@ const AP_Param::GroupInfo AP_BattMonitor::var_info[] = {
 #endif
 
 #endif // AP_BATT_MONITOR_MAX_INSTANCES > 1
+
+    // @Param: _ISALEGRO
+    // @DisplayName: compensation offset of allegro when vcc based board voltage changed
+    // @Description: compensate vcc of acs756-758 changes
+    // @Values: 0:Disabled,1: Enabled
+    // @User: Standard
+    AP_GROUPINFO("_ISALEGRO", 20, AP_BattMonitor, _alegro_off_comp[0], 0),
 
     AP_GROUPEND
 };
