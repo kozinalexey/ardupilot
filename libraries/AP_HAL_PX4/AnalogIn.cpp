@@ -60,6 +60,8 @@ static const struct {
     { 15,  6.6f/4096  },    // analog airspeed sensor, 2:1 scaling
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     { 1,   3.3f/4096  },
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+    { 1,   3.3f/4096  },
 #else
 #error "Unknown board type for AnalogIn scaling"
 #endif
