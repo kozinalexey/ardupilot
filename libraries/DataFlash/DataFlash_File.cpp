@@ -85,7 +85,9 @@ DataFlash_File::DataFlash_File(DataFlash_Class &front,
 #elif defined(CONFIG_ARCH_BOARD_VRBRAIN_V54)
     _writebuf_chunk(512),  
 #elif defined(CONFIG_ARCH_BOARD_F4BY)
-    _writebuf_chunk(512), 
+    _writebuf_chunk(512),  
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+    _writebuf_chunk(512),
 #else
     _writebuf_chunk(4096),
 #endif

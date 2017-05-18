@@ -67,6 +67,8 @@ static const struct {
 	{ 13, 16.8f/4096 }, // analog3, on SPI port pin 4
 	{ 14,  6.6f/4096  }, // board voltage
 	{ 15,  6.6f/4096  }, // servorail voltage
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+    { 1,   3.3f/4096  },
 #else
 #error "Unknown board type for AnalogIn scaling"
 #endif

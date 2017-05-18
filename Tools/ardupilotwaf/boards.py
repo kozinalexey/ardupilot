@@ -806,3 +806,10 @@ class f4by(px4):
         self.board_name = 'f4by'
         self.romfs_exclude(['oreoled.bin'])
 
+class f4by_mini(px4):
+    name = 'f4by-mini'
+    def __init__(self):
+        super(f4by_mini, self).__init__()
+        self.bootloader_name = 'aerofcv1_bl.bin'
+        self.board_name = 'f4by-mini'
+        self.romfs_exclude(['oreoled.bin'])
