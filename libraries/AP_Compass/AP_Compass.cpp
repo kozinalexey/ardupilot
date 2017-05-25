@@ -576,6 +576,12 @@ void Compass::_detect_backends(void)
                                               ROTATION_PITCH_180_YAW_90), AP_Compass_IST8310::name, true);
 #endif
         break;
+    case AP_BoardConfig::PX4_BOARD_F4BY:
+#if 1
+        ADD_BACKEND(AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(0, 0x1e),
+                                              ROTATION_PITCH_180_YAW_90), AP_Compass_HMC5843::name, true);
+#endif
+        break;
     default:
         break;
     }

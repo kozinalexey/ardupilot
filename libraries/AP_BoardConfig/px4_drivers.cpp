@@ -318,6 +318,7 @@ void AP_BoardConfig::px4_setup_drivers(void)
     case PX4_BOARD_AUAV21:
     case PX4_BOARD_PH2SLIM:
     case PX4_BOARD_AEROFC:
+    case PX4_BOARD_F4BY:
         break;
     default:
         sensor_config_error("Unknown board type");
@@ -537,7 +538,12 @@ void AP_BoardConfig::px4_autodetect(void)
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     px4.board_type.set_and_notify(PX4_BOARD_AEROFC);
     hal.console->printf("Detected Aero FC\n");
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+    px4.board_type.set_and_notify(PX4_BOARD_F4BY);
+    hal.console->printf("Detected F4BY\n");
 #endif
+
+
 
 }
 

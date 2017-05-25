@@ -38,10 +38,12 @@
 // we don't have any sdcard
 #undef HAL_BOARD_LOG_DIRECTORY
 #undef HAL_BOARD_TERRAIN_DIRECTORY
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+#define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_PX4_F4BY
+#define HAL_STORAGE_SIZE            16384
 #elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
 #define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_PX4_F4BY_MINI
 #define HAL_STORAGE_SIZE            16384
-#define USE_FLASH_STORAGE           1
 #else
 #error "Unknown PX4 board type"
 #endif
@@ -102,6 +104,18 @@
 #define HAL_PX4_HAVE_MTD_SUPPORT 0
 #define HAL_PX4_HAVE_PX4IO 0
 #define HAL_PX4_HAVE_PWM_INPUT 0
+#endif
+
+/* f4by */
+#ifdef CONFIG_ARCH_BOARD_F4BY
+#define HAL_PX4_HAVE_PX4IO 0
+#define HAL_BARO_MS5611_I2C_ADDR 0x77
+#define HAL_BARO_MS5611_I2C_BUS 0
+#endif
+
+/* f4by-mini */
+#ifdef CONFIG_ARCH_BOARD_F4BY_MINI
+#define HAL_PX4_HAVE_PX4IO 0
 #endif
 
 /* default values */
