@@ -70,6 +70,9 @@ void AP_BoardConfig::px4_setup_pwm()
         { 7, PWM_SERVO_MODE_3PWM1CAP, 2 },
 #if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
         { 8, PWM_SERVO_MODE_12PWM, 0 },
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+        { 8, PWM_SERVO_MODE_8PWM, 0 },
+        { 9, PWM_SERVO_MODE_12PWM, 0 },
 #endif
     };
     uint8_t mode_parm = (uint8_t)px4.pwm_count.get();
@@ -415,13 +418,15 @@ void AP_BoardConfig::px4_setup_peripherals(void)
     const char *fmu_mode = "mode_serial";
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     const char *fmu_mode = "mode_rcin";
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+    const char *fmu_mode = "mode_pwm";    
 #else
     const char *fmu_mode = "mode_pwm4";
 #endif
     if (px4_start_driver(fmu_main, "fmu", fmu_mode)) {
         printf("fmu %s started OK\n", fmu_mode);
     } else {
-        sensor_config_error("fmu start failed");
+        printf("fmu start failed");
     }
 
     hal.gpio->init();
