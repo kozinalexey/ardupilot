@@ -83,7 +83,9 @@ DataFlash_File::DataFlash_File(DataFlash_Class &front,
 #elif defined(CONFIG_ARCH_BOARD_VRHERO_V10)
     _writebuf_chunk(512),
 #elif defined(CONFIG_ARCH_BOARD_VRBRAIN_V54)
-    _writebuf_chunk(512),
+    _writebuf_chunk(512),  
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+    _writebuf_chunk(512), 
 #else
     _writebuf_chunk(4096),
 #endif
@@ -639,7 +641,7 @@ uint16_t DataFlash_File::find_last_log()
         memset(buf, 0, sizeof(buf));
         if (read(fd, buf, sizeof(buf)-1) > 0) {
 #if HAL_OS_POSIX_IO
-            sscanf(buf, "%u", &ret);
+            sscanf(buf, "%u", &ret);            
 #else
             ret = strtol(buf, NULL, 10);
 #endif            
@@ -1141,13 +1143,13 @@ void DataFlash_File::flush(void)
     }
     hal.scheduler->resume_timer_procs();
     if (write_fd_semaphore->take(1)) {
-        if (_write_fd != -1) {
-            ::fsync(_write_fd);
-        }
+    if (_write_fd != -1) {
+        ::fsync(_write_fd);
+    }
         write_fd_semaphore->give();
     } else {
         _internal_errors++;
-    }
+}
 }
 #endif
 

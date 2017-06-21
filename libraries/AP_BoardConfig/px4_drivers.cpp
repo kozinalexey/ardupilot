@@ -60,6 +60,9 @@ void AP_BoardConfig::px4_setup_pwm()
         { 7, PWM_SERVO_MODE_3PWM1CAP, 2 },
 #if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
         { 8, PWM_SERVO_MODE_12PWM, 0 },
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
+        { 8, PWM_SERVO_MODE_8PWM, 0 },
+        { 9, PWM_SERVO_MODE_12PWM, 0 },
 #endif
     };
     uint8_t mode_parm = (uint8_t)state.pwm_count.get();
@@ -162,7 +165,7 @@ bool AP_BoardConfig::px4_start_driver(main_fn_t main_function, const char *name,
     return (status >> 8) == 0;
 }
 
-/*
+    /*
   play a tune
  */
 void AP_BoardConfig::px4_tone_alarm(const char *tone_string)
@@ -261,6 +264,7 @@ void AP_BoardConfig::px4_setup_peripherals(void)
     const char *fmu_mode = "mode_serial";
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     const char *fmu_mode = "mode_rcin";
+#elif defined(CONFIG_ARCH_BOARD_F4BY)
 #else
 #if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
     const char *fmu_mode = "mode_pwm";

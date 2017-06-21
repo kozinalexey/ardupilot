@@ -93,6 +93,7 @@ public:
         VRX_BOARD_UBRAIN52 = 35,
         VRX_BOARD_CORE10   = 36,
         VRX_BOARD_BRAIN54  = 38,
+		PX4_BOARD_F4BY     = 50,
         PX4_BOARD_OLDDRIVERS = 100,
 #endif
     };
