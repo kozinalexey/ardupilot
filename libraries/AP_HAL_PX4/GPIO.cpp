@@ -30,7 +30,7 @@ PX4GPIO::PX4GPIO()
 void PX4GPIO::init()
 {
 #if defined(CONFIG_ARCH_BOARD_PX4FMU_V1) || defined(CONFIG_ARCH_BOARD_PX4FMU_V4) \
-	|| defined(CONFIG_ARCH_BOARD_F4BY)
+	|| defined(CONFIG_ARCH_BOARD_F4BY) || defined(CONFIG_ARCH_BOARD_F4BY_MINI)
     _led_fd = open(LED0_DEVICE_PATH, O_RDWR);
     if (_led_fd == -1) {
         AP_HAL::panic("Unable to open " LED0_DEVICE_PATH);
@@ -205,7 +205,7 @@ void PX4GPIO::write(uint8_t pin, uint8_t value)
             break;
 #endif
 
-#if defined(CONFIG_ARCH_BOARD_F4BY)
+#if defined(CONFIG_ARCH_BOARD_F4BY) || defined(CONFIG_ARCH_BOARD_F4BY_MINI)
         case HAL_GPIO_A_LED_PIN:    // Arming LED
             if (value == HAL_GPIO_LED_ON) {
                 ioctl(_led_fd, LED_ON, LED_RED);
@@ -213,7 +213,7 @@ void PX4GPIO::write(uint8_t pin, uint8_t value)
                 ioctl(_led_fd, LED_OFF, LED_RED);
             }
             break;
-
+#if defined(CONFIG_ARCH_BOARD_F4BY)
         case HAL_GPIO_B_LED_PIN:    // Green LED
             if (value == HAL_GPIO_LED_ON) {
                 ioctl(_led_fd, LED_ON, LED_GREEN);
@@ -221,6 +221,7 @@ void PX4GPIO::write(uint8_t pin, uint8_t value)
                 ioctl(_led_fd, LED_OFF, LED_GREEN);
             }
             break;
+#endif            
 
         case HAL_GPIO_C_LED_PIN:    // GPS LED 
             if (value == HAL_GPIO_LED_ON) { 

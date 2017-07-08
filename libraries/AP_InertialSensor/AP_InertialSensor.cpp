@@ -853,7 +853,10 @@ AP_InertialSensor::detect_backends(void)
         _fast_sampling_mask.set_default(1);
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU60x0_NAME)));
         break;
-
+    case AP_BoardConfig::PX4_BOARD_F4BY_MINI:
+        _fast_sampling_mask.set_default(1);
+        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME)));
+        break;
     default:
         break;
     }

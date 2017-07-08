@@ -83,6 +83,13 @@ static PX4::SPIDeviceManager spi_mgr_instance;
 #define UARTD_DEFAULT_DEVICE "/dev/ttyS3" // frsky telem
 #define UARTE_DEFAULT_DEVICE "/dev/ttyS2"
 #define UARTF_DEFAULT_DEVICE "/dev/ttyS6"
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+#define UARTA_DEFAULT_DEVICE "/dev/ttyACM0"
+#define UARTB_DEFAULT_DEVICE "/dev/ttyS0"
+#define UARTC_DEFAULT_DEVICE "/dev/ttyS2"
+#define UARTD_DEFAULT_DEVICE "/dev/ttyS3" // frsky telem
+#define UARTE_DEFAULT_DEVICE "/dev/ttyS4"
+#define UARTF_DEFAULT_DEVICE "/dev/null"
 #else
 #define UARTA_DEFAULT_DEVICE "/dev/ttyACM0"
 #define UARTB_DEFAULT_DEVICE "/dev/ttyS3"

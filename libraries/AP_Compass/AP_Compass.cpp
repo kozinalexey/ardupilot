@@ -672,7 +672,13 @@ void Compass::_detect_backends(void)
         ADD_BACKEND(AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(1, HAL_COMPASS_HMC5843_I2C_ADDR),
                                               true, ROTATION_ROLL_180), AP_Compass_HMC5843::name, false);
         break;
-
+    case AP_BoardConfig::PX4_BOARD_F4BY_MINI:
+        ADD_BACKEND(AP_Compass_HMC5843::probe(*this, hal.spi->get_device(HAL_COMPASS_HMC5843_NAME),
+                                               false, ROTATION_YAW_270),
+                     AP_Compass_HMC5843::name, false);
+        ADD_BACKEND(AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(1, HAL_COMPASS_HMC5843_I2C_ADDR),
+                                              true, ROTATION_ROLL_180), AP_Compass_HMC5843::name, false);
+		break;
     case AP_BoardConfig::VRX_BOARD_BRAIN51:
     case AP_BoardConfig::VRX_BOARD_BRAIN52:
     case AP_BoardConfig::VRX_BOARD_BRAIN52E:

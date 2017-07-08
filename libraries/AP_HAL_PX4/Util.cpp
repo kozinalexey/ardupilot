@@ -126,6 +126,8 @@ bool PX4Util::get_system_id(char buf[40])
     const char *board_type = "AEROFCv1";
 #elif defined(CONFIG_ARCH_BOARD_F4BY)
     const char *board_type = "F4BY";
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+    const char *board_type = "F4BY_MINI";    
 #else
     const char *board_type = "PX4v?";
 #endif
@@ -248,7 +250,7 @@ extern "C" {
 */
 void *PX4Util::malloc_type(size_t size, AP_HAL::Util::Memory_Type mem_type)
 {
-#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1) && !defined(CONFIG_ARCH_BOARD_F4BY)
+#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1) && !defined(CONFIG_ARCH_BOARD_F4BY) && !defined(CONFIG_ARCH_BOARD_F4BY_MINI)
     if (mem_type == AP_HAL::Util::MEM_DMA_SAFE) {
     return fat_dma_alloc(size);
     } else {
@@ -260,7 +262,7 @@ void *PX4Util::malloc_type(size_t size, AP_HAL::Util::Memory_Type mem_type)
 }
 void PX4Util::free_type(void *ptr, size_t size, AP_HAL::Util::Memory_Type mem_type)
 {
-#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1) && !defined(CONFIG_ARCH_BOARD_F4BY)
+#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V1) && !defined(CONFIG_ARCH_BOARD_F4BY) && !defined(CONFIG_ARCH_BOARD_F4BY_MINI)
     if (mem_type == AP_HAL::Util::MEM_DMA_SAFE) {
         return fat_dma_free(ptr, size);
     } else {

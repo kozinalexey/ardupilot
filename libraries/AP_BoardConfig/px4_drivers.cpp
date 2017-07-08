@@ -60,9 +60,11 @@ void AP_BoardConfig::px4_setup_pwm()
         { 7, PWM_SERVO_MODE_3PWM1CAP, 2 },
 #if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
         { 8, PWM_SERVO_MODE_12PWM, 0 },
-#elif defined(CONFIG_ARCH_BOARD_F4BY)
+#elif defined(CONFIG_ARCH_BOARD_F4BY) || defined(CONFIG_ARCH_BOARD_F4BY_MINI)
         { 8, PWM_SERVO_MODE_8PWM, 0 },
+#if defined(CONFIG_ARCH_BOARD_F4BY)        
         { 9, PWM_SERVO_MODE_12PWM, 0 },
+#endif
 #endif
     };
     uint8_t mode_parm = (uint8_t)state.pwm_count.get();
@@ -264,9 +266,7 @@ void AP_BoardConfig::px4_setup_peripherals(void)
     const char *fmu_mode = "mode_serial";
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     const char *fmu_mode = "mode_rcin";
-#elif defined(CONFIG_ARCH_BOARD_F4BY)
-#else
-#if CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN
+#elif defined(CONFIG_ARCH_BOARD_F4BY) || defined(CONFIG_ARCH_BOARD_F4BY_MINI)
     const char *fmu_mode = "mode_pwm";
 #else
     const char *fmu_mode = "mode_pwm4";

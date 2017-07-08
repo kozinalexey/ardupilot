@@ -83,6 +83,9 @@ public:
         PX4_BOARD_AEROFC   = 13,
         PX4_BOARD_PIXHAWK_PRO = 14,
         PX4_BOARD_AUAV21   = 20,
+        PX4_BOARD_F4BY     = 21,
+        PX4_BOARD_F4BY     = 21,
+        PX4_BOARD_F4BY_MINI     = 22,
         PX4_BOARD_PCNC1    = 21,
         PX4_BOARD_MINDPXV2 = 22,
         PX4_BOARD_SP01     = 23,
@@ -94,6 +97,7 @@ public:
         VRX_BOARD_CORE10   = 36,
         VRX_BOARD_BRAIN54  = 38,
 		PX4_BOARD_F4BY     = 50,
+		PX4_BOARD_F4BY_MINI  = 51,
         PX4_BOARD_OLDDRIVERS = 100,
 #endif
     };
