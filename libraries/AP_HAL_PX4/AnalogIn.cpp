@@ -64,11 +64,14 @@ static const struct {
     { 10, (5.7f*3.3f)/4096 }, // FMU battery on multi-connector pin 5, // 5.7:1 scaling
     { 11,  6.6f/4096  }, // analog airspeed input, 2:1 scaling
     { 12,  3.3f/4096  }, // analog2, on SPI port pin 3
-	{ 13, 16.8f/4096 }, // analog3, on SPI port pin 4
-	{ 14,  6.6f/4096  }, // board voltage
-	{ 15,  6.6f/4096  }, // servorail voltage
+	{ 13, 16.8f/4096  }, // analog3, on SPI port pin 4
+	{ 14,  6.6f/4096  }, // board voltage, 2:1 scaling
+	{ 15,  6.6f/4096  }, // servorail voltage, 2:1 scaling
 #elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
-    { 1,   3.3f/4096  },
+    { 10, (11.f*3.3f)/4096 }, // battery voltage, 11:1 scaling
+    { 11,  (2.f*3.3f)/4096 }, // current, 2:1 scaling
+    { 12,  (1.f*3.3f)/4096 }, // analog airspeed input, 1:1 scaling
+	{ 13,  (2.f*3.3f)/4096 }, // board voltage, 2:1 scaling
 #else
 #error "Unknown board type for AnalogIn scaling"
 #endif
@@ -299,6 +302,11 @@ void PX4AnalogIn::_timer_tick(void)
             {
                 _servorail_voltage = buf_adc[i].am_data * 6.6f / 4096;
             }
+#elif defined(CONFIG_ARCH_BOARD_F4BY_MINI)
+            if(buf_adc[i].am_channel == 13)
+            {
+                _board_voltage = buf_adc[i].am_data * 6.6f / 4096;
+            }            
 #endif
         }
         for (uint8_t i=0; i<ret/sizeof(buf_adc[0]); i++) {
