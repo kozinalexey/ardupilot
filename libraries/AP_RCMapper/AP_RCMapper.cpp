@@ -56,6 +56,16 @@ const AP_Param::GroupInfo RCMapper::var_info[] = {
     // @RebootRequired: True
     AP_GROUPINFO_FRAME("LATERAL",    5, RCMapper, _ch_lateral, 7, AP_PARAM_FRAME_SUB),
 
+#if APM_BUILD_TYPE(APM_BUILD_ArduCopter)
+    // @Param: mode
+    // @DisplayName: mode channel for arducopter. for plane see FLTMODE_CH
+    // @Description: mode channel number. This is useful when you have a RC transmitter that can't change the channel order easily. mode is normally on channel 5, but you can move it to any channel with this parameter.  Reboot is required for changes to take effect.
+    // @Range: 5 8
+    // @Increment: 1
+    // @User: Advanced
+    // @RebootRequired: True
+    AP_GROUPINFO("MODE",         6, RCMapper, _ch_mode, 5),
+#endif
     AP_GROUPEND
 };
 

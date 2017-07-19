@@ -29,6 +29,9 @@ public:
     /// lateral - return input channel number for lateral input
     uint8_t lateral() const { return _ch_lateral; }
 
+    /// mode - return input channel number for mode input
+    uint8_t mode() const { return _ch_mode; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 private:
@@ -39,4 +42,5 @@ private:
     AP_Int8 _ch_throttle;
     AP_Int8 _ch_forward;
     AP_Int8 _ch_lateral;
+    AP_Int8 _ch_mode;
 };
