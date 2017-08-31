@@ -126,8 +126,10 @@ uint32_t AP_WheelEncoder_Quadrature::get_gpio(uint8_t pin_number)
         return GPIO_GPIO3_INPUT;
     case 54:
         return GPIO_GPIO4_INPUT;
+#ifdef GPIO_GPIO5_INPUT
     case 55:
         return GPIO_GPIO5_INPUT;
+#endif
     }
 #endif
     return 0;
