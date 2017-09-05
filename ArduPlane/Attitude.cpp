@@ -104,9 +104,20 @@ void Plane::stabilize_pitch(float speed_scaler)
     if (control_mode == STABILIZE && channel_pitch->get_control_in() != 0) {
         disable_integrator = true;
     }
-    SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor, 
+    if (g.kff_rudder_mix != 2) //rudder mix =2 for test new mode of mixing
+    {
+    SRV_Channels::set_output_scaled(SRV_Channel::k_elevator,  pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor,
+                                                                                           speed_scaler,
+                                                                                           disable_integrator));
+
+    }
+    else
+    {
+    SRV_Channels::set_output_scaled(SRV_Channel::k_elevator, ahrs.cos_roll() * pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor,
                                                                                            speed_scaler, 
                                                                                            disable_integrator));
+
+    }
 }
 
 /*
@@ -455,7 +466,19 @@ void Plane::calc_nav_yaw_coordinated(float speed_scaler)
         commanded_rudder = yawController.get_servo_out(speed_scaler, disable_integrator);
 
         // add in rudder mixing from roll
+        if (g.kff_rudder_mix != 2) //rudder mix =2 for test new mode of mixing
+        {
         commanded_rudder += SRV_Channels::get_output_scaled(SRV_Channel::k_aileron) * g.kff_rudder_mix;
+        }
+        else
+        {
+        commanded_rudder *= ahrs.cos_roll(); //in horizontal fly using base command
+        // in 90 deg roll use rudder for stabilize pitch
+        int32_t demanded_pitch = nav_pitch_cd + g.pitch_trim_cd + SRV_Channels::get_output_scaled(SRV_Channel::k_throttle) * g.kff_throttle_to_pitch;
+        commanded_rudder +=  ahrs.sin_roll() * pitchController.get_servo_out(demanded_pitch - ahrs.pitch_sensor,
+                                                                                                         speed_scaler,
+                                                                                                         true);
+        }
         commanded_rudder += rudder_input;
     }
 
