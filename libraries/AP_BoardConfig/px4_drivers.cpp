@@ -290,7 +290,6 @@ void AP_BoardConfig::px4_setup_peripherals(void)
 #else
     const char *fmu_mode = "mode_pwm4";
 #endif
-#endif
     if (px4_start_driver(fmu_main, "fmu", fmu_mode)) {
         printf("fmu %s started OK\n", fmu_mode);
     } else {

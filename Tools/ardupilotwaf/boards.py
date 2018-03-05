@@ -289,7 +289,7 @@ class chibios(Board):
             HAVE_STD_NULLPTR_T = 0,
         )
 
-        env.AP_LIBRARIES += [
+            env.AP_LIBRARIES += [
             'AP_HAL_ChibiOS',
         ]
 
@@ -398,6 +398,22 @@ class chibios(Board):
         fun = getattr(module, 'pre_build', None)
         if fun:
             fun(bld)
+
+class f4by_ch(chibios):
+    name = 'f4by-ch'
+    def configure_env(self, cfg, env):
+        super(f4by_ch, self).configure_env(cfg, env)
+        env.DEFINES.update(
+            CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_CHIBIOS_F4BY',
+        )
+
+class f4by_mini_ch(chibios):
+    name = 'f4by-mini-ch'
+    def configure_env(self, cfg, env):
+        super(f4by_mini_ch, self).configure_env(cfg, env)
+        env.DEFINES.update(
+            CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_CHIBIOS_F4BY_MINI',
+        )
 
 class linux(Board):
     def configure_env(self, cfg, env):
