@@ -9,12 +9,15 @@
 #endif
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN || defined(HAL_CHIBIOS_ARCH_FMUV3) || defined(HAL_CHIBIOS_ARCH_FMUV4) || defined(HAL_CHIBIOS_ARCH_MINDPXV2)
-#ifndef AP_FEATURE_BOARD_DETECT
 #define AP_FEATURE_BOARD_DETECT 1
-#endif
 #define AP_FEATURE_SAFETY_BUTTON 1
 #else
+
+/* alow select future in chibios hwdef file */
+#ifndef AP_FEATURE_BOARD_DETECT
 #define AP_FEATURE_BOARD_DETECT 0
+#endif
+
 #define AP_FEATURE_SAFETY_BUTTON 0
 #endif
 
@@ -120,7 +123,7 @@ public:
 
     // get number of PWM outputs enabled on FMU
     static uint8_t get_pwm_count(void) {
-#if AP_FEATURE_BOARD_DETECT
+#if AP_FEATURE_BOARD_DETECT || defined(AP_FEATURE_BRD_PWM_COUNT_PARAM )
         return instance?instance->state.pwm_count.get():4;
 #else
         return 0;
@@ -132,7 +135,7 @@ private:
     
     AP_Int16 vehicleSerialNumber;
 
-#if AP_FEATURE_BOARD_DETECT
+#if AP_FEATURE_BOARD_DETECT  || defined(AP_FEATURE_BRD_PWM_COUNT_PARAM )
     struct {
         AP_Int8 pwm_count;
         AP_Int8 safety_enable;
@@ -145,7 +148,9 @@ private:
         AP_Int8 board_type;
         AP_Int8 io_enable;
     } state;
+#endif
 
+#if AP_FEATURE_BOARD_DETECT
     static enum px4_board_type px4_configured_board;
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4 || CONFIG_HAL_BOARD == HAL_BOARD_VRBRAIN

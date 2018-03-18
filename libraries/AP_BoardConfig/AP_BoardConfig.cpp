@@ -69,7 +69,9 @@
 
 #elif CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
 # define BOARD_SAFETY_ENABLE_DEFAULT 1
+#ifndef BOARD_PWM_COUNT_DEFAULT
 # define BOARD_PWM_COUNT_DEFAULT 6
+#endif
 # define BOARD_SER1_RTSCTS_DEFAULT 2
 # define BOARD_TYPE_DEFAULT PX4_BOARD_AUTO
 #endif
@@ -83,7 +85,7 @@ AP_BoardConfig *AP_BoardConfig::instance;
 
 // table of user settable parameters
 const AP_Param::GroupInfo AP_BoardConfig::var_info[] = {
-#if AP_FEATURE_BOARD_DETECT
+#if AP_FEATURE_BOARD_DETECT || defined(AP_FEATURE_BRD_PWM_COUNT_PARAM )
     // @Param: PWM_COUNT
     // @DisplayName: Auxiliary pin config
     // @Description: Control assigning of FMU pins to PWM output, timer capture and GPIO. All unassigned pins can be used for GPIO
