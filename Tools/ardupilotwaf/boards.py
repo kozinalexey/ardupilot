@@ -399,6 +399,8 @@ class chibios(Board):
         if fun:
             fun(bld)
 
+
+
 class linux(Board):
     def configure_env(self, cfg, env):
         super(linux, self).configure_env(cfg, env)

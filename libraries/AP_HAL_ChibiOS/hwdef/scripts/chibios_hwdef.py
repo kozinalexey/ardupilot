@@ -710,6 +710,8 @@ def write_ADC_config(f):
         scale = p.extra_value('SCALE', default=None)
         if p.label == 'VDD_5V_SENS':
             f.write('#define ANALOG_VCC_5V_PIN %u\n' % chan)
+        if p.label == 'FMU_SERVORAIL_VCC_SENS':
+            f.write('#define ANALOG_FMU_SERVORAIL_VCC_PIN %u\n' % chan)
         adc_chans.append((chan, scale, p.label, p.portpin))
     adc_chans = sorted(adc_chans)
     vdd = get_config('STM32_VDD')

@@ -266,6 +266,15 @@ void AnalogIn::_timer_tick(void)
             _board_voltage = buf_adc[i] * pin_config[i].scaling;
         }
 #endif
+#ifdef ANALOG_FMU_SERVORAIL_VCC_PIN
+        if (pin_config[i].channel == ANALOG_FMU_SERVORAIL_VCC_PIN) {
+            // get servo voltage  ADC fmu cpu
+        	_servorail_voltage = buf_adc[i] * pin_config[i].scaling;
+        }
+#endif
+
+
+
     }
     for (uint8_t i=0; i<ADC_GRP1_NUM_CHANNELS; i++) {
         Debug("chan %u value=%u\n",
