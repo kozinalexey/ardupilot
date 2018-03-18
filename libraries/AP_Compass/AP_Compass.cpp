@@ -558,6 +558,14 @@ void Compass::_detect_backends(void)
         } \
     } while (0)
 
+/*for chibios board coniguration */
+#ifdef    HAL_EXT_COMPASS_HMC5843_I2C_BUS
+    ADD_BACKEND(DRIVER_HMC5883, AP_Compass_HMC5843::probe(*this, hal.i2c_mgr->get_device(HAL_EXT_COMPASS_HMC5843_I2C_BUS, HAL_COMPASS_HMC5843_I2C_ADDR),
+                                                          true, ROTATION_ROLL_180),
+                AP_Compass_HMC5843::name, true);
+#endif
+
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     ADD_BACKEND(DRIVER_SITL, new AP_Compass_SITL(*this), nullptr, false);
     return;
