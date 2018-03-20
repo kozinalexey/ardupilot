@@ -313,8 +313,10 @@ def write_mcu_config(f):
         f.write('#define HAL_USE_SDC TRUE\n')
         env_vars['CHIBIOS_FATFS_FLAG'] = 'USE_FATFS=yes'
     else:
+        f.write('#define HAL_USE_MMC_SPI TRUE\n')
         f.write('#define HAL_USE_SDC FALSE\n')
-        env_vars['CHIBIOS_FATFS_FLAG'] = 'USE_FATFS=no'
+        f.write('#define USE_POSIX\n\n')
+        env_vars['CHIBIOS_FATFS_FLAG'] = 'USE_FATFS=yes'
     if 'OTG1' in bytype:
         f.write('#define STM32_USB_USE_OTG1                  TRUE\n')
         f.write('#define HAL_USE_USB TRUE\n')

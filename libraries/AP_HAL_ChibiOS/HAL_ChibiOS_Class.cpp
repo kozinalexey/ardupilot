@@ -175,7 +175,20 @@ static THD_FUNCTION(main_loop,arg)
     }
     thread_running = false;
 }
+#if HAL_USE_MMC_SPI == 1
+MMCDriver MMCD1;
+/* Maximum speed SPI configuration (18MHz, CPHA=0, CPOL=0, MSb first).*/
+static SPIConfig hs_spicfg = {NULL, GPIOE, 15U, SPI_CR1_BR_1 | SPI_CR1_BR_0 , 0};
+/* Low speed SPI configuration (281.250kHz, CPHA=0, CPOL=0, MSb first).*/
+static SPIConfig ls_spicfg = {NULL, GPIOE, 15U,
+                              SPI_CR1_BR_2 | SPI_CR1_BR_1 | SPI_CR1_BR_0,
+                              0};
 
+/* MMC/SD over SPI driver configuration.*/
+static MMCConfig mmccfg = {&SPID2, &ls_spicfg, &hs_spicfg};
+
+
+#endif
 void HAL_ChibiOS::run(int argc, char * const argv[], Callbacks* callbacks) const
 {
     /*
@@ -203,6 +216,31 @@ void HAL_ChibiOS::run(int argc, char * const argv[], Callbacks* callbacks) const
      * Start SD Driver
      */
 #ifdef USE_POSIX
+#if HAL_USE_MMC_SPI == 1
+    FRESULT err;
+#undef SDCD1
+    palSetPadMode(GPIOE, 15U, PAL_MODE_OUTPUT_PUSHPULL);
+    palSetPad(GPIOE, 15U);
+    mmcObjectInit(&MMCD1);
+    mmcStart(&MMCD1, &mmccfg);
+
+    if(mmcConnect(&MMCD1) == HAL_FAILED) {
+        printf("Err: Failed to initialize SDMMC!\n");
+    } else {
+        err = f_mount(&SDC_FS, "/", 1);
+        if (err != FR_OK) {
+            printf("Err: Failed to mount SDMMC Card!\n");
+            mmcDisconnect(&MMCD1);
+        } else {
+            printf("Successfully mounted SDMMC Card..\n");
+        }
+        //Create APM Directory
+        mkdir("/APM", 0777);
+    }
+    //palClearPad(GPIOE, 15U);
+
+#endif
+#if HAL_USE_SDC == 1
     FRESULT err;
     sdcStart(&SDCD1, NULL);
 
@@ -219,6 +257,10 @@ void HAL_ChibiOS::run(int argc, char * const argv[], Callbacks* callbacks) const
         //Create APM Directory
         mkdir("/APM", 0777);
     }
+
+
+
+#endif
 #endif
     assert(callbacks);
     g_callbacks = callbacks;
