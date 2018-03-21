@@ -11,9 +11,9 @@ define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_CHIBIOS_F4BY_MINI
 # crystal frequency
 OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
-
 STM32_PLLM_VALUE 8
-STM32_ST_USE_TIMER 5
+
+define STM32_ST_USE_TIMER 5
 # board voltage
 STM32_VDD 330U
 
@@ -28,10 +28,12 @@ define HAL_STORAGE_SIZE 16384
 # todo enable RAMTROM parameter storage and remove HAL_USE_EMPTY_STORAGE after tests
 # define HAL_WITH_RAMTRON 1
 define HAL_USE_EMPTY_STORAGE 1
+
 # space to reserve for bootloader and storage at start of flash
 FLASH_RESERVE_START_KB 16
 # space to reserve for storage at end of flash
-FLASH_RESERVE_END_KB 0
+# FLASH_RESERVE_END_KB 0
+
 
 
 # serial port for stdout
@@ -79,7 +81,7 @@ PB4 SPI3_MISO SPI3
 PB5 SPI3_MOSI SPI3
 
 # radio DMA_CH ?
-PA3 TIM9_CH1 TIM9 RCIN FLOAT LOW 
+PA3 TIM5_CH4 TIM5 RCIN FLOAT LOW 
 # sbus inverter 
 PB2 SBUS_INV OUTPUT
 
@@ -92,7 +94,7 @@ PC7  TIM8_CH2   TIM8 PWM(4)
 PC8  TIM3_CH3   TIM3 PWM(5)
 PC9  TIM3_CH4   TIM3 PWM(6)
 PA8  TIM1_CH1   TIM1 PWM(7)
-PA1  TIM1_CH3   TIM1 PWM(8)
+PA10 TIM1_CH3   TIM1 PWM(8)
 
 
 # LED setup is similar to PixRacer LED_GREEN ?
@@ -112,7 +114,6 @@ PA15 TIM2_CH1 TIM2 ALARM
 # inverter control pin
 PC15 INV_UART4 OUTPUT 
 
-PB0 
 # SPI device table. The DEVID values are chosen to match the PX4 port
 # of ArduPilot so users don't need to re-do their accel and compass calibrations
 # when moving to ChibiOS
