@@ -15,7 +15,11 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 STM32_PLLM_VALUE 8
 
-define STM32_ST_USE_TIMER 5
+# this is the STM32 timer that ChibiOS will use for the low level
+# driver. This must be a 32 bit timer. We currently only support
+# timers 2, 3, 4, 5 and 21. See hal_st_lld.c in ChibiOS for details
+define STM32_ST_USE_TIMER 4
+
 # board voltage
 STM32_VDD 330U
 
@@ -83,9 +87,9 @@ PA7 SPI1_MOSI SPI1
 # PB4 SPI3_MISO SPI3
 # PB5 SPI3_MOSI SPI3
 
-# radio DMA_CH ?
-# PA3 TIM5_CH4 TIM5 RCIN FLOAT LOW 
-# PA3 TIM9_CH2 TIM9 RCIN FLOAT LOW 
+# radio 
+# PA3 TIM5_CH4 TIM5 RCIN FLOAT LOW  # Error: Bad channel number, only channel 1 and 2 supported for RCIN
+# PA3 TIM9_CH2 TIM9 RCIN FLOAT LOW # no dma for rcin
 
 # sbus inverter 
 PB2 SBUS_INV OUTPUT
