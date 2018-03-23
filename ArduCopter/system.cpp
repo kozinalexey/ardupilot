@@ -20,15 +20,6 @@ static void failsafe_check_static()
 
 void Copter::init_ardupilot()
 {
-    if (!hal.gpio->usb_connected()) {
-        // USB is not connected, this means UART0 may be a Xbee, with
-        // its darned bricking problem. We can't write to it for at
-        // least one second after powering up. Simplest solution for
-        // now is to delay for 1 second. Something more elegant may be
-        // added later
-        delay(1000);
-    }
-
     // initialise serial port
     serial_manager.init_console();
 
@@ -425,7 +416,7 @@ void Copter::update_auto_armed()
         }
 #else
         // if motors are armed and throttle is above zero auto_armed should be true
-        // if motors are armed and we are in throw mode, then auto_ermed should be true
+        // if motors are armed and we are in throw mode, then auto_armed should be true
         if(motors->armed() && (!ap.throttle_zero || control_mode == THROW)) {
             set_auto_armed(true);
         }

@@ -113,6 +113,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Bitmask: 0:Roll,1:Pitch,2:Yaw
     GSCALAR(gcs_pid_mask,           "GCS_PID_MASK",     0),
 
+#if MODE_RTL_ENABLED == ENABLED
     // @Param: RTL_ALT
     // @DisplayName: RTL Altitude
     // @Description: The minimum relative altitude the model will move to before Returning to Launch.  Set to zero to return at current altitude.
@@ -140,6 +141,35 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(rtl_speed_cms,   "RTL_SPEED",     0),
 
+    // @Param: RTL_ALT_FINAL
+    // @DisplayName: RTL Final Altitude
+    // @Description: This is the altitude the vehicle will move to as the final stage of Returning to Launch or after completing a mission.  Set to zero to land.
+    // @Units: cm
+    // @Range: -1 1000
+    // @Increment: 1
+    // @User: Standard
+    GSCALAR(rtl_alt_final,  "RTL_ALT_FINAL", RTL_ALT_FINAL),
+
+    // @Param: RTL_CLIMB_MIN
+    // @DisplayName: RTL minimum climb
+    // @Description: The vehicle will climb this many cm during the initial climb portion of the RTL
+    // @Units: cm
+    // @Range: 0 3000
+    // @Increment: 10
+    // @User: Standard
+    GSCALAR(rtl_climb_min,  "RTL_CLIMB_MIN",    RTL_CLIMB_MIN_DEFAULT),
+
+    // @Param: RTL_LOIT_TIME
+    // @DisplayName: RTL loiter time
+    // @Description: Time (in milliseconds) to loiter above home before beginning final descent
+    // @Units: ms
+    // @Range: 0 60000
+    // @Increment: 1000
+    // @User: Standard
+    GSCALAR(rtl_loiter_time,      "RTL_LOIT_TIME",    RTL_LOITER_TIME),
+#endif
+
+#if RANGEFINDER_ENABLED == ENABLED
     // @Param: RNGFND_GAIN
     // @DisplayName: Rangefinder gain
     // @Description: Used to adjust the speed with which the target altitude is changed when objects are sensed below the copter
@@ -147,6 +177,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Increment: 0.01
     // @User: Standard
     GSCALAR(rangefinder_gain, "RNGFND_GAIN", RANGEFINDER_GAIN_DEFAULT),
+#endif
 
     // @Param: FS_BATT_ENABLE
     // @DisplayName: Battery Failsafe Enable
@@ -199,39 +230,12 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(super_simple,   "SUPER_SIMPLE",     0),
 
-    // @Param: RTL_ALT_FINAL
-    // @DisplayName: RTL Final Altitude
-    // @Description: This is the altitude the vehicle will move to as the final stage of Returning to Launch or after completing a mission.  Set to zero to land.
-    // @Units: cm
-    // @Range: -1 1000
-    // @Increment: 1
-    // @User: Standard
-    GSCALAR(rtl_alt_final,  "RTL_ALT_FINAL", RTL_ALT_FINAL),
-
-    // @Param: RTL_CLIMB_MIN
-    // @DisplayName: RTL minimum climb
-    // @Description: The vehicle will climb this many cm during the initial climb portion of the RTL
-    // @Units: cm
-    // @Range: 0 3000
-    // @Increment: 10
-    // @User: Standard
-    GSCALAR(rtl_climb_min,  "RTL_CLIMB_MIN",    RTL_CLIMB_MIN_DEFAULT),
-
     // @Param: WP_YAW_BEHAVIOR
     // @DisplayName: Yaw behaviour during missions
     // @Description: Determines how the autopilot controls the yaw during missions and RTL
     // @Values: 0:Never change yaw, 1:Face next waypoint, 2:Face next waypoint except RTL, 3:Face along GPS course
     // @User: Standard
     GSCALAR(wp_yaw_behavior,  "WP_YAW_BEHAVIOR",    WP_YAW_BEHAVIOR_DEFAULT),
-
-    // @Param: RTL_LOIT_TIME
-    // @DisplayName: RTL loiter time
-    // @Description: Time (in milliseconds) to loiter above home before beginning final descent
-    // @Units: ms
-    // @Range: 0 60000
-    // @Increment: 1000
-    // @User: Standard
-    GSCALAR(rtl_loiter_time,      "RTL_LOIT_TIME",    RTL_LOITER_TIME),
 
     // @Param: LAND_SPEED
     // @DisplayName: Land speed
@@ -455,15 +459,6 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Advanced
     ASCALAR(angle_max, "ANGLE_MAX",                 DEFAULT_ANGLE_MAX),
 
-    // @Param: RC_FEEL_RP
-    // @DisplayName: RC Feel Roll/Pitch
-    // @Description: RC feel for roll/pitch which controls vehicle response to user input with 0 being extremely soft and 100 being crisp
-    // @Range: 0 100
-    // @Increment: 10
-    // @User: Standard
-    // @Values: 0:Very Soft, 25:Soft, 50:Medium, 75:Crisp, 100:Very Crisp
-    GSCALAR(rc_feel_rp, "RC_FEEL_RP",  RC_FEEL_RP_MEDIUM),
-
     // @Param: PHLD_BRAKE_RATE
     // @DisplayName: PosHold braking rate
     // @Description: PosHold flight mode's rotation rate during braking in deg/sec
@@ -531,9 +526,10 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(acro_yaw_p,                 "ACRO_YAW_P",           ACRO_YAW_P),
 
+#if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
     // @Param: ACRO_BAL_ROLL
     // @DisplayName: Acro Balance Roll
-    // @Description: rate at which roll angle returns to level in acro mode.  A higher value causes the vehicle to return to level faster.
+    // @Description: rate at which roll angle returns to level in acro and sport mode.  A higher value causes the vehicle to return to level faster.
     // @Range: 0 3
     // @Increment: 0.1
     // @User: Advanced
@@ -541,12 +537,14 @@ const AP_Param::Info Copter::var_info[] = {
 
     // @Param: ACRO_BAL_PITCH
     // @DisplayName: Acro Balance Pitch
-    // @Description: rate at which pitch angle returns to level in acro mode.  A higher value causes the vehicle to return to level faster.
+    // @Description: rate at which pitch angle returns to level in acro and sport mode.  A higher value causes the vehicle to return to level faster.
     // @Range: 0 3
     // @Increment: 0.1
     // @User: Advanced
     GSCALAR(acro_balance_pitch,     "ACRO_BAL_PITCH",   ACRO_BALANCE_PITCH),
+#endif
 
+#if MODE_ACRO_ENABLED == ENABLED
     // @Param: ACRO_TRAINER
     // @DisplayName: Acro Trainer
     // @Description: Type of trainer used in acro mode
@@ -561,6 +559,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Range: -0.5 1.0
     // @User: Advanced
     GSCALAR(acro_rp_expo,  "ACRO_RP_EXPO",    ACRO_RP_EXPO_DEFAULT),
+#endif
 
     // variables not in the g class which contain EEPROM saved variables
 
@@ -775,6 +774,7 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(avoidance_adsb, "AVD_", AP_Avoidance_Copter),
 #endif
 
+#if AUTOTUNE_ENABLED == ENABLED
     // @Param: AUTOTUNE_AXES
     // @DisplayName: Autotune axis bitmask
     // @Description: 1-byte bitmap of axes to autotune
@@ -796,24 +796,29 @@ const AP_Param::Info Copter::var_info[] = {
     // @Range: 0.001 0.006
     // @User: Standard
     GSCALAR(autotune_min_d, "AUTOTUNE_MIN_D", 0.001f),
+#endif
 
     // @Group: NTF_
     // @Path: ../libraries/AP_Notify/AP_Notify.cpp
     GOBJECT(notify, "NTF_",  AP_Notify),
 
+#if MODE_THROW_ENABLED == ENABLED
     // @Param: THROW_MOT_START
     // @DisplayName: Start motors before throwing is detected
     // @Description: Used by THROW mode. Controls whether motors will run at the speed set by THR_MIN or will be stopped when armed and waiting for the throw.
     // @Values: 0:Stopped,1:Running
     // @User: Standard
     GSCALAR(throw_motor_start, "THROW_MOT_START", 0),
+#endif
 
+#if AP_TERRAIN_AVAILABLE && AC_TERRAIN
     // @Param: TERRAIN_FOLLOW
     // @DisplayName: Terrain Following use control
     // @Description: This enables terrain following for RTL and LAND flight modes. To use this option TERRAIN_ENABLE must be 1 and the GCS must  support sending terrain data to the aircraft.  In RTL the RTL_ALT will be considered a height above the terrain.  In LAND mode the vehicle will slow to LAND_SPEED 10m above terrain (instead of 10m above home).  This parameter does not affect AUTO and Guided which use a per-command flag to determine if the height is above-home, absolute or above-terrain.
     // @Values: 0:Do Not Use in RTL and Land,1:Use in RTL and Land
     // @User: Standard
     GSCALAR(terrain_follow, "TERRAIN_FOLLOW", 0),
+#endif
 
     // @Group:
     // @Path: Parameters.cpp
@@ -838,6 +843,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Path: ../libraries/AP_Button/AP_Button.cpp
     AP_SUBGROUPINFO(button, "BTN_", 2, ParametersG2, AP_Button),
 
+#if MODE_THROW_ENABLED == ENABLED
     // @Param: THROW_NEXTMODE
     // @DisplayName: Throw mode's follow up mode
     // @Description: Vehicle will switch to this mode after the throw is successfully completed.  Default is to stay in throw mode (18)
@@ -851,6 +857,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:Upward Throw,1:Drop
     // @User: Standard
     AP_GROUPINFO("THROW_TYPE", 4, ParametersG2, throw_type, ThrowType_Upward),
+#endif
 
     // @Param: GND_EFFECT_COMP
     // @DisplayName: Ground Effect Compensation Enable/Disable
@@ -892,12 +899,14 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("ACRO_Y_EXPO", 9, ParametersG2, acro_y_expo, ACRO_Y_EXPO_DEFAULT),
 
+#if MODE_ACRO_ENABLED == ENABLED
     // @Param: ACRO_THR_MID
     // @DisplayName: Acro Thr Mid
     // @Description: Acro Throttle Mid
     // @Range: 0 1
     // @User: Advanced
     AP_GROUPINFO("ACRO_THR_MID", 10, ParametersG2, acro_thr_mid, ACRO_THR_MID_DEFAULT),
+#endif
 
     // @Param: SYSID_ENFORCE
     // @DisplayName: GCS sysid enforcement
@@ -905,13 +914,15 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:NotEnforced,1:Enforced
     // @User: Advanced
     AP_GROUPINFO("SYSID_ENFORCE", 11, ParametersG2, sysid_enforce, 0),
+
 #if STATS_ENABLED == ENABLED
     // @Group: STAT
     // @Path: ../libraries/AP_Stats/AP_Stats.cpp
     AP_SUBGROUPINFO(stats, "STAT", 12, ParametersG2, AP_Stats),
 #endif
+
 #if GRIPPER_ENABLED == ENABLED
-	// @Group: GRIP_
+    // @Group: GRIP_
     // @Path: ../libraries/AP_Gripper/AP_Gripper.cpp
     AP_SUBGROUPINFO(gripper, "GRIP_", 13, ParametersG2, AP_Gripper),
 #endif
@@ -1002,7 +1013,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
   constructor for g2 object
  */
 ParametersG2::ParametersG2(void)
-    : temp_calibration(copter.ins)
+    : temp_calibration() // this doesn't actually need constructing, but removing it here is problematic syntax-wise
 #if BEACON_ENABLED == ENABLED
     , beacon(copter.serial_manager)
 #endif
@@ -1171,6 +1182,12 @@ void Copter::convert_pid_parameters(void)
     table_size = ARRAY_SIZE(throttle_conversion_info);
     for (uint8_t i=0; i<table_size; i++) {
         AP_Param::convert_old_parameter(&throttle_conversion_info[i], 0.001f);
+    }
+    // convert RC_FEEL_RP to ATC_INPUT_TC
+    const AP_Param::ConversionInfo rc_feel_rp_conversion_info = { Parameters::k_param_rc_feel_rp, 0, AP_PARAM_INT8, "ATC_INPUT_TC" };
+    AP_Int8 rc_feel_rp_old;
+    if (AP_Param::find_old_parameter(&rc_feel_rp_conversion_info, &rc_feel_rp_old)) {
+        AP_Param::set_default_by_name(rc_feel_rp_conversion_info.new_name, (1.0f / (2.0f + rc_feel_rp_old.get() * 0.1f)));
     }
 
     const uint8_t old_rc_keys[14] = { Parameters::k_param_rc_1_old,  Parameters::k_param_rc_2_old,
