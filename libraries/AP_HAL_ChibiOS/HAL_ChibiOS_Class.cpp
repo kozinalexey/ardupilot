@@ -218,7 +218,6 @@ void HAL_ChibiOS::run(int argc, char * const argv[], Callbacks* callbacks) const
 #ifdef USE_POSIX
 #if HAL_USE_MMC_SPI == 1
     FRESULT err;
-#undef SDCD1
     palSetPadMode(GPIOE, 15U, PAL_MODE_OUTPUT_PUSHPULL);
     palSetPad(GPIOE, 15U);
     mmcObjectInit(&MMCD1);

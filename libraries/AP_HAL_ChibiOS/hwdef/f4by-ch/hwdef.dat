@@ -10,13 +10,11 @@ define def_ccm_size 64
 
 #default 256 NO WORK WITH DISPLAY SSD1306 CONNECTED and compass internal calibration
 #use auto calculation stack size for interrupt by os
-define PORT_INT_REQUIRED_STACK 0
+define PORT_INT_REQUIRED_STACK 128
 
 # board ID for firmware load
 APJ_BOARD_ID 20
 define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_CHIBIOS_F4BY
-
-# define AP_FEATURE_BOARD_DETECT 1
                                 
 # USB setup
 USB_VENDOR 0x27AC # Swift-Flyer 
@@ -99,8 +97,8 @@ PB13 SPI2_SCK SPI2
 PB14 SPI2_MISO SPI2
 PB15 SPI2_MOSI SPI2
 
-
-PB12 FRAM_CS CS
+PB12 OUTPUT HIGH
+# PB12 FRAM_CS CS
 # SPEED_VERYLOW
 # PE15 FLASH_CS CS
 
@@ -113,18 +111,20 @@ define HAL_COMPASS_HMC5843_ROTATION ROTATION_YAW_270
 
 define HAL_EXT_COMPASS_HMC5843_I2C_BUS 1
 SPIDEV mpu6000   SPI1 DEVID1 MPU_CS   MODE3 1*MHZ 8*MHZ
-SPIDEV ramtron   SPI2 DEVID10 FRAM_CS      MODE3  8*MHZ  8*MHZ 
+# SPIDEV ramtron   SPI2 DEVID10 FRAM_CS      MODE3  8*MHZ  8*MHZ 
 # SPIDEV dataflash SPI2 DEVID1 FLASH_CS MODE3 1*MHZ 8*MHZ
 
 # enable RAMTROM parameter storage
-define HAL_WITH_RAMTRON 1
+# define HAL_WITH_RAMTRON 1
 # define HAL_USE_EMPTY_STORAGE 1
-define HAL_STORAGE_SIZE 16384
-define STORAGE_FLASH_PAGE 22
+# define HAL_STORAGE_SIZE 16384
+# define STORAGE_FLASH_PAGE 22
 
 # store params inside cpu flash
 # FLASH_RESERVE_START_KB 64
-# define HAL_STORAGE_SIZE 8192
+# define HAL_STORAGE_SIZE 32768
+# define STORAGE_FLASH_PAGE 16384
+# 8192
 # define STORAGE_FLASH_PAGE 1
 
 # enable FAT filesystem support (needs a microSD defined via SDIO)
@@ -199,3 +199,7 @@ PB1 DRDY_HMC5883 INPUT PULLUP
 define AP_FEATURE_BRD_PWM_COUNT_PARAM 1
 define BOARD_PWM_COUNT_DEFAULT 12
 
+# reserve 16k for bootloader and 32k for flash storage
+FLASH_RESERVE_START_KB 48
+define HAL_STORAGE_SIZE 16384
+define STORAGE_FLASH_PAGE 1
